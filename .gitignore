@@ -1,0 +1,41 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Angular
+.angular/
+
+# Compilação
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Volumes e dados locais
+data/
+data/postgres/
+*.db
+*.db-journal
+
+# Ambientes locais
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.log
+
+# IDEs e Sistema
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

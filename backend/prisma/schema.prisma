@@ -1,0 +1,130 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ModalidadePagamento {
+  CREDITO
+  DEBITO
+  DINHEIRO_CONTA
+  OUTRO
+}
+
+enum TipoLancamento {
+  A_VISTA
+  PARCELADO
+}
+
+model PaymentMethod {
+  id               String              @id @default(uuid())
+  nome             String
+  modalidade       ModalidadePagamento
+  diaFechamento    Int?
+  diaVencimento    Int?
+  instituicaoBanco String
+  ativo            Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  lancamentos      Lancamento[]
+
+  @@map("payment_methods")
+}
+
+model Lancamento {
+  id              String         @id @default(uuid())
+  codigo          String         @default(uuid())
+  comprador       String
+  compradorId     String?
+  compradorRel    Comprador?     @relation(fields: [compradorId], references: [id], onDelete: SetNull)
+  nome            String
+  loja            String
+  lojaId          String?
+  lojaRel         Loja?          @relation(fields: [lojaId], references: [id], onDelete: SetNull)
+  data            DateTime
+  categoria       String
+  quantidade      Decimal        @default(1) @db.Decimal(12, 3)
+  valorUnitario   Decimal        @db.Decimal(12, 2)
+  valorTotal      Decimal        @db.Decimal(12, 2)
+  meioPagamentoId String
+  meioPagamento   PaymentMethod  @relation(fields: [meioPagamentoId], references: [id], onDelete: Restrict)
+  tipo            TipoLancamento @default(A_VISTA)
+  numeroParcelas  Int            @default(1)
+  observacoes     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  parcelas        Parcela[]
+
+  @@map("lancamentos")
+}
+
+model Comprador {
+  id          String       @id @default(uuid())
+  nome        String       @unique
+  email       String?
+  ativo       Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lancamentos Lancamento[]
+
+  @@map("compradores")
+}
+
+model Loja {
+  id          String       @id @default(uuid())
+  nome        String       @unique
+  categoria   String?      // Categoria do estabelecimento (ex: Supermercado, Eletrônicos, Farmácia)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lancamentos Lancamento[]
+
+  @@map("lojas")
+}
+
+model Parcela {
+  id             String     @id @default(uuid())
+  lancamentoId   String
+  lancamento     Lancamento @relation(fields: [lancamentoId], references: [id], onDelete: Cascade)
+  numero         Int
+  totalParcelas  Int
+  valor          Decimal    @db.Decimal(12, 2)
+  dataVencimento DateTime
+  mesReferencia  String     // Formato YYYY-MM para agrupamento rápido de faturas
+  pago           Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([mesReferencia])
+  @@map("parcelas")
+}
+
+model CategoriaItem {
+  id        String   @id @default(uuid())
+  nome      String   @unique
+  cor       String?  // Cor hexadecimal para badges (ex: #38b6ff, #10b981)
+  icone     String?  // Identificador de ícone ou tag
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categorias_itens")
+}
+
+model CategoriaLoja {
+  id        String   @id @default(uuid())
+  nome      String   @unique
+  descricao String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categorias_lojas")
+}
