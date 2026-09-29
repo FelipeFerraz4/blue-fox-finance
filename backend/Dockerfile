@@ -24,8 +24,10 @@ RUN apk add --no-cache openssl libc6-compat
 
 ENV NODE_ENV=production
 
-COPY package*.json ./
-RUN npm install --omit=dev && npm install -g ts-node typescript prisma
+COPY package*.json tsconfig*.json ./
+RUN npm install --omit=dev && npm install -g ts-node typescript@^5.6.2 prisma
+
+ENV NODE_PATH=/usr/local/lib/node_modules
 
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
@@ -34,4 +36,4 @@ COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node prisma/seed.js && node dist/src/main"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npx prisma db seed && node dist/src/main"]

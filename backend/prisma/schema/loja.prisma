@@ -1,0 +1,11 @@
+model Loja {
+  id          String       @id @default(uuid())
+  nome        String       @unique
+  categoria   String?      // Categoria do estabelecimento (ex: Supermercado, Eletrônicos, Farmácia)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lancamentos Lancamento[]
+
+  @@map("lojas")
+}

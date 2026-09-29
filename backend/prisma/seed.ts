@@ -1,62 +1,43 @@
-import { PrismaClient, ModalidadePagamento } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { seedPagamentos } from './seeds/pagamentos.seed';
+import { seedCategoriasLojas } from './seeds/categorias-lojas.seed';
+import { seedCategoriasItens } from './seeds/categorias-itens.seed';
+import { seedLojas } from './seeds/lojas.seed';
+import { seedUsuarios } from './seeds/usuarios.seed';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed de Meios de Pagamento padrão...');
+  console.log('🚀 Iniciando processo de seed modular do BlueFox Spend...');
+  const startTime = Date.now();
 
-  const defaultMethods = [
-    {
-      nome: 'Dinheiro',
-      modalidade: ModalidadePagamento.DINHEIRO_CONTA,
-      instituicaoBanco: 'Carteira',
-      diaFechamento: null,
-      diaVencimento: null,
-    },
-    {
-      nome: 'Pix',
-      modalidade: ModalidadePagamento.DINHEIRO_CONTA,
-      instituicaoBanco: 'Geral',
-      diaFechamento: null,
-      diaVencimento: null,
-    },
-    {
-      nome: 'Boleto Bancário',
-      modalidade: ModalidadePagamento.OUTRO,
-      instituicaoBanco: 'Geral',
-      diaFechamento: null,
-      diaVencimento: null,
-    },
-    {
-      nome: 'TED / Transferência',
-      modalidade: ModalidadePagamento.DINHEIRO_CONTA,
-      instituicaoBanco: 'Geral',
-      diaFechamento: null,
-      diaVencimento: null,
-    },
-  ];
+  try {
+    // 1. Meios de pagamento
+    await seedPagamentos(prisma);
 
-  for (const method of defaultMethods) {
-    const existing = await prisma.paymentMethod.findFirst({
-      where: { nome: method.nome },
-    });
+    // 2. Categorias de Lojas
+    await seedCategoriasLojas(prisma);
 
-    if (!existing) {
-      await prisma.paymentMethod.create({
-        data: method,
-      });
-      console.log(`✅ Meio de pagamento criado: ${method.nome}`);
-    } else {
-      console.log(`ℹ️ Meio de pagamento já existente: ${method.nome}`);
-    }
+    // 3. Categorias de Itens/Despesas
+    await seedCategoriasItens(prisma);
+
+    // 4. Lojas padrão
+    await seedLojas(prisma);
+
+    // 5. Usuários/Compradores padrão
+    await seedUsuarios(prisma);
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`✨ Todos os seeds foram aplicados com sucesso em ${elapsed}s!`);
+  } catch (error) {
+    console.error('❌ Erro durante a execução dos seeds:', error);
+    throw error;
   }
-
-  console.log('✨ Seed finalizado com sucesso!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erro durante o seed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

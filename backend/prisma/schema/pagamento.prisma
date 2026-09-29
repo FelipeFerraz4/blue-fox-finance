@@ -1,0 +1,22 @@
+enum ModalidadePagamento {
+  CREDITO
+  DEBITO
+  DINHEIRO_CONTA
+  OUTRO
+}
+
+model PaymentMethod {
+  id               String              @id @default(uuid())
+  nome             String
+  modalidade       ModalidadePagamento
+  diaFechamento    Int?
+  diaVencimento    Int?
+  instituicaoBanco String
+  ativo            Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  lancamentos      Lancamento[]
+
+  @@map("payment_methods")
+}

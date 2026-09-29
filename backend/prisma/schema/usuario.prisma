@@ -1,0 +1,12 @@
+model Comprador {
+  id          String       @id @default(uuid())
+  nome        String       @unique
+  email       String?
+  ativo       Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lancamentos Lancamento[]
+
+  @@map("compradores")
+}
