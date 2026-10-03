@@ -13,21 +13,19 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     <div class="payment-methods-page">
       <div class="page-header">
         <div class="page-header-content">
-          <div class="header-icon-box">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-          </div>
-          <div>
-            <div class="title-with-pill">
-              <h1 class="page-title">Meios de Pagamento</h1>
-              <span class="badge badge-brand">Cartões & Contas</span>
+          <div class="title-with-pill">
+            <div class="header-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
             </div>
-            <p class="page-subtitle">
-              Cadastre seus cartões de crédito com dias de fechamento e vencimento para projeção exata das faturas futuras
-            </p>
+            <h1 class="page-title">Meios de Pagamento</h1>
+            <span class="badge badge-brand">Cartões & Contas</span>
           </div>
+          <p class="page-subtitle">
+            Cadastre seus cartões de crédito com dias de fechamento e vencimento para projeção exata das faturas futuras
+          </p>
         </div>
 
         <button (click)="openAddModal()" class="btn btn-primary btn-pill add-btn">
@@ -51,72 +49,129 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
           <p>Carregando meios de pagamento...</p>
         </div>
 
-        <div class="table-responsive" *ngIf="!loading && methods.length > 0">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Meio de Pagamento</th>
-                <th>Modalidade</th>
-                <th class="text-center">Dia de Fechamento</th>
-                <th class="text-center">Dia de Vencimento</th>
-                <th>Instituição / Banco</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let m of methods">
-                <td>
-                  <div class="method-name-col">
-                    <strong class="text-gray-900">{{ m.nome }}</strong>
-                  </div>
-                </td>
-                <td>
+        <div *ngIf="!loading && methods.length > 0">
+          <div class="desktop-table-container">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Meio de Pagamento</th>
+                    <th>Modalidade</th>
+                    <th class="text-center">Dia de Fechamento</th>
+                    <th class="text-center">Dia de Vencimento</th>
+                    <th>Instituição / Banco</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let m of methods">
+                    <td>
+                      <div class="method-name-col">
+                        <strong class="text-gray-900">{{ m.nome }}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="getModalidadeClass(m.modalidade)">
+                        {{ getModalidadeLabel(m.modalidade) }}
+                      </span>
+                    </td>
+                    <td class="text-center font-medium">
+                      <span *ngIf="m.diaFechamento" class="day-badge">Dia {{ m.diaFechamento }}</span>
+                      <span *ngIf="!m.diaFechamento" class="text-muted">-</span>
+                    </td>
+                    <td class="text-center font-medium">
+                      <span *ngIf="m.diaVencimento" class="day-badge highlight-due">Dia {{ m.diaVencimento }}</span>
+                      <span *ngIf="!m.diaVencimento" class="text-muted">-</span>
+                    </td>
+                    <td>
+                      <span class="banco-tag">{{ m.instituicaoBanco }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
+                        {{ m.ativo ? 'Ativo' : 'Inativo' }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <div class="table-actions">
+                        <button
+                          (click)="toggleStatus(m)"
+                          class="btn btn-secondary btn-sm"
+                          [title]="m.ativo ? 'Desativar meio' : 'Ativar meio'"
+                        >
+                          {{ m.ativo ? 'Desativar' : 'Ativar' }}
+                        </button>
+                        <button
+                          (click)="promptDeleteMethod(m)"
+                          class="btn btn-danger btn-sm"
+                          title="Excluir meio de pagamento"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cards Mobile de Meios de Pagamento -->
+          <div class="mobile-cards-container">
+            <div *ngFor="let m of methods" class="method-mobile-card">
+              <!-- Topo: Nome do Meio de Pagamento e Status -->
+              <div class="method-card-header">
+                <div class="method-card-title-wrap">
+                  <span class="method-card-name">{{ m.nome }}</span>
+                  <span class="banco-tag" *ngIf="m.instituicaoBanco">{{ m.instituicaoBanco }}</span>
+                </div>
+                <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
+                  {{ m.ativo ? 'Ativo' : 'Inativo' }}
+                </span>
+              </div>
+
+              <!-- Metadados: Modalidade, Fechamento e Vencimento -->
+              <div class="method-card-body">
+                <div class="meta-item">
+                  <span class="meta-label">Modalidade:</span>
                   <span class="badge" [ngClass]="getModalidadeClass(m.modalidade)">
                     {{ getModalidadeLabel(m.modalidade) }}
                   </span>
-                </td>
-                <td class="text-center font-medium">
-                  <span *ngIf="m.diaFechamento" class="day-badge">Dia {{ m.diaFechamento }}</span>
-                  <span *ngIf="!m.diaFechamento" class="text-muted">-</span>
-                </td>
-                <td class="text-center font-medium">
-                  <span *ngIf="m.diaVencimento" class="day-badge highlight-due">Dia {{ m.diaVencimento }}</span>
-                  <span *ngIf="!m.diaVencimento" class="text-muted">-</span>
-                </td>
-                <td>
-                  <span class="banco-tag">{{ m.instituicaoBanco }}</span>
-                </td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
-                    {{ m.ativo ? 'Ativo' : 'Inativo' }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <div class="table-actions">
-                    <button
-                      (click)="toggleStatus(m)"
-                      class="btn btn-secondary btn-sm"
-                      [title]="m.ativo ? 'Desativar meio' : 'Ativar meio'"
-                    >
-                      {{ m.ativo ? 'Desativar' : 'Ativar' }}
-                    </button>
-                    <button
-                      (click)="promptDeleteMethod(m)"
-                      class="btn btn-danger btn-sm"
-                      title="Excluir meio de pagamento"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      </svg>
-                      Excluir
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+                <div class="meta-item" *ngIf="m.diaFechamento || m.diaVencimento">
+                  <span class="meta-label">Fatura:</span>
+                  <span class="day-badge" *ngIf="m.diaFechamento">Fecha {{ m.diaFechamento }}</span>
+                  <span class="day-badge highlight-due" *ngIf="m.diaVencimento">Vence {{ m.diaVencimento }}</span>
+                </div>
+              </div>
+
+              <!-- Ações Mobile -->
+              <div class="method-card-actions">
+                <button
+                  (click)="toggleStatus(m)"
+                  class="btn btn-secondary btn-sm mobile-action-btn"
+                  [title]="m.ativo ? 'Desativar meio' : 'Ativar meio'"
+                >
+                  {{ m.ativo ? 'Desativar' : 'Ativar' }}
+                </button>
+                <button
+                  (click)="promptDeleteMethod(m)"
+                  class="btn btn-danger btn-sm mobile-action-btn"
+                  title="Excluir meio de pagamento"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  <span>Excluir</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="!loading && methods.length === 0" class="empty-state">
@@ -248,14 +303,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
 
     .page-header-content {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
     }
 
     .header-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
       color: #ffffff;
       display: flex;
@@ -265,10 +321,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       flex-shrink: 0;
     }
 
+    .header-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
     .title-with-pill {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
       flex-wrap: wrap;
     }
 
@@ -278,6 +339,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       border: 1px solid rgba(0, 74, 173, 0.15);
       font-weight: 600;
       font-size: 0.72rem;
+      white-space: nowrap;
     }
 
     .add-btn {
@@ -286,11 +348,32 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     }
 
     @media (max-width: 768px) {
-      .page-header-content {
-        align-items: flex-start;
+      .header-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+      }
+      .header-icon-box svg {
+        width: 18px;
+        height: 18px;
+      }
+      .title-with-pill {
+        gap: 0.5rem;
       }
       .add-btn {
         width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-icon-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+      }
+      .header-icon-box svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -347,6 +430,99 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       align-items: center;
       gap: 0.5rem;
       justify-content: center;
+    }
+
+    /* Responsividade Desktop vs Mobile */
+    .desktop-table-container {
+      display: block;
+    }
+
+    .mobile-cards-container {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-table-container {
+        display: none !important;
+      }
+
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+    }
+
+    /* Cards Mobile de Meios de Pagamento */
+    .method-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .method-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .method-card-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .method-card-name {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0b132b;
+    }
+
+    .method-card-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-top: 1px dashed var(--gray-200);
+      border-bottom: 1px dashed var(--gray-200);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta-label {
+      color: var(--gray-500);
+      font-size: 0.78rem;
+    }
+
+    .method-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .mobile-action-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
     }
   `],
 })
