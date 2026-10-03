@@ -253,12 +253,18 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .page-header {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .breadcrumb-row {
@@ -266,6 +272,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       align-items: center;
       gap: 0.5rem;
       font-size: 0.85rem;
+      flex-wrap: wrap;
     }
 
     .breadcrumb-link {
@@ -289,12 +296,14 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
     .breadcrumb-current {
       color: #64748b;
       font-weight: 500;
+      word-break: break-word;
     }
 
     .header-main {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      width: 100%;
     }
 
     .title-with-badge {
@@ -306,11 +315,31 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
 
     .page-title {
       font-family: var(--font-outfit), sans-serif;
-      font-size: 1.85rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: #0b132b;
       margin: 0;
       letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 768px) {
+      .breadcrumb-row {
+        justify-content: center;
+        text-align: center;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .page-title {
+        font-size: 1.15rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.05rem;
+      }
     }
 
     .badge-role {
@@ -322,13 +351,14 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.2rem 0.65rem;
       border-radius: 50px;
+      white-space: nowrap;
     }
 
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       color: #64748b;
-      margin: 0.35rem 0 0 0;
+      margin: 0.15rem 0 0 0;
     }
 
     .feedback-banner {
@@ -340,6 +370,10 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       font-size: 0.9rem;
       font-weight: 500;
       animation: fadeIn 0.2s ease-out;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
+      word-break: break-word;
     }
 
     .feedback-banner.success {
@@ -354,12 +388,19 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       grid-template-columns: 360px 1fr;
       gap: 1.5rem;
       align-items: start;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    .profile-col-side {
+    .profile-col-side,
+    .profile-col-main {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .card {
@@ -368,6 +409,10 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       border: 1px solid rgba(0, 74, 173, 0.08);
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
       overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .card-avatar-preview {
@@ -376,6 +421,8 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       flex-direction: column;
       align-items: center;
       text-align: center;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .avatar-hero-wrap {
@@ -483,6 +530,8 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       cursor: pointer;
       transition: all 0.15s ease;
       text-align: left;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .avatar-option-btn:hover {
@@ -515,6 +564,8 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
     /* Coluna Formulário */
     .form-card {
       padding: 1.75rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .card-header-clean {
@@ -524,6 +575,13 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       padding-bottom: 1.25rem;
       border-bottom: 1px solid #f1f5f9;
       margin-bottom: 1.5rem;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .card-header-clean > div {
+      min-width: 0;
+      flex: 1;
     }
 
     .header-icon-box {
@@ -544,24 +602,30 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       font-weight: 700;
       color: #0b132b;
       margin: 0;
+      word-break: break-word;
     }
 
     .card-subtitle {
       font-size: 0.82rem;
       color: #64748b;
       margin: 0.15rem 0 0 0;
+      word-break: break-word;
     }
 
     .profile-form {
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-row {
       display: flex;
       gap: 1.25rem;
       flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .flex-1 {
@@ -573,6 +637,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
+      min-width: 0;
     }
 
     .form-label {
@@ -617,6 +682,155 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
     @media (max-width: 900px) {
       .profile-grid {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-page {
+        gap: 1.25rem;
+      }
+
+      .page-header {
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .header-main {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .title-with-badge {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .page-subtitle {
+        text-align: center;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .feedback-banner {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .card-avatar-preview {
+        padding: 1.5rem 1rem;
+      }
+
+      .avatar-hero-circle {
+        width: 80px;
+        height: 80px;
+      }
+
+      .avatar-hero-circle svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      .avatars-selection-section {
+        width: 100%;
+        text-align: center;
+      }
+
+      .section-sublabel {
+        text-align: center;
+        display: block;
+      }
+
+      .form-card {
+        padding: 1.25rem 1rem;
+      }
+
+      .card-header-clean {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+      }
+
+      .card-header-clean > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .card-title {
+        text-align: center;
+      }
+
+      .card-subtitle {
+        text-align: center;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .flex-1 {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+        gap: 0.65rem;
+        width: 100%;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .avatars-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+
+      .avatar-option-btn {
+        padding: 0.45rem 0.5rem;
+        gap: 0.35rem;
+      }
+
+      .avatar-mini-icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .avatar-mini-icon svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .avatar-option-name {
+        font-size: 0.72rem;
       }
     }
 
