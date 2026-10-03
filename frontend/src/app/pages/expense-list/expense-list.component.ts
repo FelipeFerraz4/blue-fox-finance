@@ -21,19 +21,17 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       <!-- Header da Página -->
       <div class="page-header">
         <div class="page-header-content">
-          <div class="header-icon-box">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M9 11l3 3L22 4"/>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
-          </div>
-          <div>
-            <div class="title-with-pill">
-              <h1 class="page-title">Lançamentos de Despesas</h1>
-              <span class="badge badge-brand">Histórico & Faturas</span>
+          <div class="title-with-pill">
+            <div class="header-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
             </div>
-            <p class="page-subtitle">Visualização de lançamentos com ordenação por mais recente, paginação e filtros</p>
+            <h1 class="page-title">Lançamentos de Despesas</h1>
+            <span class="badge badge-brand">Histórico & Faturas</span>
           </div>
+          <p class="page-subtitle">Visualização de lançamentos com ordenação por mais recente, paginação e filtros</p>
         </div>
 
         <div class="header-actions">
@@ -210,101 +208,176 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
         </div>
 
         <div *ngIf="expenses.length > 0; else noExpenses" class="card table-card">
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Loja / Estabelecimento</th>
-                  <th>Item / Nome</th>
-                  <th>Comprador</th>
-                  <th>Categoria</th>
-                  <th class="text-center">Qtd</th>
-                  <th class="text-right">Valor Unit.</th>
-                  <th class="text-right">Valor Total</th>
-                  <th>Meio de Pagamento</th>
-                  <th>Tipo / Parcelas</th>
-                  <th class="text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of expenses">
-                  <td>
-                    <span class="date-badge">
-                      {{ item.data | date:'dd/MM/yyyy' }}
-                    </span>
-                  </td>
-                  <td>
-                    <strong class="text-gray-900 font-medium">{{ item.loja }}</strong>
-                  </td>
-                  <td>
-                    <div class="font-medium text-gray-900">{{ item.nome }}</div>
-                    <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
-                  </td>
-                  <td>
-                    <span class="comprador-badge">{{ item.comprador }}</span>
-                  </td>
-                  <td>
-                    <span class="badge badge-gray">{{ item.categoria }}</span>
-                  </td>
-                  <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
-                  <td class="text-right text-muted">
-                    {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                  </td>
-                  <td class="text-right font-bold text-primary">
+          <!-- 1. Visão Desktop (Tabela) -->
+          <div class="desktop-table-container">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Loja / Estabelecimento</th>
+                    <th>Item / Nome</th>
+                    <th>Comprador</th>
+                    <th>Categoria</th>
+                    <th class="text-center">Qtd</th>
+                    <th class="text-right">Valor Unit.</th>
+                    <th class="text-right">Valor Total</th>
+                    <th>Meio de Pagamento</th>
+                    <th>Tipo / Parcelas</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of expenses">
+                    <td>
+                      <span class="date-badge">
+                        {{ item.data | date:'dd/MM/yyyy' }}
+                      </span>
+                    </td>
+                    <td>
+                      <strong class="text-gray-900 font-medium">{{ item.loja }}</strong>
+                    </td>
+                    <td>
+                      <div class="font-medium text-gray-900">{{ item.nome }}</div>
+                      <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
+                    </td>
+                    <td>
+                      <span class="comprador-badge">{{ item.comprador }}</span>
+                    </td>
+                    <td>
+                      <span class="badge badge-gray">{{ item.categoria }}</span>
+                    </td>
+                    <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
+                    <td class="text-right text-muted">
+                      {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </td>
+                    <td class="text-right font-bold text-primary">
+                      {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </td>
+                    <td>
+                      <span class="badge badge-primary">
+                        {{ item.meioPagamento?.nome || 'N/A' }}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        *ngIf="item.tipo === 'PARCELADO'"
+                        (click)="openParcelasModal(item)"
+                        class="btn-parcelas-pill"
+                        title="Ver parcelas do lançamento"
+                      >
+                        <span class="pill-badge">{{ item.numeroParcelas }}x</span>
+                        <span class="pill-text">ver parcelas</span>
+                      </button>
+                      <span
+                        *ngIf="item.tipo !== 'PARCELADO'"
+                        class="badge badge-success"
+                      >
+                        À Vista
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <div class="table-actions-row">
+                        <button
+                          (click)="openEditModal(item)"
+                          class="btn-action-icon btn-action-edit"
+                          title="Editar Lançamento"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                          <span class="action-btn-text">Editar</span>
+                        </button>
+                        <button
+                          (click)="promptDelete(item)"
+                          class="btn-action-icon btn-action-delete"
+                          title="Excluir Lançamento"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                          <span class="action-btn-text">Excluir</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2. Visão Mobile (Cards Responsivos com Nome em Destaque) -->
+          <div class="mobile-cards-container">
+            <div *ngFor="let item of expenses" class="expense-mobile-card">
+              <!-- Topo: Nome do Item e Valor Total -->
+              <div class="expense-card-top">
+                <div class="expense-card-title-wrap">
+                  <span class="expense-card-name">{{ item.nome }}</span>
+                  <span class="expense-card-store text-muted">{{ item.loja }}</span>
+                </div>
+                <div class="expense-card-price-wrap">
+                  <span class="expense-card-total font-bold text-primary">
                     {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                  </td>
-                  <td>
-                    <span class="badge badge-primary">
-                      {{ item.meioPagamento?.nome || 'N/A' }}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      *ngIf="item.tipo === 'PARCELADO'"
-                      (click)="openParcelasModal(item)"
-                      class="btn-parcelas-pill"
-                      title="Ver parcelas do lançamento"
-                    >
-                      <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                      <span class="pill-text">ver parcelas</span>
-                    </button>
-                    <span
-                      *ngIf="item.tipo !== 'PARCELADO'"
-                      class="badge badge-success"
-                    >
-                      À Vista
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="table-actions-row">
-                      <button
-                        (click)="openEditModal(item)"
-                        class="btn-action-icon btn-action-edit"
-                        title="Editar Lançamento"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                        <span class="action-btn-text">Editar</span>
-                      </button>
-                      <button
-                        (click)="promptDelete(item)"
-                        class="btn-action-icon btn-action-delete"
-                        title="Excluir Lançamento"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="3 6 5 6 21 6"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        <span class="action-btn-text">Excluir</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </span>
+                  <span class="expense-card-unit text-muted text-xs">
+                    {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Metadados: Data e Comprador -->
+              <div class="expense-card-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Data:</span>
+                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Comprador:</span>
+                  <span class="comprador-badge">{{ item.comprador }}</span>
+                </div>
+              </div>
+
+              <!-- Badges: Categoria, Meio de Pagamento e Tipo -->
+              <div class="expense-card-badges">
+                <span class="badge badge-gray">{{ item.categoria }}</span>
+                <span class="badge badge-primary">{{ item.meioPagamento?.nome || 'N/A' }}</span>
+                <button
+                  *ngIf="item.tipo === 'PARCELADO'"
+                  (click)="openParcelasModal(item)"
+                  class="btn-parcelas-pill"
+                  title="Ver parcelas do lançamento"
+                >
+                  <span class="pill-badge">{{ item.numeroParcelas }}x</span>
+                  <span class="pill-text">ver parcelas</span>
+                </button>
+                <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">À Vista</span>
+              </div>
+
+              <!-- Observações caso existam -->
+              <div *ngIf="item.observacoes" class="expense-card-obs">
+                <small class="text-muted">{{ item.observacoes }}</small>
+              </div>
+
+              <!-- Ações Rápidas Mobile -->
+              <div class="expense-card-actions">
+                <button (click)="openEditModal(item)" class="btn btn-secondary btn-sm mobile-action-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span>Editar</span>
+                </button>
+                <button (click)="promptDelete(item)" class="btn btn-danger btn-sm mobile-action-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  <span>Excluir</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Controles de Paginação -->
@@ -378,89 +451,163 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
 
             <!-- Detalhes dos Itens do Grupo -->
             <div *ngIf="isGroupExpanded(idx)" class="group-details-body">
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Item / Nome</th>
-                      <th>Comprador</th>
-                      <th>Categoria</th>
-                      <th class="text-center">Qtd</th>
-                      <th class="text-right">Valor Unit.</th>
-                      <th class="text-right">Valor Total</th>
-                      <th>Meio Pagamento</th>
-                      <th>Tipo / Parcelas</th>
-                      <th class="text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let item of group.itens">
-                      <td>
-                        <div class="font-medium text-gray-900">{{ item.nome }}</div>
-                        <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
-                      </td>
-                      <td>
-                        <span class="comprador-badge">{{ item.comprador }}</span>
-                      </td>
-                      <td>
-                        <span class="badge badge-gray">{{ item.categoria }}</span>
-                      </td>
-                      <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
-                      <td class="text-right text-muted">
-                        {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                      </td>
-                      <td class="text-right font-bold text-primary">
+              <div class="desktop-table-container">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Item / Nome</th>
+                        <th>Comprador</th>
+                        <th>Categoria</th>
+                        <th class="text-center">Qtd</th>
+                        <th class="text-right">Valor Unit.</th>
+                        <th class="text-right">Valor Total</th>
+                        <th>Meio Pagamento</th>
+                        <th>Tipo / Parcelas</th>
+                        <th class="text-center">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of group.itens">
+                        <td>
+                          <div class="font-medium text-gray-900">{{ item.nome }}</div>
+                          <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
+                        </td>
+                        <td>
+                          <span class="comprador-badge">{{ item.comprador }}</span>
+                        </td>
+                        <td>
+                          <span class="badge badge-gray">{{ item.categoria }}</span>
+                        </td>
+                        <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
+                        <td class="text-right text-muted">
+                          {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        </td>
+                        <td class="text-right font-bold text-primary">
+                          {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        </td>
+                        <td>
+                          <span class="badge badge-primary">{{ item.meioPagamento?.nome || 'N/A' }}</span>
+                        </td>
+                        <td>
+                          <button
+                            *ngIf="item.tipo === 'PARCELADO'"
+                            (click)="openParcelasModal(item)"
+                            class="btn-parcelas-pill"
+                            title="Ver parcelas do lançamento"
+                          >
+                            <span class="pill-badge">{{ item.numeroParcelas }}x</span>
+                            <span class="pill-text">ver parcelas</span>
+                          </button>
+                          <span
+                            *ngIf="item.tipo !== 'PARCELADO'"
+                            class="badge badge-success"
+                          >
+                            À Vista
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <div class="table-actions-row">
+                            <button
+                              (click)="openEditModal(item)"
+                              class="btn-action-icon btn-action-edit"
+                              title="Editar Lançamento"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                              </svg>
+                              <span class="action-btn-text">Editar</span>
+                            </button>
+                            <button
+                              (click)="promptDelete(item)"
+                              class="btn-action-icon btn-action-delete"
+                              title="Excluir Lançamento"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                              </svg>
+                              <span class="action-btn-text">Excluir</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Visão Mobile (Cards Responsivos no Grupo) -->
+              <div class="mobile-cards-container" style="padding: 1rem;">
+                <div *ngFor="let item of group.itens" class="expense-mobile-card">
+                  <!-- Topo: Nome do Item e Valor Total -->
+                  <div class="expense-card-top">
+                    <div class="expense-card-title-wrap">
+                      <span class="expense-card-name">{{ item.nome }}</span>
+                      <span class="expense-card-store text-muted">{{ item.loja }}</span>
+                    </div>
+                    <div class="expense-card-price-wrap">
+                      <span class="expense-card-total font-bold text-primary">
                         {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                      </td>
-                      <td>
-                        <span class="badge badge-primary">{{ item.meioPagamento?.nome || 'N/A' }}</span>
-                      </td>
-                      <td>
-                        <button
-                          *ngIf="item.tipo === 'PARCELADO'"
-                          (click)="openParcelasModal(item)"
-                          class="btn-parcelas-pill"
-                          title="Ver parcelas do lançamento"
-                        >
-                          <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                          <span class="pill-text">ver parcelas</span>
-                        </button>
-                        <span
-                          *ngIf="item.tipo !== 'PARCELADO'"
-                          class="badge badge-success"
-                        >
-                          À Vista
-                        </span>
-                      </td>
-                      <td class="text-center">
-                        <div class="table-actions-row">
-                          <button
-                            (click)="openEditModal(item)"
-                            class="btn-action-icon btn-action-edit"
-                            title="Editar Lançamento"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            <span class="action-btn-text">Editar</span>
-                          </button>
-                          <button
-                            (click)="promptDelete(item)"
-                            class="btn-action-icon btn-action-delete"
-                            title="Excluir Lançamento"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <polyline points="3 6 5 6 21 6"/>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                            <span class="action-btn-text">Excluir</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </span>
+                      <span class="expense-card-unit text-muted text-xs">
+                        {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Metadados: Data e Comprador -->
+                  <div class="expense-card-meta">
+                    <div class="meta-item">
+                      <span class="meta-label">Data:</span>
+                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Comprador:</span>
+                      <span class="comprador-badge">{{ item.comprador }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Badges: Categoria, Meio de Pagamento e Tipo -->
+                  <div class="expense-card-badges">
+                    <span class="badge badge-gray">{{ item.categoria }}</span>
+                    <span class="badge badge-primary">{{ item.meioPagamento?.nome || 'N/A' }}</span>
+                    <button
+                      *ngIf="item.tipo === 'PARCELADO'"
+                      (click)="openParcelasModal(item)"
+                      class="btn-parcelas-pill"
+                      title="Ver parcelas do lançamento"
+                    >
+                      <span class="pill-badge">{{ item.numeroParcelas }}x</span>
+                      <span class="pill-text">ver parcelas</span>
+                    </button>
+                    <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">À Vista</span>
+                  </div>
+
+                  <!-- Observações caso existam -->
+                  <div *ngIf="item.observacoes" class="expense-card-obs">
+                    <small class="text-muted">{{ item.observacoes }}</small>
+                  </div>
+
+                  <!-- Ações Rápidas Mobile -->
+                  <div class="expense-card-actions">
+                    <button (click)="openEditModal(item)" class="btn btn-secondary btn-sm mobile-action-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                      <span>Editar</span>
+                    </button>
+                    <button (click)="promptDelete(item)" class="btn btn-danger btn-sm mobile-action-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                      <span>Excluir</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -514,26 +661,50 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
               </div>
             </div>
 
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Parcela</th>
-                  <th>Mês de Referência</th>
-                  <th>Vencimento Estimado</th>
-                  <th class="text-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let p of selectedItemForModal.parcelas">
-                  <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
-                  <td>{{ p.mesReferencia }}</td>
-                  <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
-                  <td class="text-right font-bold text-primary">
+            <div class="desktop-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Parcela</th>
+                    <th>Mês de Referência</th>
+                    <th>Vencimento Estimado</th>
+                    <th class="text-right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of selectedItemForModal.parcelas">
+                    <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
+                    <td>{{ p.mesReferencia }}</td>
+                    <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                    <td class="text-right font-bold text-primary">
+                      {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Cards de Parcelas -->
+            <div class="mobile-cards-container">
+              <div *ngFor="let p of selectedItemForModal.parcelas" class="parcela-mobile-card">
+                <div class="parcela-card-header">
+                  <span class="parcela-num font-bold">Parcela {{ p.numero }} de {{ p.totalParcelas }}</span>
+                  <span class="parcela-val font-bold text-primary">
                     {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </span>
+                </div>
+                <div class="parcela-card-body">
+                  <div class="meta-item">
+                    <span class="meta-label">Mês Ref:</span>
+                    <span class="meta-val">{{ p.mesReferencia }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Vencimento:</span>
+                    <span class="meta-val">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer mt-4 text-right">
             <button class="btn btn-secondary" (click)="closeModal()">Fechar</button>
@@ -1378,6 +1549,240 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       font-size: 1.25rem;
       cursor: pointer;
       color: var(--gray-400);
+    }
+
+    /* Responsividade Desktop vs Mobile */
+    .desktop-table-container {
+      display: block;
+    }
+    .mobile-cards-container {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .page-header-content {
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .title-with-pill {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .page-subtitle {
+        text-align: center;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .header-actions {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 0.75rem;
+      }
+
+      .view-mode-toggle {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .toggle-btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .table-summary-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.35rem;
+      }
+
+      .pagination-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.85rem;
+      }
+
+      .pagination-info {
+        text-align: center;
+      }
+
+      .pagination-buttons {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .empty-state {
+        text-align: center;
+        align-items: center;
+      }
+
+      .empty-state-actions {
+        justify-content: center;
+      }
+
+      .filter-footer {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+      }
+
+      .desktop-table-container {
+        display: none !important;
+      }
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+    }
+
+    /* Cards Mobile de Lançamentos */
+    .expense-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .expense-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .expense-card-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .expense-card-name {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0b132b;
+      line-height: 1.3;
+    }
+    .expense-card-store {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+    .expense-card-price-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .expense-card-total {
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .expense-card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-top: 1px dashed var(--gray-200);
+      border-bottom: 1px dashed var(--gray-200);
+      font-size: 0.85rem;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .meta-label {
+      color: var(--gray-500);
+      font-size: 0.78rem;
+    }
+    .meta-val {
+      color: var(--gray-800);
+      font-weight: 600;
+    }
+    .expense-card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .expense-card-obs {
+      background: #f8fafc;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      border-left: 3px solid var(--primary);
+    }
+    .expense-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .mobile-action-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+    }
+
+    /* Cards Mobile de Parcelas Modal */
+    .parcela-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .parcela-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .parcela-num {
+      font-size: 0.9rem;
+      color: #0b132b;
+    }
+    .parcela-val {
+      font-size: 1rem;
+    }
+    .parcela-card-body {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
     }
   `],
 })
