@@ -25,8 +25,8 @@ export interface SystemAvatar {
   providedIn: 'root',
 })
 export class UserService {
-  private readonly STORAGE_KEY = 'bluefox_spend_user_profile';
-  private readonly LEGACY_STORAGE_KEY = 'bluefox_costs_user_profile';
+  private readonly STORAGE_KEY = 'bluefox_finance_user_profile';
+  private readonly LEGACY_STORAGE_KEYS = ['bluefox_spend_user_profile', 'bluefox_costs_user_profile'];
 
   public readonly availableAvatars: SystemAvatar[] = [
     { id: 'avatar-1', name: 'Blue Fox Oficial', color: '#004aad', iconType: 'fox-blue' },
@@ -61,7 +61,13 @@ export class UserService {
 
   private loadProfile(): UserProfile {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY) || localStorage.getItem(this.LEGACY_STORAGE_KEY);
+      let stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) {
+        for (const legacyKey of this.LEGACY_STORAGE_KEYS) {
+          stored = localStorage.getItem(legacyKey);
+          if (stored) break;
+        }
+      }
       if (stored) {
         return { ...this.defaultProfile, ...JSON.parse(stored) };
       }
