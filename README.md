@@ -1,6 +1,6 @@
-# 🦊 BlueFox Spend - Gestão e Controle de Gastos Financeiros
+# 🦊 BlueFox Finance - Gestão Financeira e Controle de Gastos
 
-Sistema web completo para gestão e controle de gastos (*Spend Management*), compras com cartões de crédito e débito, regras de fechamento e vencimento de faturas, parcelamentos, múltiplos compradores e dashboard analítico.
+Sistema web completo para gestão financeira e controle de gastos (*Finance & Spend Management*), compras com cartões de crédito e débito, regras de fechamento e vencimento de faturas, parcelamentos, múltiplos compradores e dashboard analítico.
 
 ---
 
@@ -19,7 +19,7 @@ O projeto está totalmente configurado para subir todos os serviços com um úni
 
 ```bash
 # 1. Navegue até o diretório do projeto
-cd blue-fox-spend
+cd blue-fox-finance
 
 # 2. Suba os containers com build automático
 docker compose up -d --build
