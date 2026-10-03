@@ -10,19 +10,19 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
-    title: 'Dashboard | BlueFox Spend',
+    title: 'Dashboard | BlueFox Finance',
   },
   {
     path: 'lancamentos',
     loadComponent: () =>
       import('./pages/expense-list/expense-list.component').then((m) => m.ExpenseListComponent),
-    title: 'Lançamentos | BlueFox Spend',
+    title: 'Lançamentos | BlueFox Finance',
   },
   {
     path: 'lancamentos/novo',
     loadComponent: () =>
       import('./pages/expense-form/expense-form.component').then((m) => m.ExpenseFormComponent),
-    title: 'Novo Lançamento | BlueFox Spend',
+    title: 'Novo Lançamento | BlueFox Finance',
   },
   {
     path: 'meios-pagamento',
@@ -30,25 +30,25 @@ export const routes: Routes = [
       import('./pages/payment-methods/payment-methods.component').then(
         (m) => m.PaymentMethodsComponent,
       ),
-    title: 'Meios de Pagamento | BlueFox Spend',
+    title: 'Meios de Pagamento | BlueFox Finance',
   },
   {
     path: 'lojas',
     loadComponent: () =>
       import('./pages/stores/stores.component').then((m) => m.StoresComponent),
-    title: 'Lojas & Estabelecimentos | BlueFox Spend',
+    title: 'Lojas & Estabelecimentos | BlueFox Finance',
   },
   {
     path: 'compradores',
     loadComponent: () =>
       import('./pages/buyers/buyers.component').then((m) => m.BuyersComponent),
-    title: 'Compradores | BlueFox Spend',
+    title: 'Compradores | BlueFox Finance',
   },
   {
     path: 'admin',
     loadComponent: () =>
       import('./pages/admin/admin.component').then((m) => m.AdminComponent),
-    title: 'Administração & Hub | BlueFox Spend',
+    title: 'Administração & Hub | BlueFox Finance',
   },
   {
     path: 'admin/categorias-itens',
@@ -56,7 +56,7 @@ export const routes: Routes = [
       import('./pages/admin/item-categories/item-categories.component').then(
         (m) => m.ItemCategoriesComponent,
       ),
-    title: 'Categorias de Itens | BlueFox Spend',
+    title: 'Categorias de Itens | BlueFox Finance',
   },
   {
     path: 'admin/categorias-lojas',
@@ -64,7 +64,7 @@ export const routes: Routes = [
       import('./pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
       ),
-    title: 'Categorias de Lojas | BlueFox Spend',
+    title: 'Categorias de Lojas | BlueFox Finance',
   },
   {
     path: 'admin/usuario',
@@ -72,7 +72,7 @@ export const routes: Routes = [
       import('./pages/admin/user-profile/user-profile.component').then(
         (m) => m.UserProfileComponent,
       ),
-    title: 'Perfil do Usuário | BlueFox Spend',
+    title: 'Perfil do Usuário | BlueFox Finance',
   },
   {
     path: '**',

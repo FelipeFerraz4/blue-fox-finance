@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "bluefox-spend-frontend": {
+    "bluefox-finance-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/bluefox-spend-frontend",
+            "outputPath": "dist/bluefox-finance-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -59,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "bluefox-spend-frontend:build:production"
+              "buildTarget": "bluefox-finance-frontend:build:production"
             },
             "development": {
-              "buildTarget": "bluefox-spend-frontend:build:development"
+              "buildTarget": "bluefox-finance-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

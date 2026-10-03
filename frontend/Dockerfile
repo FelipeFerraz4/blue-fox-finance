@@ -15,10 +15,10 @@ RUN npm run build
 
 # Preparar pasta única independente da versão do Angular builder
 RUN mkdir -p /app/public-html && \
-    if [ -d "/app/dist/bluefox-spend-frontend/browser" ]; then \
-      cp -r /app/dist/bluefox-spend-frontend/browser/* /app/public-html/; \
+    if [ -d "/app/dist/bluefox-finance-frontend/browser" ]; then \
+      cp -r /app/dist/bluefox-finance-frontend/browser/* /app/public-html/; \
     else \
-      cp -r /app/dist/bluefox-spend-frontend/* /app/public-html/; \
+      cp -r /app/dist/bluefox-finance-frontend/* /app/public-html/; \
     fi
 
 # Stage 2: Nginx para servir a SPA
