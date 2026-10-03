@@ -182,6 +182,9 @@ interface AdminModuleCard {
       display: flex;
       flex-direction: column;
       gap: 2rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* Cabeçalho */
@@ -202,11 +205,24 @@ interface AdminModuleCard {
 
     .page-title {
       font-family: var(--font-outfit), sans-serif;
-      font-size: 2rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: #0b132b;
       margin: 0;
       letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.15rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.05rem;
+      }
     }
 
     .hub-pill {
@@ -219,13 +235,14 @@ interface AdminModuleCard {
       padding: 0.25rem 0.75rem;
       border-radius: 50px;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
 
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       color: #64748b;
-      margin: 0.4rem 0 0 0;
+      margin: 0.15rem 0 0 0;
     }
 
     /* Card de Visão Geral do Usuário */
@@ -348,8 +365,10 @@ interface AdminModuleCard {
     /* Grid de Módulos */
     .modules-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .module-card {
@@ -363,6 +382,10 @@ interface AdminModuleCard {
       gap: 1rem;
       text-decoration: none;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .module-card:hover {
@@ -375,6 +398,7 @@ interface AdminModuleCard {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 0.75rem;
     }
 
     .module-icon-wrap {
@@ -385,6 +409,7 @@ interface AdminModuleCard {
       align-items: center;
       justify-content: center;
       transition: transform 0.2s ease;
+      flex-shrink: 0;
     }
 
     .module-card:hover .module-icon-wrap {
@@ -397,6 +422,7 @@ interface AdminModuleCard {
       text-transform: uppercase;
       padding: 0.2rem 0.55rem;
       border-radius: 50px;
+      white-space: nowrap;
     }
 
     .card-badge.primary {
@@ -428,6 +454,9 @@ interface AdminModuleCard {
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .card-category {
@@ -446,6 +475,8 @@ interface AdminModuleCard {
       color: #0b132b;
       margin: 0;
       transition: color 0.15s ease;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .module-card:hover .card-heading {
@@ -458,6 +489,8 @@ interface AdminModuleCard {
       line-height: 1.45;
       color: #64748b;
       margin: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .card-bottom {
@@ -480,15 +513,147 @@ interface AdminModuleCard {
     }
 
     @media (max-width: 768px) {
-      .user-overview-card {
-        padding: 1.25rem;
+      .admin-page {
+        gap: 1.25rem;
       }
-      .user-overview-actions {
+
+      .admin-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
         width: 100%;
       }
+
+      .header-titles {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .title-with-pill {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .page-subtitle {
+        text-align: center;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .user-overview-card {
+        padding: 1.5rem 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.25rem;
+      }
+
+      .user-overview-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .user-avatar-wrap {
+        margin: 0 auto;
+      }
+
+      .user-details-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-width: 0;
+        width: 100%;
+      }
+
+      .user-name-row {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .user-full-name {
+        font-size: 1.2rem;
+        word-break: break-word;
+        text-align: center;
+      }
+
+      .user-meta-row {
+        gap: 0.75rem;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .meta-item {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        justify-content: center;
+      }
+
+      .user-overview-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
       .user-overview-actions .btn {
         width: 100%;
         justify-content: center;
+      }
+
+      .section-divider {
+        text-align: center;
+        width: 100%;
+      }
+
+      .section-title {
+        text-align: center;
+      }
+
+      .section-desc {
+        text-align: center;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .module-card {
+        padding: 1.25rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .user-avatar-circle {
+        width: 64px;
+        height: 64px;
+      }
+
+      .module-icon-wrap {
+        width: 42px;
+        height: 42px;
+      }
+
+      .module-card {
+        padding: 1.1rem 0.9rem;
       }
     }
   `],
