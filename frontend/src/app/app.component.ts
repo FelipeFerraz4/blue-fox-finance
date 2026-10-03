@@ -34,6 +34,14 @@ import { SidebarService } from './services/sidebar.service';
       background-color: #f8fafc;
     }
 
+    app-navbar {
+      display: block;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      width: 100%;
+    }
+
     .app-body {
       display: flex;
       flex: 1;
