@@ -1,7 +1,7 @@
 {
-  "name": "bluefox-spend-backend",
+  "name": "bluefox-finance-backend",
   "version": "1.0.0",
-  "description": "Backend NestJS para controle e gestão de gastos BlueFox Spend",
+  "description": "Backend NestJS para controle e gestão financeira BlueFox Finance",
   "author": "Blue Fox",
   "private": true,
   "license": "UNLICENSED",

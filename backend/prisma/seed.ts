@@ -8,7 +8,7 @@ import { seedUsuarios } from './seeds/usuarios.seed';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🚀 Iniciando processo de seed modular do BlueFox Spend...');
+  console.log('🚀 Iniciando processo de seed modular do BlueFox Finance...');
   const startTime = Date.now();
 
   try {
