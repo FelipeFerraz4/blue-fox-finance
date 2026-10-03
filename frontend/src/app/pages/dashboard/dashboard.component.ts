@@ -57,7 +57,7 @@ import { DashboardOverview } from '../../models/dashboard.model';
       </div>
 
       <!-- Conteúdo Principal -->
-      <div *ngIf="!loading && overview">
+      <div *ngIf="!loading && overview" class="dashboard-content">
         <!-- 4 KPI Cards Principais + Card Total Parcelado -->
         <div class="kpi-grid">
           <!-- KPI 1: TOTAL A PAGAR ESTE MÊS -->
@@ -156,48 +156,91 @@ import { DashboardOverview } from '../../models/dashboard.model';
               </div>
             </div>
 
-            <div class="table-responsive" *ngIf="overview.detalhamentoComprasMes.length > 0; else noParcelas">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Comprador</th>
-                    <th>Item / Compra</th>
-                    <th>Data</th>
-                    <th>Meio de Pagamento</th>
-                    <th>Tipo</th>
-                    <th>Parcela</th>
-                    <th class="text-right">Valor da Parcela</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of overview.detalhamentoComprasMes">
-                    <td>
-                      <span class="comprador-tag">{{ item.comprador }}</span>
-                    </td>
-                    <td>
-                      <div class="item-details">
-                        <span class="item-name font-medium">{{ item.itemCompra }}</span>
-                        <span class="item-store text-muted">{{ item.loja }}</span>
-                      </div>
-                    </td>
-                    <td>{{ item.data | date:'dd/MM/yyyy' }}</td>
-                    <td>
-                      <span class="badge badge-gray">{{ item.meioPagamento }}</span>
-                    </td>
-                    <td>
-                      <span class="badge" [ngClass]="item.tipo === 'Parcelado' ? 'badge-warning' : 'badge-success'">
-                        {{ item.tipo }}
+            <div *ngIf="overview.detalhamentoComprasMes.length > 0; else noParcelas">
+              <div class="desktop-table-container">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Comprador</th>
+                        <th>Item / Compra</th>
+                        <th>Data</th>
+                        <th>Meio de Pagamento</th>
+                        <th>Tipo</th>
+                        <th>Parcela</th>
+                        <th class="text-right">Valor da Parcela</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of overview.detalhamentoComprasMes">
+                        <td>
+                          <span class="comprador-tag">{{ item.comprador }}</span>
+                        </td>
+                        <td>
+                          <div class="item-details">
+                            <span class="item-name font-medium">{{ item.itemCompra }}</span>
+                            <span class="item-store text-muted">{{ item.loja }}</span>
+                          </div>
+                        </td>
+                        <td>{{ item.data | date:'dd/MM/yyyy' }}</td>
+                        <td>
+                          <span class="badge badge-gray">{{ item.meioPagamento }}</span>
+                        </td>
+                        <td>
+                          <span class="badge" [ngClass]="item.tipo === 'Parcelado' ? 'badge-warning' : 'badge-success'">
+                            {{ item.tipo }}
+                          </span>
+                        </td>
+                        <td>
+                          <span class="parcela-badge">{{ item.parcela }}</span>
+                        </td>
+                        <td class="text-right font-semibold">
+                          {{ item.valorParcela | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Cards Mobile: Detalhamento de Compras & Parcelas -->
+              <div class="mobile-cards-container">
+                <div *ngFor="let item of overview.detalhamentoComprasMes" class="dashboard-mobile-card">
+                  <!-- Topo: Nome do Item/Compra em destaque e Valor da Parcela -->
+                  <div class="dash-card-top">
+                    <div class="dash-card-title-wrap">
+                      <span class="dash-card-item-name">{{ item.itemCompra }}</span>
+                      <span class="dash-card-store text-muted">{{ item.loja }}</span>
+                    </div>
+                    <div class="dash-card-price-wrap">
+                      <span class="dash-card-val text-primary font-bold">
+                        {{ item.valorParcela | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
                       </span>
-                    </td>
-                    <td>
                       <span class="parcela-badge">{{ item.parcela }}</span>
-                    </td>
-                    <td class="text-right font-semibold">
-                      {{ item.valorParcela | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+                  </div>
+
+                  <!-- Metadados: Data e Comprador -->
+                  <div class="dash-card-meta">
+                    <div class="meta-item">
+                      <span class="meta-label">Data:</span>
+                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Comprador:</span>
+                      <span class="comprador-tag">{{ item.comprador }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Badges: Meio de Pagamento e Tipo -->
+                  <div class="dash-card-badges">
+                    <span class="badge badge-gray">{{ item.meioPagamento }}</span>
+                    <span class="badge" [ngClass]="item.tipo === 'Parcelado' ? 'badge-warning' : 'badge-success'">
+                      {{ item.tipo }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <ng-template #noParcelas>
@@ -214,36 +257,62 @@ import { DashboardOverview } from '../../models/dashboard.model';
               <span>RESUMO POR MEIO DE PAGAMENTO</span>
             </div>
 
-            <div class="table-responsive" *ngIf="overview.resumoMeioPagamento.length > 0; else noResumo">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Meio de Pagamento</th>
-                    <th class="text-right">Total no Mês</th>
-                    <th class="text-right">% do Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let r of overview.resumoMeioPagamento">
-                    <td>
-                      <div class="payment-method-row">
-                        <span class="font-medium">{{ r.meioPagamento }}</span>
-                        <span class="text-muted text-xs">{{ r.instituicaoBanco }}</span>
-                      </div>
-                      <!-- Barra de Progresso Visual -->
-                      <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" [style.width.%]="r.percentualDoTotal"></div>
-                      </div>
-                    </td>
-                    <td class="text-right font-semibold">
-                      {{ r.totalNoMes | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                    </td>
-                    <td class="text-right font-medium">
+            <div *ngIf="overview.resumoMeioPagamento.length > 0; else noResumo">
+              <div class="desktop-table-container">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Meio de Pagamento</th>
+                        <th class="text-right">Total no Mês</th>
+                        <th class="text-right">% do Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let r of overview.resumoMeioPagamento">
+                        <td>
+                          <div class="payment-method-row">
+                            <span class="font-medium">{{ r.meioPagamento }}</span>
+                            <span class="text-muted text-xs">{{ r.instituicaoBanco }}</span>
+                          </div>
+                          <!-- Barra de Progresso Visual -->
+                          <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" [style.width.%]="r.percentualDoTotal"></div>
+                          </div>
+                        </td>
+                        <td class="text-right font-semibold">
+                          {{ r.totalNoMes | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        </td>
+                        <td class="text-right font-medium">
+                          <span class="percentage-badge">{{ r.percentualDoTotal }}%</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Cards Mobile: Resumo Meio de Pagamento -->
+              <div class="mobile-cards-container">
+                <div *ngFor="let r of overview.resumoMeioPagamento" class="payment-summary-mobile-card">
+                  <div class="payment-card-top">
+                    <div class="payment-card-title-wrap">
+                      <span class="payment-card-name font-bold">{{ r.meioPagamento }}</span>
+                      <span class="text-muted text-xs">{{ r.instituicaoBanco }}</span>
+                    </div>
+                    <div class="payment-card-val-wrap text-right">
+                      <span class="payment-card-total font-bold text-primary">
+                        {{ r.totalNoMes | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      </span>
                       <span class="percentage-badge">{{ r.percentualDoTotal }}%</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+                  </div>
+                  <!-- Barra de Progresso Visual -->
+                  <div class="progress-bar-bg mt-2">
+                    <div class="progress-bar-fill" [style.width.%]="r.percentualDoTotal"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <ng-template #noResumo>
@@ -263,28 +332,39 @@ import { DashboardOverview } from '../../models/dashboard.model';
       gap: 1.5rem;
     }
 
+    .dashboard-page .page-header {
+      margin-bottom: 0;
+    }
+
     .period-selector {
-      display: flex;
+      display: inline-flex;
+      flex-direction: row;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       background: white;
       border: 1px solid var(--gray-200);
       border-radius: var(--radius-md);
-      padding: 0.35rem 0.5rem;
+      padding: 0.35rem 0.65rem;
       box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+      flex-wrap: nowrap;
     }
 
     .btn-icon {
       background: transparent;
       border: none;
       cursor: pointer;
-      padding: 0.4rem;
+      width: 32px;
+      height: 32px;
+      padding: 0;
       border-radius: 6px;
       color: var(--gray-600);
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.15s;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
     }
 
     .btn-icon:hover {
@@ -295,6 +375,10 @@ import { DashboardOverview } from '../../models/dashboard.model';
     .current-month-display {
       position: relative;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
     }
 
     .month-label {
@@ -303,6 +387,10 @@ import { DashboardOverview } from '../../models/dashboard.model';
       color: var(--gray-800);
       padding: 0 0.5rem;
       text-transform: capitalize;
+      white-space: nowrap;
+      display: inline-block;
+      line-height: 1;
+      text-align: center;
     }
 
     .month-input-hidden {
@@ -313,6 +401,12 @@ import { DashboardOverview } from '../../models/dashboard.model';
       height: 100%;
       opacity: 0;
       cursor: pointer;
+    }
+
+    .dashboard-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
 
     .kpi-grid {
@@ -438,12 +532,155 @@ import { DashboardOverview } from '../../models/dashboard.model';
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 1.5rem;
-      margin-top: 0.5rem;
+      margin-top: 0;
     }
 
     @media (max-width: 1024px) {
       .dashboard-tables-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-page {
+        gap: 1.25rem;
+      }
+
+      .dashboard-content {
+        gap: 1.25rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        margin-bottom: 0;
+      }
+
+      .page-header > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .page-subtitle {
+        text-align: center;
+      }
+
+      .period-selector {
+        margin: 0 auto;
+        align-self: center;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        width: auto;
+        max-width: 100%;
+        white-space: nowrap;
+      }
+
+      .current-month-display {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+      }
+
+      .month-label {
+        white-space: nowrap !important;
+        line-height: 1 !important;
+      }
+
+      .btn-icon {
+        width: 32px !important;
+        height: 32px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+
+      .kpi-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.25rem 1rem;
+        gap: 0.65rem;
+      }
+
+      .kpi-content {
+        align-items: center;
+        text-align: center;
+      }
+
+      .kpi-title,
+      .kpi-value,
+      .kpi-subtext {
+        text-align: center;
+      }
+
+      .sub-summary-card {
+        text-align: center;
+        padding: 1.25rem 1rem;
+      }
+
+      .split-info {
+        flex-direction: column;
+        gap: 0.85rem;
+        text-align: center;
+      }
+
+      .split-item {
+        align-items: center;
+        text-align: center;
+      }
+
+      .divider {
+        width: 60px;
+        height: 1px;
+        background: var(--gray-300);
+        margin: 0.15rem auto;
+      }
+
+      .dashboard-tables-grid {
+        gap: 1.25rem;
+        margin-top: 0;
+      }
+
+      .card-title {
+        text-align: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+
+      .title-with-badge {
+        justify-content: center;
+        text-align: center;
+        flex-wrap: wrap;
+      }
+
+      .desktop-table-container {
+        display: none !important;
+      }
+
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.85rem;
       }
     }
 
@@ -532,6 +769,142 @@ import { DashboardOverview } from '../../models/dashboard.model';
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .desktop-table-container {
+      display: block;
+    }
+
+    .mobile-cards-container {
+      display: none;
+    }
+
+    /* Cards Mobile no Dashboard */
+    .dashboard-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      text-align: left;
+    }
+
+    .dash-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .dash-card-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      text-align: left;
+    }
+
+    .dash-card-item-name {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0b132b;
+      line-height: 1.3;
+    }
+
+    .dash-card-store {
+      font-size: 0.82rem;
+      color: var(--gray-600);
+    }
+
+    .dash-card-price-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .dash-card-val {
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+
+    .dash-card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-top: 1px dashed var(--gray-200);
+      border-bottom: 1px dashed var(--gray-200);
+      font-size: 0.82rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta-label {
+      color: var(--gray-500);
+      font-size: 0.78rem;
+    }
+
+    .meta-val {
+      color: var(--gray-800);
+      font-weight: 600;
+    }
+
+    .dash-card-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .payment-summary-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: left;
+    }
+
+    .payment-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .payment-card-title-wrap {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .payment-card-name {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 0.95rem;
+      color: #0b132b;
+    }
+
+    .payment-card-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .payment-card-total {
+      font-size: 0.95rem;
+      color: var(--primary);
     }
   `],
 })
