@@ -32,17 +32,17 @@ export interface ExpenseItemForm {
     <div class="expense-form-page">
       <!-- Cabeçalho da Página -->
       <div class="page-header">
-        <div class="header-titles">
-          <div class="header-icon-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </div>
-          <div>
+        <div class="page-header-content">
+          <div class="title-with-pill">
+            <div class="header-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </div>
             <h1 class="page-title">Novo Lançamento</h1>
-            <p class="page-subtitle">Preencha os dados da compra e adicione os itens adquiridos</p>
           </div>
+          <p class="page-subtitle">Preencha os dados da compra e adicione os itens adquiridos</p>
         </div>
 
         <a routerLink="/lancamentos" class="btn btn-secondary btn-pill">
@@ -517,27 +517,53 @@ export interface ExpenseItemForm {
               <span class="text-xs font-bold text-muted uppercase">Projeção da Fatura</span>
             </div>
 
-            <div *ngIf="previewInstallmentsList.length > 0; else noPreview" class="table-responsive mt-2">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Parcela</th>
-                    <th>Competência</th>
-                    <th>Vencimento</th>
-                    <th class="text-right">Valor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let p of previewInstallmentsList">
-                    <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
-                    <td>{{ p.mesReferencia }}</td>
-                    <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
-                    <td class="text-right font-bold text-primary">
+            <div *ngIf="previewInstallmentsList.length > 0; else noPreview" class="mt-2">
+              <div class="desktop-table-container">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Parcela</th>
+                        <th>Competência</th>
+                        <th>Vencimento</th>
+                        <th class="text-right">Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let p of previewInstallmentsList">
+                        <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
+                        <td>{{ p.mesReferencia }}</td>
+                        <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                        <td class="text-right font-bold text-primary">
+                          {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Cards Mobile de Projeção de Parcelas -->
+              <div class="mobile-cards-container">
+                <div *ngFor="let p of previewInstallmentsList" class="parcela-mobile-card">
+                  <div class="parcela-card-header">
+                    <span class="parcela-num font-bold">Parcela {{ p.numero }} de {{ p.totalParcelas }}</span>
+                    <span class="parcela-val font-bold text-primary">
                       {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </span>
+                  </div>
+                  <div class="parcela-card-body">
+                    <div class="meta-item">
+                      <span class="meta-label">Competência:</span>
+                      <span class="meta-val">{{ p.mesReferencia }}</span>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Vencimento:</span>
+                      <span class="meta-val">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <ng-template #noPreview>
@@ -572,16 +598,24 @@ export interface ExpenseItemForm {
       flex-wrap: wrap;
     }
 
-    .header-titles {
+    .page-header-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
+    }
+
+    .title-with-pill {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.65rem;
+      flex-wrap: wrap;
     }
 
     .header-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: linear-gradient(135deg, rgba(56, 182, 255, 0.2) 0%, rgba(0, 74, 173, 0.2) 100%);
       color: #004aad;
       display: flex;
@@ -591,20 +625,59 @@ export interface ExpenseItemForm {
       box-shadow: 0 4px 12px rgba(0, 74, 173, 0.12);
     }
 
+    .header-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .header-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+      }
+      .header-icon-box svg {
+        width: 18px;
+        height: 18px;
+      }
+      .title-with-pill {
+        gap: 0.5rem;
+      }
+      .page-title {
+        font-size: 1.15rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-icon-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+      }
+      .header-icon-box svg {
+        width: 16px;
+        height: 16px;
+      }
+      .page-title {
+        font-size: 1.05rem;
+      }
+    }
+
     .page-title {
       font-family: var(--font-outfit), sans-serif;
       font-weight: 800;
-      font-size: 1.75rem;
+      font-size: 1.35rem;
       letter-spacing: -0.02em;
       color: var(--gray-900);
+      line-height: 1.25;
       margin: 0;
     }
 
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       color: var(--gray-500);
-      margin: 0.2rem 0 0 0;
+      margin: 0.15rem 0 0 0;
     }
 
     .form-layout-grid {
@@ -1082,6 +1155,74 @@ export interface ExpenseItemForm {
       .col-qty {
         flex: 1;
       }
+    }
+
+    /* Responsividade Desktop vs Mobile na Pré-visualização de Parcelas */
+    .desktop-table-container {
+      display: block;
+    }
+
+    .mobile-cards-container {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-table-container {
+        display: none !important;
+      }
+
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+    }
+
+    .parcela-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .parcela-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .parcela-num {
+      font-size: 0.9rem;
+      color: #0b132b;
+    }
+
+    .parcela-val {
+      font-size: 1rem;
+    }
+
+    .parcela-card-body {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .meta-label {
+      color: var(--gray-500);
+      font-size: 0.78rem;
+    }
+
+    .meta-val {
+      color: var(--gray-800);
+      font-weight: 600;
     }
   `]
 })
