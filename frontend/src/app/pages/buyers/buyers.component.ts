@@ -14,21 +14,19 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       <!-- Cabeçalho da Página no Padrão Blue Fox -->
       <div class="page-header">
         <div class="page-header-content">
-          <div class="header-icon-box">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <div>
-            <div class="title-with-pill">
-              <h1 class="page-title">Compradores</h1>
-              <span class="badge badge-brand">Gestão de Pessoas</span>
+          <div class="title-with-pill">
+            <div class="header-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
             </div>
-            <p class="page-subtitle">
-              Cadastre as pessoas e compradores das compras para agilizar novos lançamentos e habilitar filtros avançados
-            </p>
+            <h1 class="page-title">Compradores</h1>
+            <span class="badge badge-brand">Gestão de Pessoas</span>
           </div>
+          <p class="page-subtitle">
+            Cadastre as pessoas e compradores das compras para agilizar novos lançamentos e habilitar filtros avançados
+          </p>
         </div>
 
         <button (click)="openAddModal()" class="btn btn-primary btn-pill add-btn">
@@ -424,14 +422,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     /* Cabeçalho */
     .page-header-content {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
     }
 
     .header-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
       color: #ffffff;
       display: flex;
@@ -441,10 +440,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       flex-shrink: 0;
     }
 
+    .header-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
     .title-with-pill {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
       flex-wrap: wrap;
     }
 
@@ -454,6 +458,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       border: 1px solid rgba(0, 74, 173, 0.15);
       font-weight: 600;
       font-size: 0.72rem;
+      white-space: nowrap;
     }
 
     .add-btn {
@@ -462,11 +467,32 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     }
 
     @media (max-width: 768px) {
-      .page-header-content {
-        align-items: flex-start;
+      .header-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+      }
+      .header-icon-box svg {
+        width: 18px;
+        height: 18px;
+      }
+      .title-with-pill {
+        gap: 0.5rem;
       }
       .add-btn {
         width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-icon-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+      }
+      .header-icon-box svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -557,7 +583,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
 
     .filter-search-wrap {
       flex: 1;
-      min-width: 260px;
+      min-width: 240px;
     }
 
     .search-input-box {
@@ -570,18 +596,27 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     .search-icon {
       position: absolute;
       left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
       pointer-events: none;
+      z-index: 1;
     }
 
     .search-input {
+      width: 100%;
+      height: 42px;
       padding-left: 2.35rem;
       padding-right: 2.2rem;
       font-size: 0.9rem;
+      border-radius: var(--radius-md);
+      box-sizing: border-box;
     }
 
     .btn-clear-search {
       position: absolute;
       right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
       background: none;
       border: none;
       color: var(--gray-400);
@@ -589,6 +624,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       cursor: pointer;
       line-height: 1;
       padding: 0.2rem;
+      z-index: 1;
     }
 
     .btn-clear-search:hover {
@@ -613,9 +649,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      -webkit-overflow-scrolling: touch;
+      flex-wrap: wrap;
     }
 
     .badge-filter {
@@ -625,7 +659,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
       color: var(--gray-700);
-      padding: 0.42rem 0.85rem;
+      padding: 0.45rem 0.85rem;
       border-radius: 9999px;
       font-family: var(--font-body, 'Inter', sans-serif);
       font-size: 0.82rem;
@@ -662,19 +696,67 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       background-color: #ffffff;
     }
 
+    .view-help-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--gray-500);
+      font-family: var(--font-body, 'Inter', sans-serif);
+    }
+
     @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .kpi-card {
+        padding: 1rem;
+      }
       .buyer-filter-card {
         flex-direction: column;
         align-items: stretch;
+        padding: 1rem;
+        gap: 0.85rem;
+      }
+      .filter-search-wrap {
+        width: 100%;
+        min-width: 0;
       }
       .filter-pills-wrap {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+      .filter-pills-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--gray-600);
+      }
+      .pills-scroll-container {
+        display: flex;
+        gap: 0.45rem;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .badge-filter {
+        flex: 1 1 auto;
+        min-width: 80px;
+        justify-content: center;
+        text-align: center;
+        padding: 0.5rem 0.4rem;
+        font-size: 0.82rem;
+      }
+      .card-title {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
       }
-      .pills-scroll-container {
-        width: 100%;
-        overflow-x: auto;
+      .view-help-text {
+        font-size: 0.75rem;
+        line-height: 1.3;
       }
     }
 
@@ -818,13 +900,13 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       display: none;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .desktop-table-container {
-        display: none;
+        display: none !important;
       }
 
       .mobile-cards-container {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         gap: 0.85rem;
       }
