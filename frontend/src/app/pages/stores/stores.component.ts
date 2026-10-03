@@ -15,21 +15,19 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     <div class="stores-page">
       <div class="page-header">
         <div class="page-header-content">
-          <div class="header-icon-box">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </div>
-          <div>
-            <div class="title-with-pill">
-              <h1 class="page-title">Lojas & Estabelecimentos</h1>
-              <span class="badge badge-brand">Locais de Compra</span>
+          <div class="title-with-pill">
+            <div class="header-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
             </div>
-            <p class="page-subtitle">
-              Cadastre as lojas e suas categorias para agilizar o preenchimento de lançamentos e permitir filtros refinados
-            </p>
+            <h1 class="page-title">Lojas & Estabelecimentos</h1>
+            <span class="badge badge-brand">Locais de Compra</span>
           </div>
+          <p class="page-subtitle">
+            Cadastre as lojas e suas categorias para agilizar o preenchimento de lançamentos e permitir filtros refinados
+          </p>
         </div>
 
         <button (click)="openAddModal()" class="btn btn-primary btn-pill add-btn">
@@ -73,43 +71,76 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
           <p>Carregando lojas...</p>
         </div>
 
-        <div class="table-responsive" *ngIf="!loading && filteredStores.length > 0">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Nome da Loja</th>
-                <th>Categoria do Estabelecimento</th>
-                <th>Data de Cadastro</th>
-                <th class="text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let s of filteredStores">
-                <td>
-                  <strong class="text-gray-900 font-semibold">{{ s.nome }}</strong>
-                </td>
-                <td>
-                  <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
-                    {{ s.categoria || 'Não categorizado' }}
-                  </span>
-                </td>
-                <td>{{ s.createdAt | date:'dd/MM/yyyy' }}</td>
-                <td class="text-center">
-                  <button
-                    (click)="promptDeleteStore(s)"
-                    class="btn btn-danger btn-sm"
-                    title="Excluir Loja"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div *ngIf="!loading && filteredStores.length > 0">
+          <div class="desktop-table-container">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome da Loja</th>
+                    <th>Categoria do Estabelecimento</th>
+                    <th>Data de Cadastro</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let s of filteredStores">
+                    <td>
+                      <strong class="text-gray-900 font-semibold">{{ s.nome }}</strong>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
+                        {{ s.categoria || 'Não categorizado' }}
+                      </span>
+                    </td>
+                    <td>{{ s.createdAt | date:'dd/MM/yyyy' }}</td>
+                    <td class="text-center">
+                      <button
+                        (click)="promptDeleteStore(s)"
+                        class="btn btn-danger btn-sm"
+                        title="Excluir Loja"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cards Mobile de Lojas -->
+          <div class="mobile-cards-container">
+            <div *ngFor="let s of filteredStores" class="store-mobile-card">
+              <div class="store-card-header">
+                <span class="store-card-name">{{ s.nome }}</span>
+                <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
+                  {{ s.categoria || 'Não categorizado' }}
+                </span>
+              </div>
+              <div class="store-card-body">
+                <span class="text-muted text-xs">Cadastrado em:</span>
+                <span class="font-medium text-xs">{{ s.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="store-card-actions">
+                <button
+                  (click)="promptDeleteStore(s)"
+                  class="btn btn-danger btn-sm mobile-store-delete-btn"
+                  title="Excluir Loja"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  <span>Excluir</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="!loading && filteredStores.length === 0" class="empty-state">
@@ -203,14 +234,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
 
     .page-header-content {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
     }
 
     .header-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
       color: #ffffff;
       display: flex;
@@ -220,10 +252,15 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       flex-shrink: 0;
     }
 
+    .header-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
     .title-with-pill {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
       flex-wrap: wrap;
     }
 
@@ -233,6 +270,7 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
       border: 1px solid rgba(0, 74, 173, 0.15);
       font-weight: 600;
       font-size: 0.72rem;
+      white-space: nowrap;
     }
 
     .add-btn {
@@ -241,11 +279,32 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     }
 
     @media (max-width: 768px) {
-      .page-header-content {
-        align-items: flex-start;
+      .header-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+      }
+      .header-icon-box svg {
+        width: 18px;
+        height: 18px;
+      }
+      .title-with-pill {
+        gap: 0.5rem;
       }
       .add-btn {
         width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-icon-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+      }
+      .header-icon-box svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -322,6 +381,79 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
     .text-center { text-align: center !important; }
     .mt-3 { margin-top: 0.75rem; }
     .mt-4 { margin-top: 1rem; }
+
+    /* Responsividade Desktop vs Mobile */
+    .desktop-table-container {
+      display: block;
+    }
+
+    .mobile-cards-container {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-table-container {
+        display: none !important;
+      }
+
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+    }
+
+    /* Cards Mobile de Lojas */
+    .store-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .store-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .store-card-name {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0b132b;
+    }
+
+    .store-card-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-top: 1px dashed var(--gray-200);
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .store-card-actions {
+      display: flex;
+      margin-top: 0.25rem;
+    }
+
+    .mobile-store-delete-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+    }
   `],
 })
 export class StoresComponent implements OnInit {
