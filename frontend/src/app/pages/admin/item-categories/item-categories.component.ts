@@ -105,87 +105,154 @@ import { ConfirmModalComponent } from '../../../components/confirm-modal/confirm
 
       <!-- Tabela de Categorias -->
       <div *ngIf="!loading" class="table-card">
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th style="width: 140px;">Cor</th>
-                <th>Nome da Categoria</th>
-                <th style="width: 140px;">Status</th>
-                <th style="width: 120px;" class="text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of filteredCategories" class="table-row">
-                <td>
-                  <div class="color-preview-box">
+        <div class="desktop-table-container">
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Cor</th>
+                  <th>Nome da Categoria</th>
+                  <th style="width: 140px;">Status</th>
+                  <th style="width: 120px;" class="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cat of filteredCategories" class="table-row">
+                  <td>
+                    <div class="color-preview-box">
+                      <span
+                        class="color-dot"
+                        [style.backgroundColor]="cat.cor || '#004aad'"
+                      ></span>
+                      <span class="color-hex">{{ cat.cor || '#004aad' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="category-name-cell">
+                      <span class="category-title">{{ cat.nome }}</span>
+                    </div>
+                  </td>
+                  <td>
                     <span
-                      class="color-dot"
-                      [style.backgroundColor]="cat.cor || '#004aad'"
-                    ></span>
-                    <span class="color-hex">{{ cat.cor || '#004aad' }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="category-name-cell">
-                    <span class="category-title">{{ cat.nome }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span
-                    class="badge"
-                    [class.badge-active]="cat.ativo"
-                    [class.badge-inactive]="!cat.ativo"
-                  >
-                    {{ cat.ativo ? 'Ativo' : 'Inativo' }}
-                  </span>
-                </td>
-                <td class="text-right">
-                  <div class="action-buttons">
-                    <button
-                      type="button"
-                      class="btn-icon btn-edit"
-                      (click)="openEditModal(cat)"
-                      title="Editar Categoria"
+                      class="badge"
+                      [class.badge-active]="cat.ativo"
+                      [class.badge-inactive]="!cat.ativo"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-icon btn-delete"
-                      (click)="confirmDelete(cat)"
-                      title="Excluir Categoria"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                      {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <div class="action-buttons">
+                      <button
+                        type="button"
+                        class="btn-icon btn-edit"
+                        (click)="openEditModal(cat)"
+                        title="Editar Categoria"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-icon btn-delete"
+                        (click)="confirmDelete(cat)"
+                        title="Excluir Categoria"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
 
-              <tr *ngIf="filteredCategories.length === 0" class="empty-row">
-                <td colspan="4">
-                  <div class="empty-state">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <rect x="3" y="3" width="7" height="9"/>
-                      <rect x="14" y="3" width="7" height="5"/>
-                      <rect x="14" y="12" width="7" height="9"/>
-                      <rect x="3" y="16" width="7" height="5"/>
-                    </svg>
-                    <p class="empty-text">Nenhuma categoria encontrada.</p>
-                    <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
-                      Cadastrar Categoria
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                <tr *ngIf="filteredCategories.length === 0" class="empty-row">
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="7" height="9"/>
+                        <rect x="14" y="3" width="7" height="5"/>
+                        <rect x="14" y="12" width="7" height="9"/>
+                        <rect x="3" y="16" width="7" height="5"/>
+                      </svg>
+                      <p class="empty-text">Nenhuma categoria encontrada.</p>
+                      <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
+                        Cadastrar Categoria
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cards Mobile de Categorias de Itens -->
+        <div class="mobile-cards-container" *ngIf="filteredCategories.length > 0">
+          <div *ngFor="let cat of filteredCategories" class="cat-mobile-card">
+            <div class="cat-card-header">
+              <div class="item-cat-name-box">
+                <span
+                  class="color-dot"
+                  [style.backgroundColor]="cat.cor || '#004aad'"
+                ></span>
+                <span class="category-title font-bold">{{ cat.nome }}</span>
+              </div>
+              <span
+                class="badge"
+                [class.badge-active]="cat.ativo"
+                [class.badge-inactive]="!cat.ativo"
+              >
+                {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </div>
+            <div class="cat-card-body" *ngIf="cat.cor">
+              <span class="text-muted text-xs">Código HEX:</span>
+              <span class="color-hex font-medium">{{ cat.cor }}</span>
+            </div>
+            <div class="cat-card-actions">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm mobile-action-btn"
+                (click)="openEditModal(cat)"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span>Editar</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm mobile-action-btn"
+                (click)="confirmDelete(cat)"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Excluir</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-empty-state" *ngIf="filteredCategories.length === 0">
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="7" height="9"/>
+              <rect x="14" y="3" width="7" height="5"/>
+              <rect x="14" y="12" width="7" height="9"/>
+              <rect x="3" y="16" width="7" height="5"/>
+            </svg>
+            <p class="empty-text">Nenhuma categoria encontrada.</p>
+            <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
+              Cadastrar Categoria
+            </button>
+          </div>
         </div>
       </div>
 
@@ -361,11 +428,101 @@ import { ConfirmModalComponent } from '../../../components/confirm-modal/confirm
 
     .page-title {
       font-family: var(--font-outfit), sans-serif;
-      font-size: 1.85rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: #0b132b;
       margin: 0;
       letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 768px) {
+      .breadcrumb-row {
+        justify-content: center;
+        text-align: center;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .page-header {
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .header-main {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .title-with-badge {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        font-size: 1.15rem;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .page-subtitle {
+        text-align: center;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .header-main .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .filter-card {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.85rem;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .search-box {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      .stats-row {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .feedback-alert {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .mobile-empty-state {
+        text-align: center;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.05rem;
+      }
     }
 
     .category-badge {
@@ -378,13 +535,14 @@ import { ConfirmModalComponent } from '../../../components/confirm-modal/confirm
       padding: 0.2rem 0.65rem;
       border-radius: 50px;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
 
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       color: #64748b;
-      margin: 0.35rem 0 0 0;
+      margin: 0.15rem 0 0 0;
     }
 
     /* Card de Filtros */
@@ -871,6 +1029,88 @@ import { ConfirmModalComponent } from '../../../components/confirm-modal/confirm
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsividade Desktop vs Mobile */
+    .desktop-table-container {
+      display: block;
+    }
+
+    .mobile-cards-container {
+      display: none;
+    }
+
+    .mobile-empty-state {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-table-container {
+        display: none !important;
+      }
+
+      .mobile-cards-container {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 0.85rem;
+      }
+
+      .mobile-empty-state {
+        display: block !important;
+      }
+    }
+
+    /* Cards Mobile de Categorias */
+    .cat-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 74, 173, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .cat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .item-cat-name-box {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .cat-card-body {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0;
+      border-top: 1px dashed var(--gray-200);
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .cat-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .mobile-action-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
     }
   `],
 })
