@@ -87,6 +87,12 @@ export class AppComponent implements OnInit {
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.updateLayoutState(event.urlAfterRedirects || event.url);
+        // Reseta o scroll para o início da página ao navegar para uma nova rota
+        if (!event.urlAfterRedirects?.includes('#') && !event.url?.includes('#')) {
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          document.body.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
       });
   }
 
