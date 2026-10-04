@@ -56,9 +56,12 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
                 [style.background]="'linear-gradient(135deg, ' + selectedAvatar.color + ' 0%, #0b132b 100%)'"
               >
                 <!-- SVG Dinâmico por Tipo de Avatar -->
-                <svg *ngIf="selectedAvatar.iconType === 'fox-blue'" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
+                <img
+                  *ngIf="selectedAvatar.iconType === 'fox-blue'"
+                  src="assets/logo.png"
+                  alt="Blue Fox Oficial"
+                  class="avatar-fox-img-hero"
+                />
                 <svg *ngIf="selectedAvatar.iconType === 'fox-cyan'" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
@@ -105,9 +108,12 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
                     class="avatar-mini-icon"
                     [style.background]="'linear-gradient(135deg, ' + av.color + ' 0%, #0b132b 100%)'"
                   >
-                    <svg *ngIf="av.iconType === 'fox-blue'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
+                    <img
+                      *ngIf="av.iconType === 'fox-blue'"
+                      src="assets/logo.png"
+                      alt="Blue Fox Oficial"
+                      class="avatar-fox-img-picker"
+                    />
                     <svg *ngIf="av.iconType === 'fox-cyan'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
                       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                     </svg>
@@ -439,6 +445,14 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       justify-content: center;
       box-shadow: 0 8px 24px rgba(0, 74, 173, 0.25);
       border: 3px solid #ffffff;
+      overflow: hidden;
+    }
+
+    .avatar-fox-img-hero {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
 
     .avatar-status-dot {
@@ -550,6 +564,13 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar-fox-img-picker {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
     }
 
     .avatar-option-name {

@@ -10,7 +10,13 @@ import { CommonModule } from '@angular/common';
       <div class="notice-modal-card" (click)="$event.stopPropagation()">
         <div class="notice-modal-header">
           <div class="notice-icon-box" [ngClass]="type">
-            <svg *ngIf="type === 'keycloak' || type === 'info'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <img
+              *ngIf="type === 'keycloak'"
+              src="assets/logo.png"
+              alt="BlueFox Finance"
+              class="notice-fox-img"
+            />
+            <svg *ngIf="type === 'info'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
@@ -24,13 +30,13 @@ import { CommonModule } from '@angular/common';
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           </div>
-          <div>
+          <div class="header-titles">
             <div class="title-row">
               <h2 class="notice-title">{{ title }}</h2>
               <span *ngIf="badge" class="notice-badge">{{ badge }}</span>
             </div>
           </div>
-          <button class="btn-close" (click)="onClose()">✕</button>
+          <button class="btn-close" (click)="onClose()" aria-label="Fechar modal">✕</button>
         </div>
 
         <div class="notice-modal-body">
@@ -57,15 +63,20 @@ import { CommonModule } from '@angular/common';
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(11, 19, 43, 0.65);
-      backdrop-filter: blur(5px);
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(11, 19, 43, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 2100;
-      padding: 1rem;
+      z-index: 99999;
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       animation: backdropFade 0.2s ease-out;
     }
 
@@ -78,10 +89,14 @@ import { CommonModule } from '@angular/common';
       background: #ffffff;
       border-radius: 18px;
       width: 100%;
-      max-width: 460px;
-      box-shadow: 0 20px 45px rgba(0, 74, 173, 0.18), 0 4px 16px rgba(0, 0, 0, 0.12);
+      max-width: 480px;
+      margin: auto;
+      box-shadow: 0 20px 45px rgba(0, 74, 173, 0.22), 0 4px 16px rgba(0, 0, 0, 0.15);
       border: 1px solid rgba(0, 74, 173, 0.14);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100dvh - 2rem);
       animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -95,8 +110,10 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       gap: 1rem;
       padding: 1.35rem 1.5rem 1rem;
+      padding-right: 3rem;
       border-bottom: 1px solid rgba(0, 74, 173, 0.08);
       position: relative;
+      flex-shrink: 0;
     }
 
     .notice-icon-box {
@@ -115,6 +132,12 @@ import { CommonModule } from '@angular/common';
       color: #004aad;
     }
 
+    .notice-fox-img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
     .notice-icon-box.warning {
       background: #fef3c7;
       color: #d97706;
@@ -125,6 +148,11 @@ import { CommonModule } from '@angular/common';
       color: #15803d;
     }
 
+    .header-titles {
+      flex: 1;
+      min-width: 0;
+    }
+
     .title-row {
       display: flex;
       align-items: center;
@@ -133,15 +161,16 @@ import { CommonModule } from '@angular/common';
     }
 
     .notice-title {
-      font-family: var(--font-outfit), sans-serif;
+      font-family: var(--font-headers, 'Outfit', sans-serif);
       font-weight: 700;
       font-size: 1.2rem;
-      color: var(--gray-900);
+      color: var(--gray-900, #0b132b);
       margin: 0;
+      line-height: 1.25;
     }
 
     .notice-badge {
-      font-family: var(--font-outfit), sans-serif;
+      font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -151,6 +180,7 @@ import { CommonModule } from '@angular/common';
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.15rem 0.5rem;
       border-radius: 50px;
+      white-space: nowrap;
     }
 
     .btn-close {
@@ -159,26 +189,31 @@ import { CommonModule } from '@angular/common';
       right: 1.25rem;
       background: transparent;
       border: none;
-      color: var(--gray-400);
-      font-size: 1.1rem;
+      color: var(--gray-400, #94a3b8);
+      font-size: 1.2rem;
       cursor: pointer;
       line-height: 1;
-      padding: 0.25rem;
+      padding: 0.35rem;
+      border-radius: 6px;
+      transition: color 0.15s ease, background 0.15s ease;
     }
 
     .btn-close:hover {
-      color: var(--gray-700);
+      color: var(--gray-700, #334155);
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .notice-modal-body {
       padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
     }
 
     .notice-message {
-      font-family: var(--font-inter), sans-serif;
+      font-family: var(--font-body, 'Inter', sans-serif);
       font-size: 0.94rem;
       line-height: 1.55;
-      color: var(--gray-700);
+      color: var(--gray-700, #334155);
       margin: 0;
     }
 
@@ -189,19 +224,75 @@ import { CommonModule } from '@angular/common';
       border-radius: 10px;
       padding: 0.85rem 1rem;
       font-size: 0.85rem;
-      color: var(--gray-600);
+      color: var(--gray-600, #475569);
       line-height: 1.45;
+    }
+
+    .notice-details-box p {
+      margin: 0;
     }
 
     .notice-modal-footer {
       padding: 0.85rem 1.5rem 1.25rem;
       display: flex;
       justify-content: flex-end;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(0, 74, 173, 0.06);
     }
 
     .btn-confirm {
       min-width: 110px;
       padding: 0.65rem 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .notice-modal-backdrop {
+        padding: 1rem 0.75rem;
+        align-items: center;
+      }
+
+      .notice-modal-card {
+        max-width: 100%;
+        border-radius: 16px;
+      }
+
+      .notice-modal-header {
+        padding: 1.1rem 1rem 0.85rem;
+        padding-right: 2.75rem;
+        gap: 0.75rem;
+      }
+
+      .notice-icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+      }
+
+      .notice-title {
+        font-size: 1.05rem;
+      }
+
+      .notice-modal-body {
+        padding: 1.15rem 1rem;
+      }
+
+      .notice-message {
+        font-size: 0.9rem;
+      }
+
+      .notice-details-box {
+        margin-top: 0.75rem;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.82rem;
+      }
+
+      .notice-modal-footer {
+        padding: 0.75rem 1rem 1.1rem;
+      }
+
+      .btn-confirm {
+        width: 100%;
+      }
     }
   `],
 })
