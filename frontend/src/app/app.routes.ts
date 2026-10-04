@@ -14,6 +14,12 @@ export const routes: Routes = [
       import('./pages/home/home.component').then((m) => m.HomeComponent),
     title: 'Home | BlueFox Finance',
   },
+  {
+    path: 'updates',
+    loadComponent: () =>
+      import('./pages/updates/updates.component').then((m) => m.UpdatesComponent),
+    title: 'Atualizações & Roadmap | BlueFox Finance',
+  },
 
   // 2. Plataforma Interna (Gestão Financeira & IAM)
   {

@@ -96,6 +96,10 @@ export class AppComponent implements OnInit {
       return;
     }
     const cleanUrl = url.split('?')[0].split('#')[0];
-    this.isPublicPage = cleanUrl === '' || cleanUrl === '/' || cleanUrl === '/home';
+    this.isPublicPage =
+      cleanUrl === '' ||
+      cleanUrl === '/' ||
+      cleanUrl === '/home' ||
+      cleanUrl === '/updates';
   }
 }
