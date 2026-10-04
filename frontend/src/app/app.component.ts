@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { SidebarService } from './services/sidebar.service';
@@ -10,13 +11,19 @@ import { SidebarService } from './services/sidebar.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
   template: `
-    <div class="app-layout">
+    <!-- Layout Público (Home Landing Page) -->
+    <ng-container *ngIf="isPublicPage">
+      <router-outlet></router-outlet>
+    </ng-container>
+
+    <!-- Layout da Aplicação Interna (Dashboard, Despesas, Admin, etc.) -->
+    <div *ngIf="!isPublicPage" class="app-layout">
       <!-- Barra Superior Fixa Completa (Full Width) -->
       <app-navbar></app-navbar>
 
       <!-- Corpo da Aplicação: Menu Lateral Interno + Conteúdo -->
       <div class="app-body">
-        <!-- Menu Lateral Interno (com cor de fundo da página e toggle no topo) -->
+        <!-- Menu Lateral Interno -->
         <app-sidebar></app-sidebar>
 
         <!-- Área Principal de Conteúdo (Alinhada à Esquerda) -->
@@ -65,6 +72,30 @@ import { SidebarService } from './services/sidebar.service';
     }
   `],
 })
-export class AppComponent {
-  constructor(public readonly sidebarService: SidebarService) {}
+export class AppComponent implements OnInit {
+  isPublicPage = false;
+
+  constructor(
+    public readonly sidebarService: SidebarService,
+    private readonly router: Router,
+  ) {
+    this.updateLayoutState(this.router.url);
+  }
+
+  ngOnInit(): void {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.updateLayoutState(event.urlAfterRedirects || event.url);
+      });
+  }
+
+  private updateLayoutState(url: string): void {
+    if (!url) {
+      this.isPublicPage = true;
+      return;
+    }
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    this.isPublicPage = cleanUrl === '' || cleanUrl === '/' || cleanUrl === '/home';
+  }
 }
