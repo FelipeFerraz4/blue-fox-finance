@@ -1,18 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NoticeModalComponent } from '../../components/notice-modal/notice-modal.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, NoticeModalComponent],
+  imports: [CommonModule, RouterModule],
   template: `
-    <div class="home-wrapper">
-      <!-- 1. Header Público do Portal -->
+    <div class="home-wrapper" id="inicio">
+      <!-- 1. Header Flutuante Suspenso (idêntico ao do logado) -->
       <header class="public-header">
         <div class="header-container">
-          <div class="brand">
+          <a routerLink="/" class="brand" (click)="closeMobileMenu()">
             <div class="logo-box">
               <img
                 src="assets/logo.png"
@@ -24,79 +23,117 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
               <span class="brand-title">BlueFox</span>
               <span class="brand-tag">Finance</span>
             </div>
-          </div>
+          </a>
 
+          <!-- Navegação Não Logada: APENAS Início, Sobre e Atualizações -->
           <nav class="public-nav">
-            <a href="#features" class="nav-link">Recursos</a>
-            <a href="#architecture" class="nav-link">Arquitetura</a>
-            <a href="#security" class="nav-link">Segurança & IAM</a>
+            <a href="#inicio" class="nav-link">Início</a>
+            <a href="#sobre" class="nav-link">Sobre</a>
+            <a routerLink="/updates" class="nav-link">Atualizações</a>
           </nav>
 
+          <!-- Ação Direita: APENAS o botão de Login levando para o dashboard -->
           <div class="header-actions">
-            <button
-              type="button"
-              class="btn-login-public"
-              (click)="loginModalOpen = true"
-              title="Acessar com Keycloak SSO"
-            >
+            <a routerLink="/dashboard" class="btn-login-header" title="Fazer Login">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              <span>Login SSO</span>
-            </button>
-
-            <a routerLink="/dashboard" class="btn-primary-public">
-              <span>Acessar Plataforma</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
+              <span>Login</span>
             </a>
+
+            <!-- Hambúrguer Mobile -->
+            <button
+              class="hamburger-btn"
+              [class.open]="mobileMenuOpen"
+              (click)="toggleMobileMenu()"
+              aria-label="Abrir Menu de Navegação"
+            >
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </button>
           </div>
         </div>
       </header>
 
-      <!-- 2. Hero Section -->
+      <!-- Gaveta Mobile -->
+      <div *ngIf="mobileMenuOpen" class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+      <div class="mobile-drawer" [class.open]="mobileMenuOpen">
+        <div class="mobile-drawer-header">
+          <div class="brand">
+            <div class="logo-box-sm">
+              <img src="assets/logo.png" alt="BlueFox" class="brand-logo"/>
+            </div>
+            <div class="brand-info">
+              <span class="brand-title-sm">BlueFox Finance</span>
+              <span class="brand-tag-sm">Navegação</span>
+            </div>
+          </div>
+          <button class="btn-drawer-close" (click)="closeMobileMenu()">✕</button>
+        </div>
+
+        <nav class="mobile-nav-links">
+          <a href="#inicio" (click)="closeMobileMenu()" class="mobile-nav-item">
+            <span>Início</span>
+          </a>
+          <a href="#sobre" (click)="closeMobileMenu()" class="mobile-nav-item">
+            <span>Sobre</span>
+          </a>
+          <a routerLink="/updates" (click)="closeMobileMenu()" class="mobile-nav-item">
+            <span>Atualizações</span>
+          </a>
+        </nav>
+
+        <div class="mobile-drawer-footer">
+          <a routerLink="/dashboard" (click)="closeMobileMenu()" class="btn-login-drawer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Fazer Login</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. Hero Section com Degradê Refinado e Título Nítido -->
       <section class="hero-section">
         <div class="hero-glow"></div>
         <div class="hero-container">
           <div class="hero-badge">
             <span class="badge-dot"></span>
-            <span>ECOSSISTEMA BLUE FOX &bull; GESTÃO FINANCEIRA INTELIGENTE</span>
+            <span>ECOSSISTEMA BLUE FOX &bull; GESTÃO INTELIGENTE DE GASTOS</span>
           </div>
 
           <h1 class="hero-title">
             Controle Financeiro de Alta Precisão &
-            <span class="gradient-text">Governança Corporativa</span>
+            <span class="title-highlight">Orçamento Estruturado</span>
           </h1>
 
           <p class="hero-subtitle">
-            Gerencie despesas, cartões corporativos, parcelamentos calculados automaticamente
-            e múltiplos compradores com a arquitetura moderna e segura da Blue Fox.
+            Gerencie compras em lote, parcelamentos inteligentes com cálculo automático de fechamento de cartões
+            e múltiplos compradores com a clareza e confiabilidade que o seu controle financeiro precisa.
           </p>
 
+          <!-- Apenas o botão de Login conforme solicitado -->
           <div class="hero-buttons">
-            <a routerLink="/dashboard" class="hero-btn-primary">
+            <a routerLink="/dashboard" class="hero-btn-login">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <rect x="3" y="3" width="7" height="9"/>
-                <rect x="14" y="3" width="7" height="5"/>
-                <rect x="14" y="12" width="7" height="9"/>
-                <rect x="3" y="16" width="7" height="5"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
               </svg>
-              <span>Entrar na Plataforma</span>
+              <span>Fazer Login</span>
             </a>
 
-            <button type="button" class="hero-btn-secondary" (click)="loginModalOpen = true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2.2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <a href="#sobre" class="hero-btn-secondary">
+              <span>Conhecer a Origem</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
               </svg>
-              <span>Autenticação Keycloak IAM</span>
-            </button>
+            </a>
           </div>
 
-          <!-- Hero Mockup Preview Card -->
+          <!-- Mockup Fiel do Dashboard (Apenas dados reais já implementados) -->
           <div class="preview-card-wrap">
             <div class="preview-card-glow"></div>
             <div class="preview-card">
@@ -111,49 +148,47 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
-                  <span>https://finance.bluefox.internal/dashboard</span>
+                  <span>bluefox-finance/dashboard</span>
                 </div>
-                <div class="mockup-badge">ONLINE &bull; v2.4</div>
+                <div class="mockup-badge">VERSÃO ATIVA &bull; v1.1</div>
               </div>
 
               <div class="mockup-body">
-                <!-- Mini Stats Mockup Grid -->
                 <div class="mockup-stats-grid">
                   <div class="mstat-card blue">
-                    <div class="mstat-label">Total do Mês Atual</div>
+                    <div class="mstat-label">Total de Despesas</div>
                     <div class="mstat-val">R$ 14.850,20</div>
-                    <div class="mstat-trend positive">+3.2% vs mês anterior</div>
+                    <div class="mstat-sub">Mês de referência ativo</div>
                   </div>
                   <div class="mstat-card cyan">
-                    <div class="mstat-label">Lançamentos Processados</div>
-                    <div class="mstat-val">128</div>
-                    <div class="mstat-trend">100% categorizados</div>
+                    <div class="mstat-label">Itens & Lançamentos</div>
+                    <div class="mstat-val">128 itens</div>
+                    <div class="mstat-sub">Compras categorizadas</div>
                   </div>
                   <div class="mstat-card green">
-                    <div class="mstat-label">Parcelamentos Ativos</div>
-                    <div class="mstat-val">18 planos</div>
-                    <div class="mstat-trend">Previsibilidade total</div>
+                    <div class="mstat-label">Cálculo de Faturas</div>
+                    <div class="mstat-val">100% exato</div>
+                    <div class="mstat-sub">Por dia de fechamento</div>
                   </div>
                   <div class="mstat-card purple">
-                    <div class="mstat-label">SSO IAM Security</div>
-                    <div class="mstat-val">Keycloak Ready</div>
-                    <div class="mstat-trend active">RBAC / OpenID Connect</div>
+                    <div class="mstat-label">Compradores</div>
+                    <div class="mstat-val">Multi-titular</div>
+                    <div class="mstat-sub">Divisão e rateio claro</div>
                   </div>
                 </div>
 
-                <!-- Mini visual row -->
                 <div class="mockup-features-strip">
                   <div class="mstrip-item">
                     <span class="badge-mini-dot"></span>
-                    <span>Cálculo de Fechamento de Faturas em Tempo Real</span>
+                    <span>Lançamentos em Lote com Múltiplos Itens</span>
                   </div>
                   <div class="mstrip-item">
                     <span class="badge-mini-dot"></span>
-                    <span>Relatórios Multi-Comprador e Rateio Automático</span>
+                    <span>Projeção Automática de Parcelas</span>
                   </div>
                   <div class="mstrip-item">
                     <span class="badge-mini-dot"></span>
-                    <span>Gestão Centralizada de Categorias e Estabelecimentos</span>
+                    <span>Categorias de Itens e Lojas Cadastradas</span>
                   </div>
                 </div>
               </div>
@@ -162,13 +197,13 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
         </div>
       </section>
 
-      <!-- 3. Recursos Principais (Features) -->
-      <section id="features" class="features-section">
+      <!-- 3. Recursos Já Implementados no Sistema -->
+      <section class="features-section">
         <div class="section-container">
-          <div class="section-badge">FUNCIONALIDADES ENTERPRISE</div>
-          <h2 class="section-title">Engenharia Financeira para Máxima Clareza</h2>
+          <div class="section-badge">RECURSOS DISPONÍVEIS HOJE</div>
+          <h2 class="section-title">O que o BlueFox Finance entrega</h2>
           <p class="section-subtitle">
-            Cada recurso foi desenvolvido com foco em desempenho, precisão matemática e conforto operacional.
+            Funcionalidades operacionais prontas para uso no controle diário de gastos pessoais e em equipe.
           </p>
 
           <div class="features-grid">
@@ -179,9 +214,9 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
                   <line x1="2" y1="10" x2="22" y2="10"/>
                 </svg>
               </div>
-              <h3 class="feature-name">Parcelamentos Inteligentes</h3>
+              <h3 class="feature-name">Parcelamento por Fechamento</h3>
               <p class="feature-desc">
-                Projeção automática de parcelas com cálculo exato do mês de competência baseado no dia de fechamento do cartão de crédito.
+                Cálculo inteligente do mês de competência da fatura baseado no dia de fechamento do cartão de crédito, sem necessidade de ajuste manual.
               </p>
             </div>
 
@@ -194,9 +229,9 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
                   <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
               </div>
-              <h3 class="feature-name">Múltiplos Compradores</h3>
+              <h3 class="feature-name">Divisão por Compradores</h3>
               <p class="feature-desc">
-                Controle detalhado de despesas por indivíduo, simplificando reembolsos e divisão de despesas familiares ou de equipes.
+                Identifique exatamente quem realizou cada despesa dentro de uma mesma compra ou fatura, simplificando cobranças e rateios familiares.
               </p>
             </div>
 
@@ -207,148 +242,125 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
                   <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
               </div>
-              <h3 class="feature-name">Lojas & Categorização</h3>
+              <h3 class="feature-name">Catálogo de Lojas & Categorias</h3>
               <p class="feature-desc">
-                Catálogo completo de estabelecimentos e categorização em dois níveis (itens e lojas) com badges visuais padronizados.
+                Classificação em dois níveis: estabelecimentos comerciais (Supermercado, Farmácia, E-commerce) e tipos de produtos com cores customizáveis.
               </p>
             </div>
 
             <div class="feature-card">
               <div class="feature-icon icon-purple">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </div>
-              <h3 class="feature-name">Keycloak Identity Provider</h3>
-              <p class="feature-desc">
-                Pronto para autenticação federada com Keycloak SSO corporativo, proteção OAuth2 / OIDC e políticas de segurança Zero-Trust.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. Arquitetura e Segurança IAM -->
-      <section id="architecture" class="architecture-section">
-        <div class="section-container">
-          <div class="arch-box">
-            <div class="arch-content">
-              <div class="section-badge">GOVERNANÇA & SEGURANÇA</div>
-              <h2 class="section-title text-left">Preparado para Operação Online com Keycloak SSO</h2>
-              <p class="section-subtitle text-left">
-                Quando a plataforma for publicada em ambiente de produção, todas as rotas internas de gestão
-                (Dashboard, Despesas, Cadastros e Central de Admin) serão protegidas pelo gateway de autenticação
-                corporativo Keycloak.
-              </p>
-
-              <div class="arch-points">
-                <div class="arch-point">
-                  <div class="arch-point-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Single Sign-On (SSO) Unificado:</strong> Acesso simplificado com as mesmas credenciais da suíte corporativa Blue Fox.
-                  </div>
-                </div>
-
-                <div class="arch-point">
-                  <div class="arch-point-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Controle de Acesso Baseado em Papéis (RBAC):</strong> Perfis distintos para Administradores, Gestores e Visualizadores.
-                  </div>
-                </div>
-
-                <div class="arch-point">
-                  <div class="arch-point-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Rotas REST em Inglês & Padrão OpenAPI:</strong> API limpa e padronizada (<code>/api/expenses</code>, <code>/api/stores</code>, etc.).
-                  </div>
-                </div>
-              </div>
-
-              <div class="arch-actions">
-                <button type="button" class="btn-primary-public" (click)="loginModalOpen = true">
-                  <span>Simular Conexão Keycloak SSO</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div class="arch-diagram">
-              <div class="diagram-card">
-                <div class="diagram-step active">
-                  <div class="step-num">01</div>
-                  <div class="step-info">
-                    <span class="step-title">Portal Público</span>
-                    <span class="step-desc">Landing Page de Apresentação</span>
-                  </div>
-                </div>
-                <div class="diagram-connector">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <polyline points="19 12 12 19 5 12"></polyline>
-                  </svg>
-                </div>
-                <div class="diagram-step highlight">
-                  <div class="step-num">02</div>
-                  <div class="step-info">
-                    <span class="step-title">Keycloak Identity Provider (IAM)</span>
-                    <span class="step-desc">SSO OpenID Connect &bull; MFA &bull; RBAC</span>
-                  </div>
-                </div>
-                <div class="diagram-connector">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <polyline points="19 12 12 19 5 12"></polyline>
-                  </svg>
-                </div>
-                <div class="diagram-step">
-                  <div class="step-num">03</div>
-                  <div class="step-info">
-                    <span class="step-title">BlueFox Finance Core</span>
-                    <span class="step-desc">Dashboard &bull; Despesas &bull; Administração</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5. Call To Action Final -->
-      <section class="cta-section">
-        <div class="section-container">
-          <div class="cta-card">
-            <h2 class="cta-title">Explore a Experiência Interna da Plataforma</h2>
-            <p class="cta-desc">
-              Você pode navegar pelo ambiente completo de demonstração para testar todas as funcionalidades
-              de gestão de despesas, cartões e categorias.
-            </p>
-            <div class="cta-buttons">
-              <a routerLink="/dashboard" class="hero-btn-primary">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                   <rect x="3" y="3" width="7" height="9"/>
                   <rect x="14" y="3" width="7" height="5"/>
                   <rect x="14" y="12" width="7" height="9"/>
                   <rect x="3" y="16" width="7" height="5"/>
                 </svg>
-                <span>Acessar Dashboard Interno</span>
+              </div>
+              <h3 class="feature-name">Dashboard & Indicadores</h3>
+              <p class="feature-desc">
+                Visão do mês com totalizadores, filtros por período, faturas futuras agrupadas por meio de pagamento e controle de orçamento.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Seção SOBRE: A Origem do Sistema & Blue Fox Global Group -->
+      <section id="sobre" class="about-section">
+        <div class="section-container">
+          <div class="about-card">
+            <div class="about-header">
+              <div class="section-badge">NOSSA HISTÓRIA & GOVERNANÇA</div>
+              <h2 class="about-main-title">A Origem do BlueFox Finance</h2>
+              <p class="about-subtitle">
+                Conheça como a ferramenta nasceu dentro do grupo para resolver uma dor real de gestão e como ela evoluiu.
+              </p>
+            </div>
+
+            <div class="about-grid">
+              <!-- Bloco 1: A Fundação -->
+              <div class="about-box">
+                <div class="about-box-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <h3 class="about-box-title">Por que o sistema foi criado?</h3>
+                <p class="about-box-text">
+                  O <strong>BlueFox Finance</strong> nasceu da necessidade concreta de controle e governança financeira dentro das operações do <strong>Blue Fox Global Group</strong>. 
+                  Com múltiplas compras corporativas, cartões empresariais com datas de fechamento distintas e despesas realizadas por diferentes membros, planilhas tradicionais geravam divergências e falta de previsibilidade orçamentária.
+                </p>
+                <p class="about-box-text">
+                  O sistema foi desenvolvido para calcular automaticamente em qual fatura cada despesa incide e manter o faturamento e os orçamentos sob rígido acompanhamento.
+                </p>
+              </div>
+
+              <!-- Bloco 2: A Abertura para o Público -->
+              <div class="about-box">
+                <div class="about-box-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <h3 class="about-box-title">Abertura para o Público</h3>
+                <p class="about-box-text">
+                  Após consolidar o algoritmo de cálculo de faturas, a gestão de múltiplos compradores e a separação de lançamentos em lote, percebemos que essa mesma dor afetava famílias, pequenos negócios e profissionais independentes.
+                </p>
+                <p class="about-box-text">
+                  Decidimos então disponibilizar a plataforma para o público externo, permitindo que qualquer pessoa utilize a mesma precisão de governança antes restrita às operações internas do grupo.
+                </p>
+              </div>
+
+              <!-- Bloco 3: O Blue Fox Global Group & Keycloak -->
+              <div class="about-box full-span">
+                <div class="about-box-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <h3 class="about-box-title">O que é o Blue Fox Global Group e seu papel no sistema</h3>
+                <p class="about-box-text">
+                  O <strong>Blue Fox Global Group</strong> é o grupo holding que concebe, desenvolve e investe em iniciativas de tecnologia, soluções corporativas, infraestrutura e inovação. No BlueFox Finance, o papel do grupo é atuar como guardião da governança, suporte à infraestrutura e segurança da informação.
+                </p>
+                <div class="keycloak-mention-box">
+                  <div class="keycloak-tag">Papel na Segurança & Keycloak</div>
+                  <p class="keycloak-text">
+                    O <strong>Blue Fox Global Group</strong> é o responsável por orquestrar a infraestrutura central de identidade da organização. Para o futuro deploy online em larga escala, o grupo está estruturando a integração do <strong>Keycloak SSO (IAM)</strong>, que funcionará como provedor unificado de identidade e autenticação federada (Single Sign-On), garantindo controle de acesso granular e proteção de ponta a ponta em todos os produtos do grupo.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Chamada Final Discreta (Apenas botão de Login) -->
+      <section class="cta-section">
+        <div class="section-container">
+          <div class="cta-box">
+            <h2 class="cta-title">Acesse o Sistema</h2>
+            <p class="cta-subtitle">
+              Faça login para gerenciar suas despesas, cadastros e faturas.
+            </p>
+            <div class="cta-actions">
+              <a routerLink="/dashboard" class="hero-btn-login">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Fazer Login</span>
               </a>
-              <a routerLink="/expenses" class="btn-ghost-public">
-                <span>Ver Lançamentos</span>
+
+              <a routerLink="/updates" class="btn-ghost-link">
+                <span>Ver Atualizações & Roadmap</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </a>
             </div>
           </div>
@@ -366,37 +378,24 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
           </div>
 
           <div class="footer-links">
-            <a routerLink="/dashboard">Dashboard</a>
-            <a routerLink="/expenses">Lançamentos</a>
-            <a routerLink="/stores">Lojas</a>
-            <a routerLink="/payment-methods">Pagamentos</a>
-            <a routerLink="/admin">Admin Hub</a>
+            <a href="#inicio">Início</a>
+            <a href="#sobre">Sobre</a>
+            <a routerLink="/updates">Atualizações</a>
+            <a routerLink="/dashboard">Login</a>
           </div>
 
           <div class="footer-copy">
-            &copy; 2026 Blue Fox Group &bull; Todos os direitos reservados.
+            &copy; 2026 Blue Fox Global Group &bull; Todos os direitos reservados.
           </div>
         </div>
       </footer>
-
-      <!-- Modal Reutilizável de Keycloak Login -->
-      <app-notice-modal
-        [isOpen]="loginModalOpen"
-        title="Autenticação BlueFox"
-        badge="Keycloak SSO"
-        message="O sistema de autenticação corporativo com Keycloak SSO está em preparação para o deploy online."
-        details="Em ambiente de produção, esta tela será a porta de entrada obrigatória para proteger o ecossistema interno, garantindo controle de permissões por perfil (RBAC) e Single Sign-On unificado."
-        type="keycloak"
-        confirmText="Entendido"
-        (close)="loginModalOpen = false"
-      ></app-notice-modal>
     </div>
   `,
   styles: [`
     :host {
       display: block;
       width: 100%;
-      background: #0b132b; /* Navy Oficial Blue Fox */
+      background: #080f24;
       color: #ffffff;
       font-family: var(--font-body, 'Inter', sans-serif);
       overflow-x: hidden;
@@ -408,22 +407,23 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       flex-direction: column;
     }
 
-    /* 1. Header Público */
+    /* 1. Header Flutuante Suspenso (idêntico ao logado) */
     .public-header {
       position: sticky;
       top: 0;
-      z-index: 999;
-      background: rgba(11, 19, 43, 0.92);
+      z-index: 1000;
+      background: rgba(11, 19, 43, 0.96);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(56, 182, 255, 0.18);
+      border-bottom: 1px solid rgba(56, 182, 255, 0.2);
       width: 100%;
+      box-shadow: 0 4px 20px rgba(11, 19, 43, 0.35);
     }
 
     .header-container {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 0.85rem 1.75rem;
+      padding: 0.75rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -438,17 +438,16 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
     }
 
     .logo-box {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       background: #ffffff;
-      border-radius: 12px;
+      border-radius: 11px;
       padding: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(56, 182, 255, 0.35);
+      border: 1px solid rgba(56, 182, 255, 0.3);
       box-shadow: 0 0 16px rgba(56, 182, 255, 0.35);
-      overflow: hidden;
     }
 
     .brand-logo {
@@ -464,105 +463,219 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
 
     .brand-title {
       font-family: var(--font-headers, 'Outfit', sans-serif);
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: #ffffff;
-      line-height: 1;
+      line-height: 1.1;
       letter-spacing: -0.02em;
     }
 
     .brand-tag {
-      font-size: 0.7rem;
-      font-weight: 700;
+      font-size: 0.68rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       color: #38b6ff;
     }
 
+    /* Links: Início, Sobre e Atualizações */
     .public-nav {
       display: flex;
       align-items: center;
-      gap: 1.75rem;
+      gap: 0.65rem;
     }
 
     .nav-link {
       color: #94a3b8;
       text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.2s ease;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
 
     .nav-link:hover {
-      color: #38b6ff;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
     }
 
-    .btn-login-public {
+    /* Botão de Login */
+    .btn-login-header {
       display: flex;
       align-items: center;
       gap: 0.45rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(56, 182, 255, 0.3);
-      color: #ffffff;
-      padding: 0.5rem 1.15rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(56, 182, 255, 0.35);
       border-radius: 50px;
-      font-size: 0.85rem;
+      color: #ffffff;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.86rem;
       font-weight: 600;
-      cursor: pointer;
+      text-decoration: none;
       transition: all 0.2s ease;
     }
 
-    .btn-login-public:hover {
-      background: rgba(56, 182, 255, 0.15);
+    .btn-login-header:hover {
+      background: rgba(56, 182, 255, 0.18);
       border-color: #38b6ff;
-      box-shadow: 0 0 12px rgba(56, 182, 255, 0.25);
+      box-shadow: 0 0 14px rgba(56, 182, 255, 0.35);
+      transform: translateY(-1px);
     }
 
-    .btn-primary-public {
+    .hamburger-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(56, 182, 255, 0.2);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .bar {
+      width: 20px;
+      height: 2px;
+      background: #ffffff;
+      border-radius: 2px;
+    }
+
+    /* Mobile Drawer */
+    .mobile-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 19, 43, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1001;
+    }
+
+    .mobile-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 82vw;
+      max-width: 320px;
+      height: 100vh;
+      background: #0b132b;
+      border-left: 1px solid rgba(56, 182, 255, 0.2);
+      z-index: 1002;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+
+    .mobile-drawer.open {
+      transform: translateX(0);
+    }
+
+    .mobile-drawer-header {
+      padding: 1.1rem;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logo-box-sm {
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title-sm {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .brand-tag-sm {
+      font-size: 0.65rem;
+      color: #38b6ff;
+    }
+
+    .btn-drawer-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+
+    .mobile-nav-links {
+      flex: 1;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .mobile-nav-item {
+      padding: 0.75rem 1rem;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+
+    .mobile-drawer-footer {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-login-drawer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
       color: #ffffff;
-      padding: 0.5rem 1.25rem;
+      padding: 0.75rem;
       border-radius: 50px;
-      font-size: 0.88rem;
-      font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 2px 14px rgba(56, 182, 255, 0.35);
-      transition: all 0.2s ease;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-weight: 700;
+      font-size: 0.95rem;
     }
 
-    .btn-primary-public:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(56, 182, 255, 0.5);
-    }
-
-    /* 2. Hero Section */
+    /* 2. Hero Section Refinado */
     .hero-section {
       position: relative;
-      padding: 5rem 1.5rem 4rem 1.5rem;
+      padding: 5.5rem 1.5rem 4rem 1.5rem;
+      background: 
+        radial-gradient(circle at 50% 10%, rgba(0, 74, 173, 0.38) 0%, rgba(8, 15, 36, 0) 65%),
+        radial-gradient(circle at 85% 25%, rgba(56, 182, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 15% 45%, rgba(0, 74, 173, 0.15) 0%, transparent 50%),
+        #080f24;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 20%, rgba(0, 74, 173, 0.3) 0%, rgba(11, 19, 43, 0) 70%);
     }
 
     .hero-glow {
       position: absolute;
-      top: -100px;
+      top: -120px;
       left: 50%;
       transform: translateX(-50%);
-      width: 700px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(56, 182, 255, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+      width: 850px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(56, 182, 255, 0.2) 0%, rgba(0, 74, 173, 0.1) 50%, transparent 75%);
       pointer-events: none;
-      filter: blur(50px);
+      filter: blur(60px);
     }
 
     .hero-container {
@@ -580,16 +693,15 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 1.1rem;
-      background: rgba(56, 182, 255, 0.1);
-      border: 1px solid rgba(56, 182, 255, 0.3);
+      padding: 0.4rem 1.15rem;
+      background: rgba(56, 182, 255, 0.08);
+      border: 1px solid rgba(56, 182, 255, 0.28);
       border-radius: 50px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       color: #38b6ff;
       margin-bottom: 1.5rem;
-      box-shadow: 0 0 15px rgba(56, 182, 255, 0.15);
     }
 
     .badge-dot {
@@ -598,32 +710,33 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       border-radius: 50%;
       background: #38b6ff;
       box-shadow: 0 0 8px #38b6ff;
-      animation: pulse 2s infinite;
     }
 
+    /* Título com Alto Contraste */
     .hero-title {
       font-family: var(--font-headers, 'Outfit', sans-serif);
-      font-size: 3.25rem;
+      font-size: 3.3rem;
       font-weight: 800;
+      color: #ffffff; /* Branco puro de alto contraste */
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
       line-height: 1.15;
-      letter-spacing: -0.03em;
-      max-width: 900px;
-      margin-bottom: 1.25rem;
+      letter-spacing: -0.025em;
+      max-width: 920px;
+      margin: 0 0 1.35rem 0;
     }
 
-    .gradient-text {
-      background: linear-gradient(135deg, #ffffff 0%, #38b6ff 50%, #004aad 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .title-highlight {
+      color: #38b6ff; /* Ciano nítido e vibrante */
       display: inline-block;
+      text-shadow: 0 0 25px rgba(56, 182, 255, 0.4);
     }
 
     .hero-subtitle {
       font-size: 1.15rem;
-      line-height: 1.6;
-      color: #94a3b8;
+      line-height: 1.65;
+      color: #cbd5e1; /* Cinza claro bem legível */
       max-width: 720px;
-      margin-bottom: 2.25rem;
+      margin: 0 0 2.5rem 0;
     }
 
     .hero-buttons {
@@ -635,47 +748,46 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       flex-wrap: wrap;
     }
 
-    .hero-btn-primary {
+    .hero-btn-login {
       display: flex;
       align-items: center;
       gap: 0.65rem;
       background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
       color: #ffffff;
-      padding: 0.9rem 2.2rem;
+      padding: 0.9rem 2.5rem;
       border-radius: 50px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       text-decoration: none;
-      box-shadow: 0 4px 25px rgba(56, 182, 255, 0.45);
+      box-shadow: 0 4px 25px rgba(56, 182, 255, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.2);
       transition: all 0.25s ease;
     }
 
-    .hero-btn-primary:hover {
+    .hero-btn-login:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(56, 182, 255, 0.65);
+      box-shadow: 0 8px 30px rgba(56, 182, 255, 0.6);
     }
 
     .hero-btn-secondary {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(56, 182, 255, 0.35);
-      color: #ffffff;
-      padding: 0.9rem 2.1rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 0.9rem 1.85rem;
       border-radius: 50px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s ease;
+      text-decoration: none;
+      transition: all 0.2s ease;
     }
 
     .hero-btn-secondary:hover {
-      background: rgba(56, 182, 255, 0.12);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
       border-color: #38b6ff;
-      box-shadow: 0 0 20px rgba(56, 182, 255, 0.25);
-      transform: translateY(-1px);
     }
 
     /* Preview Mockup Card */
@@ -687,26 +799,26 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
 
     .preview-card-glow {
       position: absolute;
-      inset: -5px;
-      background: linear-gradient(135deg, rgba(56, 182, 255, 0.3) 0%, rgba(0, 74, 173, 0.2) 100%);
+      inset: -4px;
+      background: linear-gradient(135deg, rgba(56, 182, 255, 0.25) 0%, rgba(0, 74, 173, 0.2) 100%);
       filter: blur(25px);
-      border-radius: 24px;
+      border-radius: 22px;
       z-index: 1;
     }
 
     .preview-card {
       position: relative;
       z-index: 2;
-      background: #0f1c3f;
+      background: #0d1733;
       border: 1px solid rgba(56, 182, 255, 0.25);
-      border-radius: 20px;
+      border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       text-align: left;
     }
 
     .mockup-header {
-      background: #091024;
+      background: #070e22;
       padding: 0.75rem 1.25rem;
       display: flex;
       align-items: center;
@@ -788,13 +900,10 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       margin-bottom: 0.25rem;
     }
 
-    .mstat-trend {
+    .mstat-sub {
       font-size: 0.7rem;
       color: #64748b;
     }
-
-    .mstat-trend.positive { color: #10b981; }
-    .mstat-trend.active { color: #38b6ff; font-weight: 600; }
 
     .mockup-features-strip {
       display: flex;
@@ -826,7 +935,7 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
     /* 3. Features Section */
     .features-section {
       padding: 5rem 1.5rem;
-      background: #091024;
+      background: #060c1d;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
@@ -851,11 +960,8 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       font-size: 2.35rem;
       font-weight: 800;
       color: #ffffff;
-      margin-bottom: 0.75rem;
+      margin: 0 0 0.75rem 0;
     }
-
-    .section-title.text-left { text-align: left; }
-    .section-subtitle.text-left { text-align: left; }
 
     .section-subtitle {
       font-size: 1.05rem;
@@ -884,7 +990,6 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       background: rgba(56, 182, 255, 0.04);
       border-color: rgba(56, 182, 255, 0.3);
       transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .feature-icon {
@@ -935,170 +1040,152 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       line-height: 1.55;
     }
 
-    /* 4. Arquitetura Section */
-    .architecture-section {
-      padding: 5rem 1.5rem;
-      background: #0b132b;
+    /* 4. Seção SOBRE */
+    .about-section {
+      padding: 5.5rem 1.5rem;
+      background: #080f24;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .arch-box {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 3.5rem;
-      align-items: center;
+    .about-card {
+      background: linear-gradient(135deg, rgba(13, 23, 51, 0.95) 0%, rgba(8, 15, 36, 0.98) 100%);
+      border: 1px solid rgba(56, 182, 255, 0.22);
+      border-radius: 24px;
+      padding: 3.5rem 2.5rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
     }
 
-    .arch-points {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      margin: 2rem 0 2.5rem 0;
+    .about-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .about-main-title {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 2.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .about-subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem;
       text-align: left;
     }
 
-    .arch-point {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.85rem;
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
-    .arch-point strong {
-      color: #ffffff;
-    }
-
-    .arch-point code {
-      background: rgba(56, 182, 255, 0.15);
-      color: #38b6ff;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-
-    .arch-point-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(56, 182, 255, 0.12);
-      border: 1px solid rgba(56, 182, 255, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 0.15rem;
-    }
-
-    .arch-actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    /* Diagram Card */
-    .arch-diagram {
-      display: flex;
-      justify-content: center;
-    }
-
-    .diagram-card {
-      width: 100%;
-      max-width: 380px;
-      background: #0f1c3f;
-      border: 1px solid rgba(56, 182, 255, 0.25);
+    .about-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 16px;
       padding: 1.75rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     }
 
-    .diagram-step {
+    .about-box.full-span {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(56, 182, 255, 0.04) 0%, rgba(0, 74, 173, 0.1) 100%);
+      border-color: rgba(56, 182, 255, 0.25);
+    }
+
+    .about-box-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
       display: flex;
       align-items: center;
-      gap: 1rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 1rem;
-      text-align: left;
+      justify-content: center;
+      margin-bottom: 0.35rem;
     }
 
-    .diagram-step.highlight {
-      background: linear-gradient(135deg, rgba(56, 182, 255, 0.12) 0%, rgba(0, 74, 173, 0.25) 100%);
-      border-color: #38b6ff;
-      box-shadow: 0 0 18px rgba(56, 182, 255, 0.2);
-    }
-
-    .step-num {
+    .about-box-title {
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1.25rem;
-      font-weight: 800;
-      color: #38b6ff;
-      background: rgba(56, 182, 255, 0.12);
-      border-radius: 8px;
-      padding: 0.35rem 0.65rem;
-    }
-
-    .step-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .step-title {
-      font-size: 0.92rem;
       font-weight: 700;
       color: #ffffff;
+      margin: 0;
     }
 
-    .step-desc {
+    .about-box-text {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: #cbd5e1;
+      margin: 0;
+    }
+
+    .about-box-text strong {
+      color: #38b6ff;
+    }
+
+    .keycloak-mention-box {
+      margin-top: 0.85rem;
+      background: rgba(11, 19, 43, 0.7);
+      border-left: 3px solid #38b6ff;
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.25rem;
+    }
+
+    .keycloak-tag {
       font-size: 0.72rem;
-      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #38b6ff;
+      margin-bottom: 0.4rem;
     }
 
-    .diagram-connector {
-      display: flex;
-      justify-content: center;
-      padding: 0.2rem 0;
-      opacity: 0.7;
+    .keycloak-text {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+      margin: 0;
     }
 
     /* 5. CTA Section */
     .cta-section {
       padding: 4.5rem 1.5rem;
-      background: radial-gradient(circle at 50% 50%, rgba(0, 74, 173, 0.25) 0%, rgba(11, 19, 43, 0) 70%);
+      background: #060c1d;
     }
 
-    .cta-card {
-      max-width: 860px;
+    .cta-box {
+      max-width: 780px;
       margin: 0 auto;
-      background: linear-gradient(135deg, rgba(15, 28, 63, 0.9) 0%, rgba(11, 19, 43, 0.95) 100%);
-      border: 1px solid rgba(56, 182, 255, 0.35);
-      border-radius: 24px;
-      padding: 3.5rem 2.5rem;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, rgba(13, 23, 51, 0.8) 0%, rgba(8, 15, 36, 0.9) 100%);
+      border: 1px solid rgba(56, 182, 255, 0.3);
+      border-radius: 20px;
+      padding: 3rem 2rem;
       text-align: center;
     }
 
     .cta-title {
       font-family: var(--font-headers, 'Outfit', sans-serif);
-      font-size: 2.25rem;
+      font-size: 2.1rem;
       font-weight: 800;
       color: #ffffff;
-      margin-bottom: 1rem;
+      margin: 0 0 0.85rem 0;
     }
 
-    .cta-desc {
+    .cta-subtitle {
       font-size: 1.05rem;
       color: #94a3b8;
-      max-width: 600px;
-      margin: 0 auto 2.25rem auto;
+      max-width: 540px;
+      margin: 0 auto 2rem auto;
       line-height: 1.6;
     }
 
-    .cta-buttons {
+    .cta-actions {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1106,23 +1193,26 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       flex-wrap: wrap;
     }
 
-    .btn-ghost-public {
+    .btn-ghost-link {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
       color: #38b6ff;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
       text-decoration: none;
-      padding: 0.85rem 1.75rem;
+      padding: 0.85rem 1.5rem;
       border-radius: 50px;
       border: 1px solid rgba(56, 182, 255, 0.3);
       transition: all 0.2s ease;
     }
 
-    .btn-ghost-public:hover {
+    .btn-ghost-link:hover {
       background: rgba(56, 182, 255, 0.1);
       border-color: #38b6ff;
     }
 
-    /* 6. Footer Público */
+    /* 6. Footer */
     .public-footer {
       background: #060b19;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1190,57 +1280,34 @@ import { NoticeModalComponent } from '../../components/notice-modal/notice-modal
       color: #475569;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-
-    /* Responsividade Mobile */
     @media (max-width: 900px) {
-      .mockup-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .arch-box {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-      }
-      .arch-diagram {
-        width: 100%;
-      }
-      .diagram-card {
-        max-width: 100%;
-      }
+      .about-grid { grid-template-columns: 1fr; }
+      .mockup-stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
-      .public-nav {
-        display: none;
-      }
-      .hero-title {
-        font-size: 2.1rem;
-      }
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-      .mockup-features-strip {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .mockup-stats-grid {
-        grid-template-columns: 1fr;
-      }
+      .public-nav { display: none; }
+      .hamburger-btn { display: flex; }
+      .hero-title { font-size: 2.2rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .mockup-features-strip { flex-direction: column; align-items: flex-start; }
+      .mockup-stats-grid { grid-template-columns: 1fr; }
+      .about-card { padding: 2rem 1.25rem; }
       .footer-container {
         flex-direction: column;
         text-align: center;
-        gap: 1.25rem;
-      }
-      .footer-links {
-        flex-wrap: wrap;
-        justify-content: center;
       }
     }
   `],
 })
 export class HomeComponent {
-  loginModalOpen = false;
+  mobileMenuOpen = false;
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
+  }
 }
