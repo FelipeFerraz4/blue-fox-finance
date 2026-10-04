@@ -246,7 +246,7 @@ import { DashboardOverview } from '../../models/dashboard.model';
             <ng-template #noParcelas>
               <div class="empty-state">
                 <p>Nenhuma fatura ou parcela com vencimento para este mês.</p>
-                <a routerLink="/lancamentos/novo" class="btn btn-primary btn-sm mt-3">+ Adicionar Lançamento</a>
+                <a routerLink="/expenses/new" class="btn btn-primary btn-sm mt-3">+ Adicionar Lançamento</a>
               </div>
             </ng-template>
           </div>

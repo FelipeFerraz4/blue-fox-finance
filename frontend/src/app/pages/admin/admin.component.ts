@@ -41,9 +41,12 @@ interface AdminModuleCard {
               class="user-avatar-circle"
               [style.background]="'linear-gradient(135deg, ' + currentAvatar.color + ' 0%, #0b132b 100%)'"
             >
-              <svg *ngIf="currentAvatar.iconType === 'fox-blue'" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
+              <img
+                *ngIf="currentAvatar.iconType === 'fox-blue'"
+                src="assets/logo.png"
+                alt="Blue Fox Oficial"
+                class="avatar-fox-img-lg"
+              />
               <svg *ngIf="currentAvatar.iconType === 'fox-cyan'" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
@@ -92,7 +95,7 @@ interface AdminModuleCard {
         </div>
 
         <div class="user-overview-actions">
-          <a routerLink="/admin/usuario" class="btn btn-primary btn-pill shadow-glow">
+          <a routerLink="/admin/user-profile" class="btn btn-primary btn-pill shadow-glow">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -279,6 +282,14 @@ interface AdminModuleCard {
       justify-content: center;
       box-shadow: 0 6px 18px rgba(0, 74, 173, 0.25);
       border: 3px solid #ffffff;
+      overflow: hidden;
+    }
+
+    .avatar-fox-img-lg {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
 
     .avatar-online-dot {
@@ -667,7 +678,7 @@ export class AdminComponent implements OnInit {
       title: 'Categorias de Itens',
       category: 'Classificação de Despesas',
       description: 'Gerenciamento completo das categorias de itens e produtos com cores personalizadas.',
-      route: '/admin/categorias-itens',
+      route: '/admin/item-categories',
       badge: 'Gerenciador',
       badgeType: 'primary',
       icon: 'tag',
@@ -677,7 +688,7 @@ export class AdminComponent implements OnInit {
       title: 'Categorias de Lojas',
       category: 'Segmentos Comerciais',
       description: 'Classificação de lojas e fornecedores (E-commerce, Farmácia, Supermercados, etc).',
-      route: '/admin/categorias-lojas',
+      route: '/admin/store-categories',
       badge: 'Gerenciador',
       badgeType: 'cyan',
       icon: 'store',
@@ -687,7 +698,7 @@ export class AdminComponent implements OnInit {
       title: 'Perfil & Configurações de Usuário',
       category: 'Segurança & Identidade',
       description: 'Edição de nome, e-mail, telefone, username e avatar oficial do sistema.',
-      route: '/admin/usuario',
+      route: '/admin/user-profile',
       badge: 'Minha Conta',
       badgeType: 'warning',
       icon: 'user',
@@ -697,7 +708,7 @@ export class AdminComponent implements OnInit {
       title: 'Lançamentos Financeiros',
       category: 'Operacional',
       description: 'Histórico completo, filtros por período e status, visualização de parcelas e relatórios.',
-      route: '/lancamentos',
+      route: '/expenses',
       badge: 'Financeiro',
       badgeType: 'primary',
       icon: 'list',
@@ -707,7 +718,7 @@ export class AdminComponent implements OnInit {
       title: 'Novo Lançamento Agrupado',
       category: 'Operacional',
       description: 'Inserção ágil com cabeçalho comum (comprador, loja, data) e múltiplos cards de compras.',
-      route: '/lancamentos/novo',
+      route: '/expenses/new',
       badge: 'Agilizado',
       badgeType: 'success',
       icon: 'plus-circle',
@@ -717,7 +728,7 @@ export class AdminComponent implements OnInit {
       title: 'Compradores',
       category: 'Cadastros Base',
       description: 'Cadastro e gestão de titulares e responsáveis pelas despesas e faturas.',
-      route: '/compradores',
+      route: '/buyers',
       icon: 'buyers',
       color: '#6366f1',
     },
@@ -725,7 +736,7 @@ export class AdminComponent implements OnInit {
       title: 'Lojas & Estabelecimentos',
       category: 'Cadastros Base',
       description: 'Registro de lojas físicas, plataformas virtuais e fornecedores com categoria associada.',
-      route: '/lojas',
+      route: '/stores',
       icon: 'store',
       color: '#8b5cf6',
     },
@@ -733,7 +744,7 @@ export class AdminComponent implements OnInit {
       title: 'Meios de Pagamento',
       category: 'Cadastros Base',
       description: 'Configuração de cartões de crédito, contas bancárias e outras modalidades financeiras.',
-      route: '/meios-pagamento',
+      route: '/payment-methods',
       icon: 'card',
       color: '#ec4899',
     },

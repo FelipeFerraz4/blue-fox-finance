@@ -45,7 +45,7 @@ export interface ExpenseItemForm {
           <p class="page-subtitle">Preencha os dados da compra e adicione os itens adquiridos</p>
         </div>
 
-        <a routerLink="/lancamentos" class="btn btn-secondary btn-pill">
+        <a routerLink="/expenses" class="btn btn-secondary btn-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
@@ -97,7 +97,7 @@ export interface ExpenseItemForm {
                 <div class="form-group">
                   <div class="label-with-action">
                     <label class="form-label">Comprador *</label>
-                    <a routerLink="/compradores" class="btn-manage-link" title="Gerenciar Compradores">
+                    <a routerLink="/buyers" class="btn-manage-link" title="Gerenciar Compradores">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
@@ -140,7 +140,7 @@ export interface ExpenseItemForm {
                 <div class="form-group">
                   <div class="label-with-action">
                     <label class="form-label">Loja / Estabelecimento *</label>
-                    <a routerLink="/lojas" class="btn-manage-link" title="Gerenciar Lojas e Categorias">
+                    <a routerLink="/stores" class="btn-manage-link" title="Gerenciar Lojas e Categorias">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
@@ -200,7 +200,7 @@ export interface ExpenseItemForm {
                 <div class="form-group">
                   <div class="label-with-action">
                     <label class="form-label">Meio de Pagamento *</label>
-                    <a routerLink="/meios-pagamento" class="btn-manage-link" title="Gerenciar Meios de Pagamento">
+                    <a routerLink="/payment-methods" class="btn-manage-link" title="Gerenciar Meios de Pagamento">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                         <line x1="1" y1="10" x2="23" y2="10"/>
@@ -1642,7 +1642,7 @@ export class ExpenseFormComponent implements OnInit {
         const count = results.length;
         this.formSuccessMessage = `${count} ${count === 1 ? 'lançamento salvo' : 'lançamentos salvos'} com sucesso!`;
         setTimeout(() => {
-          this.router.navigate(['/lancamentos']);
+          this.router.navigate(['/expenses']);
         }, 700);
       },
       error: (err) => {

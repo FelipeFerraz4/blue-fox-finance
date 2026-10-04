@@ -67,7 +67,7 @@ import { SidebarService } from '../../services/sidebar.service';
             </a>
 
             <a
-              routerLink="/lancamentos"
+              routerLink="/expenses"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{exact: true}"
               class="nav-link"
@@ -83,7 +83,7 @@ import { SidebarService } from '../../services/sidebar.service';
             </a>
 
             <a
-              routerLink="/lancamentos/novo"
+              routerLink="/expenses/new"
               routerLinkActive="active"
               class="nav-link highlight-action"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Novo Lançamento' : null"
@@ -108,7 +108,7 @@ import { SidebarService } from '../../services/sidebar.service';
           <nav class="nav-list">
             <!-- 1. Compradores -->
             <a
-              routerLink="/compradores"
+              routerLink="/buyers"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Compradores' : null"
@@ -124,7 +124,7 @@ import { SidebarService } from '../../services/sidebar.service';
 
             <!-- 2. Lojas & Estabelecimentos -->
             <a
-              routerLink="/lojas"
+              routerLink="/stores"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Lojas & Estabelecimentos' : null"
@@ -140,7 +140,7 @@ import { SidebarService } from '../../services/sidebar.service';
 
             <!-- 3. Meios de Pagamento -->
             <a
-              routerLink="/meios-pagamento"
+              routerLink="/payment-methods"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Meios de Pagamento' : null"
@@ -156,7 +156,7 @@ import { SidebarService } from '../../services/sidebar.service';
 
             <!-- 4. Categorias de Itens -->
             <a
-              routerLink="/admin/categorias-itens"
+              routerLink="/admin/item-categories"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Categorias de Itens' : null"
@@ -172,7 +172,7 @@ import { SidebarService } from '../../services/sidebar.service';
 
             <!-- 5. Categorias de Lojas -->
             <a
-              routerLink="/admin/categorias-lojas"
+              routerLink="/admin/store-categories"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Categorias de Lojas' : null"
@@ -215,7 +215,7 @@ import { SidebarService } from '../../services/sidebar.service';
 
             <!-- 2. Perfil do Usuário -->
             <a
-              routerLink="/admin/usuario"
+              routerLink="/admin/user-profile"
               routerLinkActive="active"
               class="nav-link"
               [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Perfil do Usuário' : null"

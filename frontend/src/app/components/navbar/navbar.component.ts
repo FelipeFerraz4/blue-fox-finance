@@ -10,14 +10,17 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
   standalone: true,
   imports: [CommonModule, RouterModule, NoticeModalComponent],
   template: `
-    <header class="navbar">
-      <div class="navbar-container">
+    <header class="app-header">
+      <div class="navbar">
+        <div class="navbar-container">
         <!-- Brand & Logo Oficial Blue Fox -->
         <a routerLink="/dashboard" class="brand" (click)="closeMobileMenu()">
           <div class="logo-box">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
+            <img
+              src="assets/logo.png"
+              alt="BlueFox Finance"
+              class="brand-logo-img"
+            />
           </div>
           <div class="brand-text">
             <span class="brand-title">BlueFox</span>
@@ -37,7 +40,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             Dashboard
           </a>
 
-          <a routerLink="/lancamentos" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+          <a routerLink="/expenses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 11l3 3L22 4"/>
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -45,7 +48,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             Lançamentos
           </a>
 
-          <a routerLink="/meios-pagamento" routerLinkActive="active" class="nav-item">
+          <a routerLink="/payment-methods" routerLinkActive="active" class="nav-item">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="5" width="20" height="14" rx="2"/>
               <line x1="2" y1="10" x2="22" y2="10"/>
@@ -53,7 +56,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             Meios de Pagamento
           </a>
 
-          <a routerLink="/lojas" routerLinkActive="active" class="nav-item">
+          <a routerLink="/stores" routerLinkActive="active" class="nav-item">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
@@ -61,7 +64,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             Lojas
           </a>
 
-          <a routerLink="/compradores" routerLinkActive="active" class="nav-item">
+          <a routerLink="/buyers" routerLinkActive="active" class="nav-item">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
@@ -80,7 +83,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
 
         <!-- Right Actions: Novo Lançamento + Botão Login à Direita -->
         <div class="navbar-actions">
-          <a routerLink="/lancamentos/novo" class="btn btn-primary btn-sm btn-pill cta-btn">
+          <a routerLink="/expenses/new" class="btn btn-primary btn-sm btn-pill cta-btn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -115,6 +118,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
           </button>
         </div>
       </div>
+      </div>
 
       <!-- Backdrop Overlay para Mobile -->
       <div *ngIf="mobileMenuOpen" class="mobile-backdrop" (click)="closeMobileMenu()"></div>
@@ -125,9 +129,11 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
         <div class="mobile-drawer-header">
           <div class="brand">
             <div class="logo-box-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
+              <img
+                src="assets/logo.png"
+                alt="BlueFox Finance"
+                class="brand-logo-img"
+              />
             </div>
             <div class="brand-text">
               <span class="brand-title-sm">BlueFox Finance</span>
@@ -144,14 +150,17 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
 
         <!-- Card de Usuário / Perfil Rápido -->
         <div class="drawer-user-section">
-          <a routerLink="/admin/usuario" (click)="closeMobileMenu()" class="drawer-user-card" title="Ver perfil e configurações">
+          <a routerLink="/admin/user-profile" (click)="closeMobileMenu()" class="drawer-user-card" title="Ver perfil e configurações">
             <div
               class="user-avatar-mini"
               [style.background]="'linear-gradient(135deg, ' + currentAvatar.color + ' 0%, #0b132b 100%)'"
             >
-              <svg *ngIf="currentAvatar.iconType === 'fox-blue'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
+              <img
+                *ngIf="currentAvatar.iconType === 'fox-blue'"
+                src="assets/logo.png"
+                alt="Blue Fox Oficial"
+                class="avatar-fox-img-mini"
+              />
               <svg *ngIf="currentAvatar.iconType === 'fox-cyan'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
@@ -202,7 +211,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Dashboard</span>
           </a>
 
-          <a routerLink="/lancamentos" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/expenses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4"/>
@@ -215,7 +224,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
           <!-- SEÇÃO 2: CADASTROS BASE -->
           <div class="drawer-section-label">Cadastros Base</div>
 
-          <a routerLink="/compradores" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/buyers" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -225,7 +234,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Compradores</span>
           </a>
 
-          <a routerLink="/lojas" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/stores" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -235,7 +244,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Lojas & Estabelecimentos</span>
           </a>
 
-          <a routerLink="/meios-pagamento" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/payment-methods" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -245,7 +254,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Meios de Pagamento</span>
           </a>
 
-          <a routerLink="/admin/categorias-itens" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/admin/item-categories" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
@@ -255,7 +264,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Categorias de Itens</span>
           </a>
 
-          <a routerLink="/admin/categorias-lojas" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/admin/store-categories" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -278,7 +287,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <div class="icon-wrap admin-icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
             </div>
             <div class="nav-text-container">
@@ -287,7 +296,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             </div>
           </a>
 
-          <a routerLink="/admin/usuario" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/admin/user-profile" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
             <div class="icon-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -300,7 +309,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
 
         <!-- Rodapé da Gaveta Mobile com Ações Rápidas -->
         <div class="mobile-drawer-footer">
-          <a routerLink="/lancamentos/novo" (click)="closeMobileMenu()" class="btn btn-primary btn-pill full-width mb-2">
+          <a routerLink="/expenses/new" (click)="closeMobileMenu()" class="btn btn-primary btn-pill full-width mb-2">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -344,6 +353,11 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
       width: 100%;
     }
 
+    .app-header {
+      width: 100%;
+      position: relative;
+    }
+
     .navbar {
       background: rgba(11, 19, 43, 0.96); /* Navy Oficial Blue Fox com acabamento suspenso */
       backdrop-filter: blur(12px);
@@ -373,20 +387,32 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
     }
 
     .logo-box {
-      background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
-      color: #ffffff;
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      background: #ffffff;
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      padding: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 16px rgba(56, 182, 255, 0.35);
-      transition: transform 0.2s ease;
+      box-shadow: 0 0 16px rgba(56, 182, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(56, 182, 255, 0.3);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      overflow: hidden;
     }
 
     .brand:hover .logo-box {
-      transform: scale(1.05);
+      transform: scale(1.06);
+      box-shadow: 0 0 22px rgba(56, 182, 255, 0.6);
+      border-color: #38b6ff;
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .brand-text {
@@ -579,15 +605,18 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
     }
 
     .logo-box-sm {
-      background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
-      color: #ffffff;
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
+      background: #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      padding: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 10px rgba(56, 182, 255, 0.3);
+      box-shadow: 0 0 12px rgba(56, 182, 255, 0.35);
+      border: 1px solid rgba(56, 182, 255, 0.3);
+      flex-shrink: 0;
+      overflow: hidden;
     }
 
     .brand-title-sm {
@@ -660,6 +689,14 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
       flex-shrink: 0;
       border: 2px solid rgba(255, 255, 255, 0.4);
       box-shadow: 0 2px 8px rgba(0, 74, 173, 0.3);
+      overflow: hidden;
+    }
+
+    .avatar-fox-img-mini {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
     }
 
     .user-status-dot {
