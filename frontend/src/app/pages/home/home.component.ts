@@ -27,8 +27,8 @@ import { RouterModule } from '@angular/router';
 
           <!-- Navegação Não Logada: APENAS Início, Sobre e Atualizações -->
           <nav class="public-nav">
-            <a href="#inicio" class="nav-link">Início</a>
-            <a href="#sobre" class="nav-link">Sobre</a>
+            <a routerLink="/" class="nav-link active">Início</a>
+            <a routerLink="/about" class="nav-link">Sobre</a>
             <a routerLink="/updates" class="nav-link">Atualizações</a>
           </nav>
 
@@ -74,10 +74,10 @@ import { RouterModule } from '@angular/router';
         </div>
 
         <nav class="mobile-nav-links">
-          <a href="#inicio" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/" (click)="closeMobileMenu()" class="mobile-nav-item active">
             <span>Início</span>
           </a>
-          <a href="#sobre" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/about" (click)="closeMobileMenu()" class="mobile-nav-item">
             <span>Sobre</span>
           </a>
           <a routerLink="/updates" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -125,10 +125,11 @@ import { RouterModule } from '@angular/router';
               <span>Fazer Login</span>
             </a>
 
-            <a href="#sobre" class="hero-btn-secondary">
+            <a routerLink="/about" class="hero-btn-secondary">
               <span>Conhecer a Origem</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"/>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </a>
           </div>
@@ -266,73 +267,62 @@ import { RouterModule } from '@angular/router';
         </div>
       </section>
 
-      <!-- 4. Seção SOBRE: A Origem do Sistema & Blue Fox Global Group -->
-      <section id="sobre" class="about-section">
+      <!-- 4. Resumo da Seção SOBRE na Home com Link para a Página Completa /about -->
+      <section class="about-section">
         <div class="section-container">
           <div class="about-card">
             <div class="about-header">
               <div class="section-badge">NOSSA HISTÓRIA & GOVERNANÇA</div>
               <h2 class="about-main-title">A Origem do BlueFox Finance</h2>
               <p class="about-subtitle">
-                Conheça como a ferramenta nasceu dentro do grupo para resolver uma dor real de gestão e como ela evoluiu.
+                Desenvolvido internamente pelo Blue Fox Global Group para controle rigoroso de despesas e orçamentos, e agora disponível para todos.
               </p>
             </div>
 
-            <div class="about-grid">
-              <!-- Bloco 1: A Fundação -->
-              <div class="about-box">
-                <div class="about-box-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
+            <div class="about-summary-grid">
+              <!-- Item 1: Fundação -->
+              <div class="about-summary-box">
+                <div class="summary-box-icon icon-blue">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                   </svg>
                 </div>
-                <h3 class="about-box-title">Por que o sistema foi criado?</h3>
-                <p class="about-box-text">
-                  O <strong>BlueFox Finance</strong> nasceu da necessidade concreta de controle e governança financeira dentro das operações do <strong>Blue Fox Global Group</strong>. 
-                  Com múltiplas compras corporativas, cartões empresariais com datas de fechamento distintas e despesas realizadas por diferentes membros, planilhas tradicionais geravam divergências e falta de previsibilidade orçamentária.
-                </p>
-                <p class="about-box-text">
-                  O sistema foi desenvolvido para calcular automaticamente em qual fatura cada despesa incide e manter o faturamento e os orçamentos sob rígido acompanhamento.
-                </p>
+                <div class="summary-box-content">
+                  <h3 class="summary-box-title">Criado para Governança do Grupo</h3>
+                  <p class="summary-box-text">
+                    Nasceu da necessidade concreta do <strong>Blue Fox Global Group</strong> de gerenciar faturas de múltiplos cartões corporativos, compras de diferentes membros e orçamento com exatidão matemática.
+                  </p>
+                </div>
               </div>
 
-              <!-- Bloco 2: A Abertura para o Público -->
-              <div class="about-box">
-                <div class="about-box-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+              <!-- Item 2: Abertura ao Público -->
+              <div class="about-summary-box">
+                <div class="summary-box-icon icon-teal">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
                 </div>
-                <h3 class="about-box-title">Abertura para o Público</h3>
-                <p class="about-box-text">
-                  Após consolidar o algoritmo de cálculo de faturas, a gestão de múltiplos compradores e a separação de lançamentos em lote, percebemos que essa mesma dor afetava famílias, pequenos negócios e profissionais independentes.
-                </p>
-                <p class="about-box-text">
-                  Decidimos então disponibilizar a plataforma para o público externo, permitindo que qualquer pessoa utilize a mesma precisão de governança antes restrita às operações internas do grupo.
-                </p>
-              </div>
-
-              <!-- Bloco 3: O Blue Fox Global Group & Keycloak -->
-              <div class="about-box full-span">
-                <div class="about-box-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                </div>
-                <h3 class="about-box-title">O que é o Blue Fox Global Group e seu papel no sistema</h3>
-                <p class="about-box-text">
-                  O <strong>Blue Fox Global Group</strong> é o grupo holding que concebe, desenvolve e investe em iniciativas de tecnologia, soluções corporativas, infraestrutura e inovação. No BlueFox Finance, o papel do grupo é atuar como guardião da governança, suporte à infraestrutura e segurança da informação.
-                </p>
-                <div class="keycloak-mention-box">
-                  <div class="keycloak-tag">Papel na Segurança & Keycloak</div>
-                  <p class="keycloak-text">
-                    O <strong>Blue Fox Global Group</strong> é o responsável por orquestrar a infraestrutura central de identidade da organização. Para o futuro deploy online em larga escala, o grupo está estruturando a integração do <strong>Keycloak SSO (IAM)</strong>, que funcionará como provedor unificado de identidade e autenticação federada (Single Sign-On), garantindo controle de acesso granular e proteção de ponta a ponta em todos os produtos do grupo.
+                <div class="summary-box-content">
+                  <h3 class="summary-box-title">Abertura e Democratização</h3>
+                  <p class="summary-box-text">
+                    Com a comprovada eficiência do motor de cálculo e divisão por compradores, a plataforma foi disponibilizada para que famílias e parceiros externos usufruam da mesma tecnologia de gestão.
                   </p>
                 </div>
               </div>
+            </div>
+
+            <!-- Botão de Acesso à Página Completa de Sobre -->
+            <div class="about-cta-center">
+              <a routerLink="/about" class="btn-read-full-story">
+                <span>Conhecer a História Completa & o Papel do Blue Fox Global Group</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
             </div>
           </div>
         </div>
@@ -378,8 +368,8 @@ import { RouterModule } from '@angular/router';
           </div>
 
           <div class="footer-links">
-            <a href="#inicio">Início</a>
-            <a href="#sobre">Sobre</a>
+            <a routerLink="/">Início</a>
+            <a routerLink="/about">Sobre</a>
             <a routerLink="/updates">Atualizações</a>
             <a routerLink="/dashboard">Login</a>
           </div>
@@ -498,6 +488,12 @@ import { RouterModule } from '@angular/router';
     .nav-link:hover {
       color: #ffffff;
       background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(56, 182, 255, 0.25) 0%, rgba(0, 74, 173, 0.45) 100%);
+      border: 1px solid rgba(56, 182, 255, 0.4);
     }
 
     .header-actions {
@@ -635,6 +631,11 @@ import { RouterModule } from '@angular/router';
       border-radius: 8px;
     }
 
+    .mobile-nav-item.active {
+      background: rgba(56, 182, 255, 0.15);
+      color: #38b6ff;
+    }
+
     .mobile-drawer-footer {
       padding: 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -717,7 +718,7 @@ import { RouterModule } from '@angular/router';
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 3.3rem;
       font-weight: 800;
-      color: #ffffff; /* Branco puro de alto contraste */
+      color: #ffffff;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
       line-height: 1.15;
       letter-spacing: -0.025em;
@@ -726,7 +727,7 @@ import { RouterModule } from '@angular/router';
     }
 
     .title-highlight {
-      color: #38b6ff; /* Ciano nítido e vibrante */
+      color: #38b6ff;
       display: inline-block;
       text-shadow: 0 0 25px rgba(56, 182, 255, 0.4);
     }
@@ -734,7 +735,7 @@ import { RouterModule } from '@angular/router';
     .hero-subtitle {
       font-size: 1.15rem;
       line-height: 1.65;
-      color: #cbd5e1; /* Cinza claro bem legível */
+      color: #cbd5e1;
       max-width: 720px;
       margin: 0 0 2.5rem 0;
     }
@@ -1040,7 +1041,7 @@ import { RouterModule } from '@angular/router';
       line-height: 1.55;
     }
 
-    /* 4. Seção SOBRE */
+    /* 4. Seção SOBRE (Resumo) */
     .about-section {
       padding: 5.5rem 1.5rem;
       background: #080f24;
@@ -1057,7 +1058,7 @@ import { RouterModule } from '@angular/router';
 
     .about-header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.75rem;
     }
 
     .about-main-title {
@@ -1076,81 +1077,85 @@ import { RouterModule } from '@angular/router';
       line-height: 1.6;
     }
 
-    .about-grid {
+    .about-summary-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 1.75rem;
       text-align: left;
+      margin-bottom: 2.5rem;
     }
 
-    .about-box {
+    .about-summary-box {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 16px;
       padding: 1.75rem;
       display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      gap: 1.15rem;
+      align-items: flex-start;
     }
 
-    .about-box.full-span {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, rgba(56, 182, 255, 0.04) 0%, rgba(0, 74, 173, 0.1) 100%);
-      border-color: rgba(56, 182, 255, 0.25);
-    }
-
-    .about-box-icon {
+    .summary-box-icon {
       width: 44px;
       height: 44px;
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 0.35rem;
+      flex-shrink: 0;
     }
 
-    .about-box-title {
+    .summary-box-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .summary-box-title {
       font-family: var(--font-headers, 'Outfit', sans-serif);
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: #ffffff;
       margin: 0;
     }
 
-    .about-box-text {
-      font-size: 0.92rem;
-      line-height: 1.65;
+    .summary-box-text {
+      font-size: 0.9rem;
+      line-height: 1.6;
       color: #cbd5e1;
       margin: 0;
     }
 
-    .about-box-text strong {
+    .summary-box-text strong {
       color: #38b6ff;
     }
 
-    .keycloak-mention-box {
-      margin-top: 0.85rem;
-      background: rgba(11, 19, 43, 0.7);
-      border-left: 3px solid #38b6ff;
-      border-radius: 0 10px 10px 0;
-      padding: 1rem 1.25rem;
+    .about-cta-center {
+      display: flex;
+      justify-content: center;
+      padding-top: 0.5rem;
     }
 
-    .keycloak-tag {
-      font-size: 0.72rem;
+    .btn-read-full-story {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: rgba(56, 182, 255, 0.08);
+      border: 1px solid rgba(56, 182, 255, 0.35);
+      color: #ffffff;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #38b6ff;
-      margin-bottom: 0.4rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
     }
 
-    .keycloak-text {
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      line-height: 1.55;
-      margin: 0;
+    .btn-read-full-story:hover {
+      background: rgba(56, 182, 255, 0.2);
+      border-color: #38b6ff;
+      box-shadow: 0 0 20px rgba(56, 182, 255, 0.35);
+      transform: translateY(-2px);
     }
 
     /* 5. CTA Section */
@@ -1281,7 +1286,7 @@ import { RouterModule } from '@angular/router';
     }
 
     @media (max-width: 900px) {
-      .about-grid { grid-template-columns: 1fr; }
+      .about-summary-grid { grid-template-columns: 1fr; }
       .mockup-stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
 

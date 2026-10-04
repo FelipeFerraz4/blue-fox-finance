@@ -36,7 +36,7 @@ interface FeatureItem {
           <!-- Navegação Não Logada: APENAS Início, Sobre e Atualizações -->
           <nav class="public-nav">
             <a routerLink="/" class="nav-link">Início</a>
-            <a routerLink="/" fragment="sobre" class="nav-link">Sobre</a>
+            <a routerLink="/about" class="nav-link">Sobre</a>
             <a routerLink="/updates" class="nav-link active">Atualizações</a>
           </nav>
 
@@ -85,7 +85,7 @@ interface FeatureItem {
           <a routerLink="/" (click)="closeMobileMenu()" class="mobile-nav-item">
             <span>Início</span>
           </a>
-          <a routerLink="/" fragment="sobre" (click)="closeMobileMenu()" class="mobile-nav-item">
+          <a routerLink="/about" (click)="closeMobileMenu()" class="mobile-nav-item">
             <span>Sobre</span>
           </a>
           <a routerLink="/updates" (click)="closeMobileMenu()" class="mobile-nav-item active">
@@ -281,7 +281,7 @@ interface FeatureItem {
 
           <div class="footer-links">
             <a routerLink="/">Início</a>
-            <a routerLink="/" fragment="sobre">Sobre</a>
+            <a routerLink="/about">Sobre</a>
             <a routerLink="/updates">Atualizações</a>
             <a routerLink="/dashboard">Login</a>
           </div>

@@ -15,6 +15,12 @@ export const routes: Routes = [
     title: 'Home | BlueFox Finance',
   },
   {
+    path: 'about',
+    loadComponent: () =>
+      import('./pages/about/about.component').then((m) => m.AboutComponent),
+    title: 'Sobre o BlueFox Finance | Blue Fox Global Group',
+  },
+  {
     path: 'updates',
     loadComponent: () =>
       import('./pages/updates/updates.component').then((m) => m.UpdatesComponent),

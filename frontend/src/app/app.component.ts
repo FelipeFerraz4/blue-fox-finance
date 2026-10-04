@@ -100,6 +100,7 @@ export class AppComponent implements OnInit {
       cleanUrl === '' ||
       cleanUrl === '/' ||
       cleanUrl === '/home' ||
+      cleanUrl === '/about' ||
       cleanUrl === '/updates';
   }
 }
