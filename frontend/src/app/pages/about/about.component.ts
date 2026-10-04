@@ -588,6 +588,9 @@ import { RouterModule } from '@angular/router';
     .about-hero {
       text-align: center;
       margin-bottom: 3.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .section-badge {
@@ -598,6 +601,7 @@ import { RouterModule } from '@angular/router';
       text-transform: uppercase;
       color: #38b6ff;
       margin-bottom: 0.65rem;
+      text-align: center;
     }
 
     .page-title {
@@ -608,6 +612,9 @@ import { RouterModule } from '@angular/router';
       letter-spacing: -0.025em;
       margin: 0 0 1rem 0;
       line-height: 1.15;
+      display: block;
+      text-align: center;
+      width: 100%;
     }
 
     .page-subtitle {
@@ -616,6 +623,7 @@ import { RouterModule } from '@angular/router';
       max-width: 780px;
       margin: 0 auto;
       line-height: 1.65;
+      text-align: center;
     }
 
     .text-white { color: #ffffff; }

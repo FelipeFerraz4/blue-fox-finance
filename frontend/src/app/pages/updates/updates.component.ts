@@ -580,6 +580,9 @@ interface FeatureItem {
     .updates-hero {
       text-align: center;
       margin-bottom: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .section-badge {
@@ -590,6 +593,7 @@ interface FeatureItem {
       text-transform: uppercase;
       color: #38b6ff;
       margin-bottom: 0.65rem;
+      text-align: center;
     }
 
     .page-title {
@@ -600,6 +604,9 @@ interface FeatureItem {
       letter-spacing: -0.02em;
       margin: 0 0 0.85rem 0;
       line-height: 1.2;
+      display: block;
+      text-align: center;
+      width: 100%;
     }
 
     .page-subtitle {
@@ -608,6 +615,7 @@ interface FeatureItem {
       max-width: 720px;
       margin: 0 auto;
       line-height: 1.6;
+      text-align: center;
     }
 
     /* Abas de Filtro */
