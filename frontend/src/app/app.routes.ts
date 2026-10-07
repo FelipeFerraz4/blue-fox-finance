@@ -6,25 +6,21 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./pages/home/home.component').then((m) => m.HomeComponent),
-    title: 'BlueFox Finance | Gestão & Governança Financeira',
   },
   {
     path: 'home',
     loadComponent: () =>
       import('./pages/home/home.component').then((m) => m.HomeComponent),
-    title: 'Home | BlueFox Finance',
   },
   {
     path: 'about',
     loadComponent: () =>
       import('./pages/about/about.component').then((m) => m.AboutComponent),
-    title: 'Sobre o BlueFox Finance | Blue Fox Global Group',
   },
   {
     path: 'updates',
     loadComponent: () =>
       import('./pages/updates/updates.component').then((m) => m.UpdatesComponent),
-    title: 'Atualizações & Roadmap | BlueFox Finance',
   },
 
   // 2. Plataforma Interna (Gestão Financeira & IAM)
@@ -32,19 +28,16 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
-    title: 'Dashboard | BlueFox Finance',
   },
   {
     path: 'expenses',
     loadComponent: () =>
       import('./pages/expense-list/expense-list.component').then((m) => m.ExpenseListComponent),
-    title: 'Expenses | BlueFox Finance',
   },
   {
     path: 'expenses/new',
     loadComponent: () =>
       import('./pages/expense-form/expense-form.component').then((m) => m.ExpenseFormComponent),
-    title: 'New Expense | BlueFox Finance',
   },
   {
     path: 'payment-methods',
@@ -52,25 +45,21 @@ export const routes: Routes = [
       import('./pages/payment-methods/payment-methods.component').then(
         (m) => m.PaymentMethodsComponent,
       ),
-    title: 'Payment Methods | BlueFox Finance',
   },
   {
     path: 'stores',
     loadComponent: () =>
       import('./pages/stores/stores.component').then((m) => m.StoresComponent),
-    title: 'Stores & Establishments | BlueFox Finance',
   },
   {
     path: 'buyers',
     loadComponent: () =>
       import('./pages/buyers/buyers.component').then((m) => m.BuyersComponent),
-    title: 'Buyers | BlueFox Finance',
   },
   {
     path: 'admin',
     loadComponent: () =>
       import('./pages/admin/admin.component').then((m) => m.AdminComponent),
-    title: 'Administration Hub | BlueFox Finance',
   },
   {
     path: 'admin/item-categories',
@@ -78,7 +67,6 @@ export const routes: Routes = [
       import('./pages/admin/item-categories/item-categories.component').then(
         (m) => m.ItemCategoriesComponent,
       ),
-    title: 'Item Categories | BlueFox Finance',
   },
   {
     path: 'admin/store-categories',
@@ -86,7 +74,6 @@ export const routes: Routes = [
       import('./pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
       ),
-    title: 'Store Categories | BlueFox Finance',
   },
   {
     path: 'admin/user-profile',
@@ -94,7 +81,6 @@ export const routes: Routes = [
       import('./pages/admin/user-profile/user-profile.component').then(
         (m) => m.UserProfileComponent,
       ),
-    title: 'User Profile | BlueFox Finance',
   },
 
   // 3. Redirecionamentos de Compatibilidade (Rotas legadas em Português)

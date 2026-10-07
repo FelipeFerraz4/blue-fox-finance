@@ -149,7 +149,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
-              <div>
+              <div class="card-header-text">
                 <h3 class="card-title">Dados Pessoais & Acesso</h3>
                 <p class="card-subtitle">Mantenha seus dados atualizados para identificação e auditoria</p>
               </div>
@@ -600,7 +600,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       width: 100%;
     }
 
-    .card-header-clean > div {
+    .card-header-text {
       min-width: 0;
       flex: 1;
     }
@@ -608,12 +608,15 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
     .header-icon-box {
       width: 40px;
       height: 40px;
+      min-width: 40px;
+      min-height: 40px;
       border-radius: 10px;
       background: #eff6ff;
       color: #004aad;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex: 0 0 40px;
       flex-shrink: 0;
     }
 
@@ -785,26 +788,22 @@ import { UserService, UserProfile, SystemAvatar } from '../../../services/user.s
       }
 
       .card-header-clean {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        text-align: center;
+        text-align: left;
         gap: 0.75rem;
       }
 
-      .card-header-clean > div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        width: 100%;
+      .card-header-text {
+        text-align: left;
       }
 
       .card-title {
-        text-align: center;
+        text-align: left;
       }
 
       .card-subtitle {
-        text-align: center;
+        text-align: left;
       }
 
       .form-row {
