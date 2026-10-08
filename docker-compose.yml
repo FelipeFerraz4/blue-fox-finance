@@ -1,14 +1,12 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: bluefox-finance-db
+    container_name: blue-fox-finance-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-bluefox_finance}
-    ports:
-      - "${DB_PORT:-5435}:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
@@ -17,38 +15,36 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - bluefox-net
+      - finance-net
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: bluefox-finance-backend
+    container_name: blue-fox-finance-backend
     restart: unless-stopped
     environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-bluefox_finance}?schema=public
-      PORT: 3000
-    ports:
-      - "3000:3000"
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/auth/realms/blue-fox-global-group}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - bluefox-net
+      - finance-net
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: bluefox-finance-frontend
+    container_name: blue-fox-finance-frontend
     restart: unless-stopped
-    ports:
-      - "4200:80"
     depends_on:
       - backend
     networks:
-      - bluefox-net
+      - finance-net
 
 networks:
-  bluefox-net:
+  finance-net:
     driver: bridge

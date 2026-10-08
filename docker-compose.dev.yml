@@ -1,0 +1,12 @@
+services:
+  postgres:
+    ports:
+      - "${DB_PORT:-5435}:5432"
+
+  backend:
+    ports:
+      - "${PORT:-3000}:3000"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"

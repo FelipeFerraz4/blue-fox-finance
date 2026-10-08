@@ -1,0 +1,19 @@
+services:
+  backend:
+    environment:
+      NODE_ENV: production
+    networks:
+      - finance-net
+      - infra-net
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    networks:
+      - finance-net
+      - infra-net
+
+networks:
+  infra-net:
+    name: ${DOCKER_NETWORK:-infra-net}
+    external: true
