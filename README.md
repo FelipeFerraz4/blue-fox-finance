@@ -13,22 +13,52 @@ Sistema web completo para gestão financeira e controle de gastos (*Finance & Sp
 
 ---
 
-## 🚀 Como Executar com Docker Compose (Recomendado)
+## 🚀 Como Executar com Docker Compose
 
-O projeto está totalmente configurado para subir todos os serviços com um único comando:
+O ecossistema está padronizado com separação clara de ambientes de **Desenvolvimento (Dev)** e **Produção (Prod)**:
 
+### 🛠️ Desenvolvimento (Dev)
+
+1. Crie a rede compartilhada (se ainda não existir):
+   ```bash
+   docker network create infra-net
+   ```
+2. Crie o arquivo de variáveis de desenvolvimento:
+   ```bash
+   cp .env.dev.example .env.dev
+   ```
+3. Suba o ambiente de desenvolvimento:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.dev up -d --build
+   ```
+4. Acessos locais:
+   - 🌐 **Frontend (Angular)**: [http://localhost:4200](http://localhost:4200)
+   - 🔌 **Backend (NestJS API)**: [http://localhost:3000/api](http://localhost:3000/api)
+   - 🗄️ **Banco PostgreSQL**: `localhost:5435`
+
+Para parar o ambiente de desenvolvimento:
 ```bash
-# 1. Navegue até o diretório do projeto
-cd blue-fox-finance
-
-# 2. Suba os containers com build automático
-docker compose up -d --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.dev down
 ```
 
-Após os containers iniciarem:
-- 🌐 **Frontend (Angular)**: [http://localhost:4200](http://localhost:4200)
-- 🔌 **Backend (NestJS API)**: [http://localhost:3000/api](http://localhost:3000/api)
-- 🗄️ **Banco PostgreSQL**: `localhost:5435` (ou porta 5432 interna na rede Docker)
+---
+
+### 🚀 Produção (Prod)
+
+1. Configure o arquivo `.env.prod`:
+   ```bash
+   cp .env.prod.example .env.prod
+   # Edite com as credenciais seguras de banco e produção
+   ```
+2. Suba o ambiente de produção:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --build
+   ```
+
+Para parar o ambiente de produção:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down
+```
 
 Os dados do banco de dados ficam salvos de forma persistente no diretório local:
 `./data/postgres`
