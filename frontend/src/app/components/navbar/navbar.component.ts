@@ -4,6 +4,7 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { NoticeModalComponent } from '../notice-modal/notice-modal.component';
 import { UserService, UserProfile, SystemAvatar } from '../../services/user.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -91,19 +92,42 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Novo Lançamento</span>
           </a>
 
-          <!-- Botão de Login no fim do lado direito do Header -->
-          <button
-            type="button"
-            class="btn-login-header"
-            (click)="openLoginNotice()"
-            title="Acessar com Keycloak SSO"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span>Login</span>
-          </button>
+          <!-- Botão de Login / Sessão Keycloak no Header -->
+          <ng-container *ngIf="!authService.isAuthenticated()">
+            <button
+              type="button"
+              class="btn-login-header"
+              (click)="login()"
+              title="Acessar com Keycloak SSO"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Login</span>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="authService.isAuthenticated()">
+            <div class="user-session-box">
+              <span class="user-session-name" [title]="authService.currentUser()?.email || ''">
+                {{ authService.currentUser()?.name || authService.currentUser()?.username }}
+              </span>
+              <button
+                type="button"
+                class="btn-logout-header"
+                (click)="logout()"
+                title="Encerrar sessão Keycloak"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>Sair</span>
+              </button>
+            </div>
+          </ng-container>
 
           <!-- Hamburger Button (Mobile Only) -->
           <button
@@ -317,12 +341,21 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
             <span>Novo Lançamento</span>
           </a>
 
-          <button (click)="openLoginNotice(); closeMobileMenu()" class="btn btn-outline-light btn-pill full-width mb-2">
+          <button *ngIf="!authService.isAuthenticated()" (click)="login(); closeMobileMenu()" class="btn btn-outline-light btn-pill full-width mb-2">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
             <span>Login SSO (Keycloak)</span>
+          </button>
+
+          <button *ngIf="authService.isAuthenticated()" (click)="logout(); closeMobileMenu()" class="btn btn-outline-danger btn-pill full-width mb-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Sair da Conta (Logout)</span>
           </button>
 
           <div class="mobile-drawer-brand-footnote">
@@ -479,6 +512,50 @@ import { UserService, UserProfile, SystemAvatar } from '../../services/user.serv
     .cta-btn {
       font-size: 0.85rem;
       padding: 0.45rem 1.15rem;
+    }
+
+    /* Sessão de Usuário Autenticado no Header */
+    .user-session-box {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(56, 182, 255, 0.25);
+      border-radius: 50px;
+      padding: 0.25rem 0.4rem 0.25rem 0.85rem;
+    }
+
+    .user-session-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-logout-header {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 50px;
+      color: #fca5a5;
+      padding: 0.3rem 0.75rem;
+      font-family: var(--font-inter), sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout-header:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #ffffff;
+      border-color: #ef4444;
+      transform: translateY(-1px);
     }
 
     /* Botão de Login no fim do Header */
@@ -920,6 +997,7 @@ export class NavbarComponent implements OnInit {
   currentAvatar: SystemAvatar;
 
   constructor(
+    public readonly authService: AuthService,
     public readonly userService: UserService,
     private readonly router: Router,
   ) {
@@ -947,6 +1025,14 @@ export class NavbarComponent implements OnInit {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen = false;
+  }
+
+  login(): void {
+    this.authService.login();
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 
   openLoginNotice(): void {

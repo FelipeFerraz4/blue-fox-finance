@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // 1. Rota Pública Inicial (Home Landing Page)
@@ -23,24 +24,28 @@ export const routes: Routes = [
       import('./pages/updates/updates.component').then((m) => m.UpdatesComponent),
   },
 
-  // 2. Plataforma Interna (Gestão Financeira & IAM)
+  // 2. Plataforma Interna (Gestão Financeira & IAM Protegidos)
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: 'expenses',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/expense-list/expense-list.component').then((m) => m.ExpenseListComponent),
   },
   {
     path: 'expenses/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/expense-form/expense-form.component').then((m) => m.ExpenseFormComponent),
   },
   {
     path: 'payment-methods',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/payment-methods/payment-methods.component').then(
         (m) => m.PaymentMethodsComponent,
@@ -48,21 +53,25 @@ export const routes: Routes = [
   },
   {
     path: 'stores',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/stores/stores.component').then((m) => m.StoresComponent),
   },
   {
     path: 'buyers',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/buyers/buyers.component').then((m) => m.BuyersComponent),
   },
   {
     path: 'admin',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/admin/admin.component').then((m) => m.AdminComponent),
   },
   {
     path: 'admin/item-categories',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/admin/item-categories/item-categories.component').then(
         (m) => m.ItemCategoriesComponent,
@@ -70,6 +79,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/store-categories',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
@@ -77,6 +87,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/user-profile',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/admin/user-profile/user-profile.component').then(
         (m) => m.UserProfileComponent,
