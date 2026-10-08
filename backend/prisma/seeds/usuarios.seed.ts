@@ -4,19 +4,30 @@ export async function seedUsuarios(prisma: PrismaClient) {
   console.log('👤 Iniciando seed de Compradores / Usuários padrão...');
 
   const defaultBuyers = [
-    { nome: 'Felipe', email: 'felipe@exemplo.com', ativo: true },
+    {
+      nome: 'Admin Finance',
+      email: 'adminfinance@bluefoxglobalgroup.com',
+      ativo: true,
+    },
+    {
+      nome: 'Usuário Finance',
+      email: 'felipe@bluefoxglobalgroup.com',
+      ativo: true,
+    },
   ];
 
   for (const buyer of defaultBuyers) {
     const existing = await prisma.comprador.findFirst({
-      where: { nome: buyer.nome },
+      where: {
+        OR: [{ nome: buyer.nome }, { email: buyer.email }],
+      },
     });
 
     if (!existing) {
       await prisma.comprador.create({
         data: buyer,
       });
-      console.log(`  ✅ Usuário/Comprador criado: ${buyer.nome}`);
+      console.log(`  ✅ Usuário/Comprador criado: ${buyer.nome} (${buyer.email})`);
     } else {
       console.log(`  ℹ️ Usuário/Comprador já existente: ${buyer.nome}`);
     }
