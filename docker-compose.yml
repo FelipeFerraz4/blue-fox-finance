@@ -10,12 +10,12 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-bluefox_finance}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-bluefox_finance}" ]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - finance-net
+      - finance-db
 
   backend:
     build:
@@ -32,7 +32,8 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - finance-net
+      - finance-db
+      - infra-net
 
   frontend:
     build:
@@ -43,8 +44,11 @@ services:
     depends_on:
       - backend
     networks:
-      - finance-net
+      - infra-net
 
 networks:
-  finance-net:
+  finance-db:
     driver: bridge
+  infra-net:
+    name: ${DOCKER_NETWORK:-infra-net}
+    external: true
