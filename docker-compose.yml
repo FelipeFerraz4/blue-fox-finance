@@ -21,7 +21,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: blue-fox-finance-backend
+    container_name: blue-fox-finance-api
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -39,7 +39,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: blue-fox-finance-frontend
+    container_name: blue-fox-finance
     restart: unless-stopped
     depends_on:
       - backend
