@@ -6,22 +6,22 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/home/home.component').then((m) => m.HomeComponent),
+      import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: 'home',
     loadComponent: () =>
-      import('./pages/home/home.component').then((m) => m.HomeComponent),
+      import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: 'about',
     loadComponent: () =>
-      import('./pages/about/about.component').then((m) => m.AboutComponent),
+      import('./features/pages/main/about/about.component').then((m) => m.AboutComponent),
   },
   {
     path: 'updates',
     loadComponent: () =>
-      import('./pages/updates/updates.component').then((m) => m.UpdatesComponent),
+      import('./features/pages/main/updates/updates.component').then((m) => m.UpdatesComponent),
   },
 
   // 2. Plataforma Interna (Gestão Financeira & IAM Protegidos)
@@ -29,25 +29,29 @@ export const routes: Routes = [
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+      import('./features/pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: 'expenses',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/expense-list/expense-list.component').then((m) => m.ExpenseListComponent),
+      import('./features/pages/expenses/expense-list/expense-list.component').then(
+        (m) => m.ExpenseListComponent,
+      ),
   },
   {
     path: 'expenses/new',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/expense-form/expense-form.component').then((m) => m.ExpenseFormComponent),
+      import('./features/pages/expenses/expense-form/expense-form.component').then(
+        (m) => m.ExpenseFormComponent,
+      ),
   },
   {
     path: 'payment-methods',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/payment-methods/payment-methods.component').then(
+      import('./features/pages/payment-methods/payment-methods.component').then(
         (m) => m.PaymentMethodsComponent,
       ),
   },
@@ -55,25 +59,25 @@ export const routes: Routes = [
     path: 'stores',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/stores/stores.component').then((m) => m.StoresComponent),
+      import('./features/pages/stores/stores.component').then((m) => m.StoresComponent),
   },
   {
     path: 'buyers',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/buyers/buyers.component').then((m) => m.BuyersComponent),
+      import('./features/pages/buyers/buyers.component').then((m) => m.BuyersComponent),
   },
   {
     path: 'admin',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/admin/admin.component').then((m) => m.AdminComponent),
+      import('./features/pages/admin/admin.component').then((m) => m.AdminComponent),
   },
   {
     path: 'admin/item-categories',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/admin/item-categories/item-categories.component').then(
+      import('./features/pages/admin/item-categories/item-categories.component').then(
         (m) => m.ItemCategoriesComponent,
       ),
   },
@@ -81,7 +85,7 @@ export const routes: Routes = [
     path: 'admin/store-categories',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/admin/store-categories/store-categories.component').then(
+      import('./features/pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
       ),
   },
@@ -89,7 +93,7 @@ export const routes: Routes = [
     path: 'admin/user-profile',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/admin/user-profile/user-profile.component').then(
+      import('./features/pages/admin/user-profile/user-profile.component').then(
         (m) => m.UserProfileComponent,
       ),
   },

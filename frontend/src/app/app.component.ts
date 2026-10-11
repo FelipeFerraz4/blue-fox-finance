@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { SidebarService } from './services/sidebar.service';
+import { NavbarComponent } from './shared/components/general/navbar/navbar.component';
+import { SidebarComponent } from './shared/components/general/sidebar/sidebar.component';
+import { SidebarService } from './core/services/sidebar/sidebar.service';
 
 @Component({
   selector: 'app-root',

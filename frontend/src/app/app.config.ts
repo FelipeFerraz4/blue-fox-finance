@@ -13,7 +13,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { routes } from './app.routes';
-import { AuthService } from './core/services/auth.service';
+import { AuthService } from './core/services/auth/auth.service';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 registerLocaleData(localePt, 'pt-BR');
