@@ -11,7 +11,9 @@ COPY angular.json tsconfig*.json ./
 COPY src ./src/
 COPY public ./public/
 
-RUN npm run build
+ARG CONFIGURATION=production
+
+RUN npx ng build --configuration=${CONFIGURATION}
 
 # Preparar pasta única independente da versão do Angular builder
 RUN mkdir -p /app/public-html && \

@@ -2,8 +2,14 @@ services:
   backend:
     environment:
       NODE_ENV: production
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-https://sso.bluefoxglobalgroup.com/auth/realms/blue-fox-global-group}
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        CONFIGURATION: production
     expose:
       - "80"
 
