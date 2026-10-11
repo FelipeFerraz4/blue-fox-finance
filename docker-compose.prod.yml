@@ -4,5 +4,6 @@ services:
       NODE_ENV: production
 
   frontend:
-    ports:
-      - "${FRONTEND_PORT:-4200}"
+    expose:
+      - "80"
+
