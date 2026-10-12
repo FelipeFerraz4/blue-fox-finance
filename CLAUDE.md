@@ -18,7 +18,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `admin/`: Painel administrativo com categorias de itens/lojas e perfil de usuário.
   - `dashboard/`, `buyers/`, `stores/`, `payment-methods/`: Módulos de páginas de domínio.
 - `src/app/shared`:
-  - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`).
+  - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`).
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 

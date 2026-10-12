@@ -136,6 +136,15 @@ O usuário pode então acessar a tela de **Meios de Pagamento** para cadastrar s
 
 ---
 
+## 🧩 Componentes Reutilizáveis do Sistema (`src/app/shared/components`)
+
+- **`<app-searchable-dropdown>`**: Componente dropdown com busca instantânea sem diferenciação de acentos, multi-seleção com tags/chips, suporte a `ControlValueAccessor` (`[(ngModel)]`, `[formControl]`), criação rápida de novos itens (`[allowCreate]`), agrupamento, navegação via teclado e templates customizados.
+- **`<app-confirm-modal>`**: Modal de confirmação contextual com variantes de perigo, aviso e ação primária.
+- **`<app-notice-modal>`**: Modal informativo para avisos e notificações do sistema.
+- **`<app-navbar>`** e **`<app-sidebar>`**: Barra de navegação e menu lateral responsivo.
+
+---
+
 ## 🔧 Execução Local para Desenvolvimento (Sem Docker)
 
 Caso queira rodar o projeto diretamente na máquina local:

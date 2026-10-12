@@ -1,0 +1,294 @@
+<div
+  class="searchable-dropdown-container"
+  [class.is-full-width]="fullWidth"
+  [class.is-disabled]="disabled"
+  [class.is-open]="isOpen"
+  [class.is-invalid]="invalid"
+  [class]="'size-' + size + ' variant-' + variant + ' rounded-' + rounded + ' ' + (customClass || '')"
+>
+  <!-- Gatilho Principal (Trigger / Select Button) -->
+  <button
+    type="button"
+    #triggerBtn
+    class="dropdown-trigger"
+    [disabled]="disabled"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-haspopup]="'listbox'"
+    (click)="toggleDropdown()"
+    (keydown)="onTriggerKeydown($event)"
+  >
+    <!-- Conteúdo Customizado via Template -->
+    <ng-container *ngIf="customTriggerTemplate; else defaultTriggerContent">
+      <ng-container
+        *ngTemplateOutlet="customTriggerTemplate; context: { $implicit: selectedOptions, selected: selectedOptions, isOpen: isOpen, clear: clearSelection.bind(this) }"
+      ></ng-container>
+    </ng-container>
+
+    <!-- Conteúdo Padrão do Gatilho -->
+    <ng-template #defaultTriggerContent>
+      <!-- Modo Multi-seleção -->
+      <div *ngIf="multiple" class="trigger-multi-content">
+        <ng-container *ngIf="selectedOptions.length === 0">
+          <span class="placeholder-text">{{ placeholder }}</span>
+        </ng-container>
+
+        <!-- Tags/Chips das opções selecionadas -->
+        <div *ngIf="selectedOptions.length > 0" class="tags-container">
+          <ng-container *ngFor="let opt of displayedTags; trackBy: trackByOptionValue">
+            <span class="selected-chip" (click)="$event.stopPropagation()">
+              <span *ngIf="opt.icon" class="chip-icon">{{ opt.icon }}</span>
+              <span class="chip-label">{{ opt.label }}</span>
+              <button
+                type="button"
+                class="chip-remove"
+                title="Remover item"
+                [disabled]="disabled"
+                (click)="deselectOption(opt, $event)"
+              >
+                ✕
+              </button>
+            </span>
+          </ng-container>
+
+          <!-- Indicador de itens restantes quando excede maxDisplayedTags -->
+          <span *ngIf="extraTagsCount > 0" class="more-tags-badge">
+            +{{ extraTagsCount }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Modo Seleção Única -->
+      <div *ngIf="!multiple" class="trigger-single-content">
+        <ng-container *ngIf="selectedOption; else singlePlaceholder">
+          <span *ngIf="selectedOption.icon" class="option-icon-prefix">
+            {{ selectedOption.icon }}
+          </span>
+          <span class="selected-label">{{ selectedOption.label }}</span>
+          <span *ngIf="selectedOption.sublabel" class="selected-sublabel">
+            ({{ selectedOption.sublabel }})
+          </span>
+          <span
+            *ngIf="selectedOption.badge"
+            class="badge-pill"
+            [class]="'badge-' + (selectedOption.badgeColor || 'primary')"
+          >
+            {{ selectedOption.badge }}
+          </span>
+        </ng-container>
+        <ng-template #singlePlaceholder>
+          <span class="placeholder-text">{{ placeholder }}</span>
+        </ng-template>
+      </div>
+    </ng-template>
+
+    <!-- Ações do Gatilho (Clear e Chevron) -->
+    <div class="trigger-actions" (click)="$event.stopPropagation()">
+      <!-- Spinner de Carregamento -->
+      <div *ngIf="loading" class="spinner-icon" title="Carregando..."></div>
+
+      <!-- Botão de Limpar Seleção -->
+      <button
+        *ngIf="clearable && !disabled && hasValue"
+        type="button"
+        class="btn-clear"
+        title="Limpar seleção"
+        (click)="clearSelection($event)"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Ícone do Chevron -->
+      <div class="chevron-icon" [class.is-rotated]="isOpen" (click)="toggleDropdown()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+  </button>
+
+  <!-- Painel Dropdown Flutuante -->
+  <div
+    *ngIf="isOpen"
+    class="dropdown-panel"
+    [style.max-height]="maxHeight"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header Customizado (Opcional) -->
+    <div *ngIf="customHeaderTemplate" class="dropdown-custom-header">
+      <ng-container
+        *ngTemplateOutlet="customHeaderTemplate; context: { total: normalizedOptions.length, filtered: filteredOptions.length }"
+      ></ng-container>
+    </div>
+
+    <!-- Barra de Busca -->
+    <div *ngIf="showSearch" class="dropdown-search-box">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          #searchInput
+          type="text"
+          class="search-input"
+          [placeholder]="searchPlaceholder"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchInput()"
+          (keydown)="onSearchKeydown($event)"
+          autocomplete="off"
+        />
+        <button
+          *ngIf="searchTerm"
+          type="button"
+          class="btn-clear-search"
+          title="Limpar busca"
+          (click)="clearSearch()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Ações Rápidas de Multi-seleção -->
+      <div *ngIf="multiple && filteredOptions.length > 0" class="multi-quick-actions">
+        <button type="button" class="btn-quick-action" (click)="selectAllFiltered()">
+          Selecionar todos ({{ filteredOptions.length }})
+        </button>
+        <button
+          *ngIf="selectedOptions.length > 0"
+          type="button"
+          class="btn-quick-action btn-danger-action"
+          (click)="clearSelection()"
+        >
+          Limpar seleção
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Opções -->
+    <div class="dropdown-options-list" role="listbox">
+      <!-- Opções Agrupadas -->
+      <ng-container *ngIf="hasGroups; else flatOptionsList">
+        <div *ngFor="let group of groupedOptions; trackBy: trackByGroupName" class="option-group">
+          <div class="group-header">
+            <span class="group-title">{{ group.name }}</span>
+            <span class="group-count">({{ group.options.length }})</span>
+          </div>
+          <ng-container *ngFor="let opt of group.options; trackBy: trackByOptionValue">
+            <ng-container
+              *ngTemplateOutlet="optionItemTemplate; context: { opt: opt }"
+            ></ng-container>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <!-- Opções Não-agrupadas (Lista Plana) -->
+      <ng-template #flatOptionsList>
+        <ng-container *ngFor="let opt of filteredOptions; let i = index; trackBy: trackByOptionValue">
+          <ng-container
+            *ngTemplateOutlet="optionItemTemplate; context: { opt: opt, index: i }"
+          ></ng-container>
+        </ng-container>
+      </ng-template>
+
+      <!-- Ação Opcional: Criar Novo Item com o Termo de Busca -->
+      <div
+        *ngIf="allowCreate && canCreateCustomOption"
+        class="create-option-item"
+        (click)="handleCreateNew()"
+      >
+        <div class="create-option-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <div class="create-option-text">
+          <span>{{ createOptionText }}</span>
+          <strong class="create-option-value">"{{ searchTerm }}"</strong>
+        </div>
+      </div>
+
+      <!-- Estado Vazio (Nenhum Resultado) -->
+      <div *ngIf="filteredOptions.length === 0 && (!allowCreate || !canCreateCustomOption)" class="empty-state">
+        <ng-container *ngIf="emptyTemplate; else defaultEmptyState">
+          <ng-container
+            *ngTemplateOutlet="emptyTemplate; context: { searchTerm: searchTerm }"
+          ></ng-container>
+        </ng-container>
+        <ng-template #defaultEmptyState>
+          <div class="empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </div>
+          <p class="empty-message">{{ emptyMessage }}</p>
+          <span *ngIf="searchTerm" class="empty-hint">
+            Não encontramos resultados para "{{ searchTerm }}"
+          </span>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Template Reutilizável de Cada Item da Lista -->
+    <ng-template #optionItemTemplate let-opt="opt" let-idx="index">
+      <div
+        class="dropdown-option-item"
+        [class.is-selected]="isOptionSelected(opt)"
+        [class.is-disabled]="opt.disabled"
+        [class.is-highlighted]="highlightedOption === opt"
+        role="option"
+        [attr.aria-selected]="isOptionSelected(opt)"
+        [attr.aria-disabled]="opt.disabled"
+        (click)="selectOption(opt)"
+      >
+        <!-- Checkbox no modo Multi-seleção -->
+        <div *ngIf="multiple" class="option-checkbox" [class.checked]="isOptionSelected(opt)">
+          <svg *ngIf="isOptionSelected(opt)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+
+        <!-- Custom Option Template ou Layout Padrão -->
+        <ng-container *ngIf="customOptionTemplate; else defaultOptionContent">
+          <ng-container
+            *ngTemplateOutlet="customOptionTemplate; context: { $implicit: opt, option: opt, selected: isOptionSelected(opt) }"
+          ></ng-container>
+        </ng-container>
+
+        <ng-template #defaultOptionContent>
+          <span *ngIf="opt.icon" class="item-icon">{{ opt.icon }}</span>
+          <div class="item-text-wrapper">
+            <span class="item-label">{{ opt.label }}</span>
+            <span *ngIf="opt.sublabel" class="item-sublabel">{{ opt.sublabel }}</span>
+          </div>
+          <span
+            *ngIf="opt.badge"
+            class="badge-pill"
+            [class]="'badge-' + (opt.badgeColor || 'primary')"
+          >
+            {{ opt.badge }}
+          </span>
+        </ng-template>
+
+        <!-- Ícone de Check no modo Seleção Única -->
+        <div *ngIf="!multiple && isOptionSelected(opt)" class="selected-checkmark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Footer Customizado (Opcional) -->
+    <div *ngIf="customFooterTemplate" class="dropdown-custom-footer">
+      <ng-container
+        *ngTemplateOutlet="customFooterTemplate; context: { selected: selectedOptions, close: closeDropdown.bind(this) }"
+      ></ng-container>
+    </div>
+  </div>
+</div>

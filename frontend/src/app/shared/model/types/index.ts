@@ -4,3 +4,4 @@ export * from './dashboard.model';
 export * from './lancamento.model';
 export * from './payment-method.model';
 export * from './store.model';
+export * from '../../components/general/searchable-dropdown/searchable-dropdown.model';

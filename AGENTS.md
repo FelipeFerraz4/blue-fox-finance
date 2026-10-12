@@ -87,8 +87,14 @@ frontend/src/app/
 │   │       │   └── sidebar.component.ts              # Menu lateral expansível/recolhível
 │   │       ├── confirm-modal/
 │   │       │   └── confirm-modal.component.ts        # Modal reutilizável para confirmação de ações
-│   │       └── notice-modal/
-│   │           └── notice-modal.component.ts         # Modal de aviso informativo e avisos do sistema
+│   │       ├── notice-modal/
+│   │       │   └── notice-modal.component.ts         # Modal de aviso informativo e avisos do sistema
+│   │       └── searchable-dropdown/                  # Dropdown com busca inteligente, multi-seleção e personalização
+│   │           ├── searchable-dropdown.component.ts  # Lógica, estados, inputs/outputs e ControlValueAccessor
+│   │           ├── searchable-dropdown.component.html # Template HTML estruturado e acessibilidade
+│   │           ├── searchable-dropdown.component.css # Estilos encapsulados, design tokens e animações
+│   │           ├── searchable-dropdown.model.ts      # Modelos tipados e variantes
+│   │           └── index.ts                          # Exportador unificado
 │   └── model/
 │       ├── mocks/                                    # Dados simulados para testes
 │       └── types/                                    # Modelos e interfaces TypeScript do domínio
@@ -114,6 +120,102 @@ frontend/src/app/
 2. **Standalone Components:** Todos os componentes utilizam `standalone: true`.
 3. **Reatividade:** Priorizar Angular **Signals** (`signal()`, `computed()`) para estados locais e **RxJS** para pipelines assíncronos HTTP.
 4. **Layout:** A alternância entre layout público (`isPublicPage`) e logado (Navbar + Sidebar) é gerenciada em `app.component.ts`.
+5. **Divisão de Arquivos dos Componentes (Multi-File Pattern):**
+   - **Padrão Obrigatório:** Para garantir manutenibilidade, legibilidade e suporte de tooling na IDE, todo componente de médio ou grande porte deve ser dividido em arquivos dedicados:
+     - `<nome>.component.ts` (lógica TypeScript, decoradores, inputs/outputs e lifecycle hooks).
+     - `<nome>.component.html` (marcação HTML, slots, `ng-template` e acessibilidade via `templateUrl`).
+     - `<nome>.component.css` (estilos encapsulados do componente via `styleUrl`).
+     - `<nome>.model.ts` (interfaces, tipos e enums específicos do componente, quando houver).
+     - `index.ts` (barrel export facilitando importações limpas).
+   - **Evitar Monólitos:** Não utilizar templates e estilos inline (`template: '...'` e `styles: ['...']` dentro do `.ts`) em componentes complexos, evitando arquivos que ultrapassem centenas de linhas.
+
+---
+
+### 🔍 Componente Compartilhado: SearchableDropdown (`<app-searchable-dropdown>`)
+
+O `SearchableDropdownComponent` é o componente padrão do ecossistema Blue Fox para campos de seleção com busca rápida, suporte a itens primitivos ou entidades de dados, seleção simples ou múltipla, tags e alta capacidade de personalização visual e comportamental.
+
+- **Localização:** `src/app/shared/components/general/searchable-dropdown/`
+- **Seletor:** `<app-searchable-dropdown>`
+- **Exportações:** `SearchableDropdownComponent`, `DropdownOption<T>`, `DropdownGroup<T>`, `DropdownSize`, `DropdownVariant`, `DropdownRounded`, `BadgeColorVariant`.
+
+#### ✨ Recursos Principais
+- **ControlValueAccessor:** Totalmente compatível com `[(ngModel)]`, `[formControl]` e `formControlName`.
+- **Busca Inteligente:** Filtragem em tempo real ignorando diacríticos/acentos (`normalize('NFD')`) e *case-insensitive*.
+- **Multi-seleção com Tags:** Ativado via `[multiple]="true"`, exibe chips removíveis, contador de itens excedentes e botões de ação rápida ("Selecionar todos", "Limpar seleção").
+- **Agrupamento Automático:** Suporte a separação por grupos/categorias via `groupField`.
+- **Criação de Itens Dinâmicos:** Ativado via `[allowCreate]="true"`, emite o evento `(createNew)` quando o usuário digita um valor não catalogado.
+- **Totalmente Estilizável:**
+  - `size`: `'sm'`, `'md'`, `'lg'`
+  - `variant`: `'default'`, `'primary'`, `'outline'`, `'navy'`, `'ghost'`
+  - `rounded`: `'sm'`, `'md'`, `'lg'`, `'pill'`
+  - `invalid`: Ativa o feedback visual de erro compatível com o formulário.
+  - `loading`: Exibe indicador visual de carregamento integrado.
+- **Templates Customizados (Content Projection):**
+  - `[customOptionTemplate]`: Customização do layout de cada linha da lista.
+  - `[customTriggerTemplate]`: Customização do gatilho/botão fechado.
+  - `[customHeaderTemplate]` e `[customFooterTemplate]`: Inserção de cabeçalhos/rodapés adicionais no painel suspenso.
+  - `[emptyTemplate]`: Customização da mensagem de nenhum resultado encontrado.
+- **Teclado & Acessibilidade:** Navegação por setas (cima/baixo), seleção com Enter, saída com Esc e fechamento automático ao clicar fora.
+
+#### 📋 Principais Inputs e Outputs
+
+| Propriedade / Evento | Tipo | Padrão | Descrição |
+| :--- | :--- | :--- | :--- |
+| `[options]` | `any[]` | `[]` | Lista de itens (primitivos, `DropdownOption` ou entidades como `Buyer`, `Store`) |
+| `[value]` / `[(ngModel)]` | `any` | `null` | Valor selecionado (ou array de valores se `multiple` for `true`) |
+| `[multiple]` | `boolean` | `false` | Habilita seleção múltipla com chips |
+| `[placeholder]` | `string` | `'Selecione uma opção...'` | Texto padrão do gatilho |
+| `[searchPlaceholder]` | `string` | `'Pesquisar...'` | Placeholder do campo de busca |
+| `[showSearch]` | `boolean` | `true` | Exibe/oculta a barra de busca no painel |
+| `[clearable]` | `boolean` | `true` | Exibe ícone para limpar o valor selecionado |
+| `[disabled]` | `boolean` | `false` | Desabilita o componente |
+| `[loading]` | `boolean` | `false` | Exibe animação de carregamento |
+| `[invalid]` | `boolean` | `false` | Aplica estilo de erro de validação |
+| `[valueField]` | `string` | `'value'` | Campo da entidade mapeado como valor (ex: `'id'`) |
+| `[labelField]` | `string` | `'label'` | Campo exibido como rótulo principal (ex: `'nome'`) |
+| `[sublabelField]` | `string` | `'sublabel'` | Campo exibido como texto auxiliar secundário |
+| `[groupField]` | `string` | `'group'` | Campo utilizado para agrupamento visual |
+| `[allowCreate]` | `boolean` | `false` | Permite criar novos itens dinamicamente |
+| `[createOptionText]` | `string` | `'+ Adicionar item:'` | Rótulo do botão de criação dinâmica |
+| `(valueChange)` | `EventEmitter<any>` | - | Notifica alterações de valor |
+| `(optionSelect)` | `EventEmitter<DropdownOption>` | - | Emite a opção selecionada |
+| `(createNew)` | `EventEmitter<string>` | - | Emite o texto pesquisado para criação |
+
+#### 💡 Exemplos de Uso
+
+```html
+<!-- 1. Seleção Única de Comprador com [(ngModel)] -->
+<app-searchable-dropdown
+  [options]="buyers"
+  valueField="id"
+  labelField="nome"
+  placeholder="Selecione um comprador..."
+  [(ngModel)]="selectedBuyerId"
+></app-searchable-dropdown>
+
+<!-- 2. Seleção Múltipla com Chips e Variante Primária -->
+<app-searchable-dropdown
+  [options]="categories"
+  [multiple]="true"
+  valueField="id"
+  labelField="nome"
+  variant="primary"
+  [(ngModel)]="selectedCategoryIds"
+></app-searchable-dropdown>
+
+<!-- 3. Seleção com Criação Rápida de Nova Loja -->
+<app-searchable-dropdown
+  [options]="stores"
+  valueField="id"
+  labelField="nome"
+  sublabelField="categoria"
+  [allowCreate]="true"
+  createOptionText="+ Cadastrar nova loja:"
+  [(ngModel)]="selectedStoreId"
+  (createNew)="onCadastrarNovaLoja($event)"
+></app-searchable-dropdown>
+```
 
 ---
 
