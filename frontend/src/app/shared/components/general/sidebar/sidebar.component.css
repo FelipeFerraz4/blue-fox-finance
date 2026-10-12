@@ -1,0 +1,224 @@
+/* Sidebar Interna com cor de fundo #f8fafc (igual à página) */
+.internal-sidebar {
+  width: 250px;
+  background-color: #f8fafc;
+  border-right: 1px solid rgba(0, 74, 173, 0.09);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: sticky;
+  top: 61px; /* Logo abaixo da navbar */
+  height: calc(100vh - 61px);
+  box-sizing: border-box;
+  z-index: 900;
+}
+
+/* Estado Recolhido */
+.internal-sidebar.collapsed {
+  width: 68px;
+}
+
+/* Topo da Sidebar com Mecanismo de Abrir e Fechar */
+.sidebar-top-bar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.85rem;
+  border-bottom: 1px solid rgba(0, 74, 173, 0.07);
+  background-color: #f1f5f9;
+  flex-shrink: 0;
+}
+
+.internal-sidebar.collapsed .sidebar-top-bar {
+  justify-content: center;
+  padding: 0;
+}
+
+.nav-title-label {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #004aad;
+}
+
+/* Botão Toggle no Topo */
+.btn-toggle-top {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 74, 173, 0.15);
+  color: #004aad;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 74, 173, 0.05);
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.btn-toggle-top:hover {
+  background: #eff6ff;
+  border-color: #004aad;
+  transform: scale(1.05);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Corpo dos Links - Seções juntas sem espaçamento forçado ao fundo */
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem; /* Seções próximas e consistentes */
+}
+
+.sidebar-body::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 74, 173, 0.15);
+  border-radius: 4px;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.group-title {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  padding: 0 0.65rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Estilo dos Links */
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  color: #475569;
+  text-decoration: none;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: #eff6ff;
+  color: #004aad;
+}
+
+.nav-link.active {
+  background: #eff6ff;
+  color: #004aad;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 #004aad, 0 2px 8px rgba(0, 74, 173, 0.06);
+}
+
+.nav-link.active .link-icon {
+  color: #004aad;
+}
+
+.link-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.link-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-mini {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #eff6ff;
+  color: #004aad;
+  border: 1px solid rgba(0, 74, 173, 0.2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 50px;
+}
+
+.highlight-action {
+  background: #eff6ff;
+  color: #004aad;
+  border: 1px dashed rgba(0, 74, 173, 0.25);
+}
+
+.highlight-action:hover {
+  background: #004aad;
+  color: #ffffff;
+  border-color: #004aad;
+}
+
+.highlight-action:hover .link-icon {
+  color: #ffffff;
+}
+
+/* Tooltip quando recolhido */
+.internal-sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0.65rem 0;
+}
+
+.internal-sidebar.collapsed .nav-link[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0b132b;
+  color: #ffffff;
+  border: 1px solid #38b6ff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 1050;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .internal-sidebar {
+    display: none;
+  }
+}
