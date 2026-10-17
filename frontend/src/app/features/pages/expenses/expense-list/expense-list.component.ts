@@ -1248,17 +1248,23 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     /* Estilos do Modal de Edição & Detalhes */
     .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1.5px solid rgba(0, 74, 173, 0.18);
+      box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
+      padding: 1.75rem;
+      max-width: 580px;
       max-height: calc(100vh - 2.5rem);
       max-height: calc(100dvh - 2.5rem);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       margin: auto;
       box-sizing: border-box;
+      position: relative;
     }
 
     .modal-content-lg {
-      max-width: 640px !important;
+      max-width: 660px !important;
       width: 100%;
     }
 

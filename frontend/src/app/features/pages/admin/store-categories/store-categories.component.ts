@@ -776,14 +776,15 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
     .modal-card {
       background: #ffffff;
-      border-radius: 16px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(0, 74, 173, 0.18);
       width: 100%;
-      max-width: 480px;
+      max-width: 490px;
       max-height: calc(100vh - 2.5rem);
       max-height: calc(100dvh - 2.5rem);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 74, 173, 0.15);
+      box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
       overflow: hidden;
       margin: auto;
       animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -791,7 +792,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .modal-header {
-      padding: 1.25rem 1.5rem;
+      padding: 1.35rem 1.75rem;
       display: flex;
       align-items: center;
       gap: 0.85rem;
@@ -838,15 +839,15 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .modal-body {
-      padding: 1.5rem;
+      padding: 1.5rem 1.75rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
       flex: 1 1 auto;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      max-height: calc(100vh - 12rem);
-      max-height: calc(100dvh - 12rem);
+      max-height: calc(100vh - 13rem);
+      max-height: calc(100dvh - 13rem);
     }
 
     .form-group {
@@ -905,7 +906,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .modal-footer {
-      padding: 1rem 1.5rem;
+      padding: 1.15rem 1.75rem;
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;

@@ -481,20 +481,25 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     }
 
     .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1.5px solid rgba(0, 74, 173, 0.18);
+      box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
+      padding: 1.75rem;
+      max-width: 520px;
       max-height: calc(100vh - 2.5rem);
       max-height: calc(100dvh - 2.5rem);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       margin: auto;
       box-sizing: border-box;
+      position: relative;
     }
 
     .modal-content form {
       display: flex;
       flex-direction: column;
       flex: 1 1 auto;
-      overflow: hidden;
       min-height: 0;
     }
 
@@ -502,29 +507,37 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--gray-200);
       flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      font-family: var(--font-headers, 'Outfit', sans-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0b132b;
+      margin: 0;
     }
 
     .modal-body {
       flex: 1 1 auto;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      max-height: calc(100vh - 12rem);
-      max-height: calc(100dvh - 12rem);
-      padding-right: 0.25rem;
+      max-height: calc(100vh - 13rem);
+      max-height: calc(100dvh - 13rem);
+      padding: 0.25rem 0.25rem 0.5rem 0;
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
+      margin-top: 1.25rem;
       padding-top: 1rem;
       border-top: 1px solid var(--gray-200);
       flex-shrink: 0;
-      margin-top: auto;
     }
 
     .btn-close {
