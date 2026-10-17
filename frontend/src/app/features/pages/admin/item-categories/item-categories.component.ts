@@ -329,17 +329,19 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 </div>
               </div>
 
-              <div class="form-group checkbox-group">
-                <label class="checkbox-label">
+              <div class="form-group status-switch-box">
+                <label class="switch-container">
                   <input
                     type="checkbox"
                     name="definirComoPadrao"
                     [(ngModel)]="definirComoPadrao"
-                    class="checkbox-input"
                   />
-                  <span>Definir como categoria padrão</span>
+                  <span class="switch-slider"></span>
                 </label>
-                <small class="text-muted text-xs block mt-1">Será pré-selecionada automaticamente ao adicionar itens em novos lançamentos.</small>
+                <div class="switch-label-text">
+                  <strong>Definir como categoria padrão</strong>
+                  <span class="text-xs text-muted block">Será pré-selecionada automaticamente ao adicionar itens em novos lançamentos</span>
+                </div>
               </div>
             </div>
 
@@ -352,7 +354,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 class="btn btn-primary btn-pill shadow-glow"
                 [disabled]="!formData.nome || isSaving"
               >
-                {{ isSaving ? 'Salvando...' : (isEditing ? 'Atualizar Categoria' : 'Cadastrar Categoria') }}
+                <span *ngIf="!isSaving">{{ isEditing ? 'Salvar Alterações' : 'Cadastrar Categoria' }}</span>
+                <span *ngIf="isSaving" class="btn-spinner-wrap">
+                  <span class="mini-spinner"></span>
+                  Salvando...
+                </span>
               </button>
             </div>
           </form>
@@ -988,25 +994,65 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       color: #64748b;
     }
 
-    .checkbox-group {
-      margin-top: 0.25rem;
-    }
-
-    .checkbox-label {
+    /* Switch Customizado para Padrão */
+    .status-switch-box {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      font-size: 0.88rem;
-      color: #334155;
-      font-weight: 500;
-      cursor: pointer;
+      gap: 0.85rem;
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      margin-top: 1rem;
     }
 
-    .checkbox-input {
-      width: 17px;
-      height: 17px;
-      accent-color: #004aad;
+    .switch-container {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
       cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .switch-container input:checked + .switch-slider {
+      background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
+    }
+
+    .switch-container input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    .switch-label-text strong {
+      font-size: 0.9rem;
+      color: #0b132b;
     }
 
     .modal-footer {

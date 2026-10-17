@@ -209,7 +209,18 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>{{ editingId ? 'Editar Meio de Pagamento' : 'Adicionar Novo Meio de Pagamento' }}</h3>
+            <div class="modal-title-with-icon">
+              <div class="icon-circle icon-circle-blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="2" y="5" width="20" height="14" rx="2"/>
+                  <line x1="2" y1="10" x2="22" y2="10"/>
+                </svg>
+              </div>
+              <div>
+                <h3>{{ editingId ? 'Editar Meio de Pagamento' : 'Novo Meio de Pagamento' }}</h3>
+                <p class="modal-subtitle">Preencha as informações do cartão, conta ou modalidade</p>
+              </div>
+            </div>
             <button class="btn-close" (click)="closeModal()">✕</button>
           </div>
 
@@ -309,14 +320,18 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               </div>
             </div>
 
-            <div class="modal-footer mt-4">
+            <div class="modal-footer">
               <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
               <button
                 type="submit"
                 [disabled]="!modalForm.valid || saving"
-                class="btn btn-primary"
+                class="btn btn-primary btn-pill"
               >
-                {{ saving ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Salvar Meio de Pagamento') }}
+                <span *ngIf="!saving">{{ editingId ? 'Salvar Alterações' : 'Salvar Meio de Pagamento' }}</span>
+                <span *ngIf="saving" class="btn-spinner-wrap">
+                  <span class="mini-spinner"></span>
+                  Salvando...
+                </span>
               </button>
             </div>
           </form>

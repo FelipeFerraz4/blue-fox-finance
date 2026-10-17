@@ -185,7 +185,18 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>{{ editingId ? 'Editar Loja' : 'Adicionar Nova Loja' }}</h3>
+            <div class="modal-title-with-icon">
+              <div class="icon-circle icon-circle-blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </div>
+              <div>
+                <h3>{{ editingId ? 'Editar Loja' : 'Nova Loja' }}</h3>
+                <p class="modal-subtitle">Preencha as informações para registro da loja</p>
+              </div>
+            </div>
             <button class="btn-close" (click)="closeModal()">✕</button>
           </div>
 
@@ -233,14 +244,18 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               </div>
             </div>
 
-            <div class="modal-footer mt-4">
+            <div class="modal-footer">
               <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
               <button
                 type="submit"
                 [disabled]="!modalForm.valid || saving"
-                class="btn btn-primary"
+                class="btn btn-primary btn-pill"
               >
-                {{ saving ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Cadastrar Loja') }}
+                <span *ngIf="!saving">{{ editingId ? 'Salvar Alterações' : 'Cadastrar Loja' }}</span>
+                <span *ngIf="saving" class="btn-spinner-wrap">
+                  <span class="mini-spinner"></span>
+                  Salvando...
+                </span>
               </button>
             </div>
           </form>
