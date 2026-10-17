@@ -16,17 +16,22 @@ sed -i 's/DB_PORT=5436/DB_PORT=5434/' ../blue-fox-iam/.env.dev
 # 2. Restaura porta no Frontend do Finance
 sed -i 's/localhost:8081/localhost:8080/' frontend/src/environments/environment.ts
 
-# 3. Restaura porta no Backend do Finance (.env e jwt.strategy)
+# 3. Restaura portas no .env.dev do Finance (FRONTEND_PORT=4200 e KEYCLOAK_ISSUER_URI)
+sed -i 's/FRONTEND_PORT=4201/FRONTEND_PORT=4200/' .env.dev
+sed -i 's/localhost:8081/localhost:8080/' .env.dev
+
+# 4. Restaura porta no Backend do Finance (.env e jwt.strategy)
 sed -i 's/localhost:8081/localhost:8080/' .env
 sed -i 's/localhost:8081/localhost:8080/' backend/.env
 sed -i 's/localhost:8081/localhost:8080/' backend/src/modules/auth/jwt.strategy.ts
 
-# 4. Reinicia os containers do Keycloak com a nova porta 8080
+# 5. Reinicia os containers do Keycloak com a nova porta 8080
 docker rm -f blue-fox-iam-server blue-fox-iam-db
 docker compose --project-directory ../blue-fox-iam \
   -f ../blue-fox-iam/docker-compose.yml \
   -f ../blue-fox-iam/docker-compose.dev.yml \
   --env-file ../blue-fox-iam/.env.dev up -d
+
 ```
 
 ---

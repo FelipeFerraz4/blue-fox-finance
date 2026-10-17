@@ -4,8 +4,11 @@ services:
       - "${DB_PORT:-5435}:5432"
 
   backend:
+    extra_hosts:
+      - "localhost:host-gateway"
     ports:
       - "${PORT:-3000}:3000"
+
 
   frontend:
     build:
