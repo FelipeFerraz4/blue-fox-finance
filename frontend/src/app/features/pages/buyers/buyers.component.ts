@@ -364,7 +364,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <small class="text-muted text-xs">Utilizado para identificação e notificações futuras.</small>
               </div>
 
-              <div class="form-group status-switch-box">
+              <div class="status-switch-box">
                 <label class="switch-container">
                   <input
                     type="checkbox"
@@ -1112,16 +1112,21 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       color: #991b1b;
     }
 
-    /* Switch Customizado para Ativo */
+    /* Switch Customizado para Padrão */
     .status-switch-box {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      background: #f8fafc;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      border: 1px solid var(--gray-200);
-      margin-top: 1rem;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 0.85rem !important;
+      background: #f8fafc !important;
+      padding: 0.85rem 1rem !important;
+      border-radius: 12px !important;
+      border: 1px solid var(--gray-200, #e2e8f0) !important;
+      margin-top: 1rem !important;
+      margin-bottom: 0.5rem !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      text-align: left !important;
     }
 
     .switch-container {
@@ -1130,6 +1135,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       width: 44px;
       height: 24px;
       flex-shrink: 0;
+      margin: 0;
     }
 
     .switch-container input {
@@ -1168,9 +1174,29 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       transform: translateX(20px);
     }
 
+    .switch-label-text {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.2rem !important;
+      text-align: left !important;
+      flex: 1 1 auto;
+    }
+
     .switch-label-text strong {
-      font-size: 0.9rem;
-      color: #0b132b;
+      display: block !important;
+      font-size: 0.88rem !important;
+      font-weight: 600 !important;
+      color: #0b132b !important;
+      line-height: 1.3 !important;
+    }
+
+    .switch-label-text span,
+    .switch-label-text .block,
+    .switch-label-text .text-muted {
+      display: block !important;
+      font-size: 0.75rem !important;
+      color: var(--gray-500, #64748b) !important;
+      line-height: 1.35 !important;
     }
 
     .modal-footer {
