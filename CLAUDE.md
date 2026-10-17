@@ -22,10 +22,10 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 
-## 🏗️ Arquitetura do Backend (NestJS 11 + Prisma ORM)
+## 🏗️ Arquitetura do Backend (NestJS 10 + Prisma 5)
 
 ### Estrutura de Módulos (`backend/src/modules`)
-- `auth`: Autenticação JWT via Keycloak, `JwtAuthGuard`, `RolesGuard`, decorators `@Roles()`, `@Public()`, `@CurrentUser()`.
+- `auth`: Autenticação JWT via Keycloak, `JwtAuthGuard`, `RolesGuard`, decorators `@Roles()`, `@Public()`, `@CurrentUser()`. Roles em `roles.constants.ts` (espelho do realm). Todo controller de domínio leva `@Roles(...FINANCE_ACCESS_ROLES)` na classe (`ROLE_ADMIN`, `ROLE_FINANCE_ADMIN`, `ROLE_FINANCE_USER`); no frontend, as rotas internas usam `data: { roles: FINANCE_ACCESS_ROLES }`.
 - `buyers`: Módulo de compradores (`buyers.controller.ts`, `buyers.service.ts`, `buyer.dto.ts`).
 - `categories`: Categorias de itens e de lojas (`categories.controller.ts`, `categories.service.ts`).
 - `dashboard`: Métricas consolidadas e faturas mensais (`dashboard.controller.ts`, `dashboard.service.ts`).

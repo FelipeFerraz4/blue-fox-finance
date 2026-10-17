@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { FINANCE_ACCESS_ROLES } from './core/services/auth/roles.constants';
 
 export const routes: Routes = [
   // 1. Rota Pública Inicial (Home Landing Page)
@@ -28,12 +29,14 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: 'expenses',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/expenses/expense-list/expense-list.component').then(
         (m) => m.ExpenseListComponent,
@@ -42,6 +45,7 @@ export const routes: Routes = [
   {
     path: 'expenses/new',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/expenses/expense-form/expense-form.component').then(
         (m) => m.ExpenseFormComponent,
@@ -50,6 +54,7 @@ export const routes: Routes = [
   {
     path: 'payment-methods',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/payment-methods/payment-methods.component').then(
         (m) => m.PaymentMethodsComponent,
@@ -58,24 +63,28 @@ export const routes: Routes = [
   {
     path: 'stores',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/stores/stores.component').then((m) => m.StoresComponent),
   },
   {
     path: 'buyers',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/buyers/buyers.component').then((m) => m.BuyersComponent),
   },
   {
     path: 'admin',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/admin/admin.component').then((m) => m.AdminComponent),
   },
   {
     path: 'admin/item-categories',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/admin/item-categories/item-categories.component').then(
         (m) => m.ItemCategoriesComponent,
@@ -84,6 +93,7 @@ export const routes: Routes = [
   {
     path: 'admin/store-categories',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
@@ -92,6 +102,7 @@ export const routes: Routes = [
   {
     path: 'admin/user-profile',
     canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
     loadComponent: () =>
       import('./features/pages/admin/user-profile/user-profile.component').then(
         (m) => m.UserProfileComponent,
