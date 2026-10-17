@@ -368,21 +368,6 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <label class="switch-container">
                   <input
                     type="checkbox"
-                    name="ativo"
-                    [(ngModel)]="formData.ativo"
-                  />
-                  <span class="switch-slider"></span>
-                </label>
-                <div class="switch-label-text">
-                  <strong>Comprador Ativo</strong>
-                  <span class="text-xs text-muted block">Disponível para seleção em novos lançamentos</span>
-                </div>
-              </div>
-
-              <div class="form-group status-switch-box">
-                <label class="switch-container">
-                  <input
-                    type="checkbox"
                     name="definirComoPadrao"
                     [(ngModel)]="definirComoPadrao"
                   />
@@ -1032,6 +1017,13 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     /* Modal de Cadastro / Edição */
     .modal-buyer-dialog {
       max-width: 480px;
+      max-height: calc(100vh - 2.5rem);
+      max-height: calc(100dvh - 2.5rem);
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .modal-header {
@@ -1041,6 +1033,16 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       margin-bottom: 1.25rem;
       padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+
+    .modal-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 12rem);
+      max-height: calc(100dvh - 12rem);
+      padding-right: 0.25rem;
     }
 
     .modal-title-with-icon {
@@ -1173,6 +1175,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       margin-top: 1.5rem;
       padding-top: 1rem;
       border-top: 1px solid var(--gray-200);
+      flex-shrink: 0;
     }
 
     .btn-spinner-wrap {

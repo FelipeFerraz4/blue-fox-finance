@@ -521,13 +521,41 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     .text-muted { color: var(--gray-500); }
     .text-xs { font-size: 0.75rem; }
 
+    .modal-content {
+      max-height: calc(100vh - 2.5rem);
+      max-height: calc(100dvh - 2.5rem);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: auto;
+      box-sizing: border-box;
+    }
+
+    .modal-content form {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      overflow: hidden;
+      min-height: 0;
+    }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+
+    .modal-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 12rem);
+      max-height: calc(100dvh - 12rem);
+      padding-right: 0.25rem;
     }
 
     .modal-footer {
@@ -536,6 +564,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       gap: 0.75rem;
       padding-top: 1rem;
       border-top: 1px solid var(--gray-200);
+      flex-shrink: 0;
+      margin-top: auto;
     }
 
     .btn-close {

@@ -333,18 +333,6 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 <label class="checkbox-label">
                   <input
                     type="checkbox"
-                    name="ativo"
-                    [(ngModel)]="formData.ativo"
-                    class="checkbox-input"
-                  />
-                  <span>Categoria Ativa no Sistema</span>
-                </label>
-              </div>
-
-              <div class="form-group checkbox-group">
-                <label class="checkbox-label">
-                  <input
-                    type="checkbox"
                     name="definirComoPadrao"
                     [(ngModel)]="definirComoPadrao"
                     class="checkbox-input"
@@ -821,7 +809,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      padding: 1rem;
+      padding: 1.25rem 1rem;
+      overflow-y: auto;
+      box-sizing: border-box;
       animation: fadeIn 0.2s ease-out;
     }
 
@@ -830,9 +820,15 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       border-radius: 16px;
       width: 100%;
       max-width: 480px;
+      max-height: calc(100vh - 2.5rem);
+      max-height: calc(100dvh - 2.5rem);
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 20px 40px rgba(0, 74, 173, 0.15);
       overflow: hidden;
+      margin: auto;
       animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
     }
 
     .modal-header {
@@ -842,6 +838,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       gap: 0.85rem;
       border-bottom: 1px solid #f1f5f9;
       position: relative;
+      flex-shrink: 0;
     }
 
     .modal-icon-badge {
@@ -886,6 +883,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 12rem);
+      max-height: calc(100dvh - 12rem);
     }
 
     .form-group {
@@ -1013,6 +1015,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       gap: 0.75rem;
       border-top: 1px solid #f1f5f9;
       background: #f8fafc;
+      flex-shrink: 0;
+      margin-top: auto;
     }
 
     .loading-state {

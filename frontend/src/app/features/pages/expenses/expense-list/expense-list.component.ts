@@ -1246,10 +1246,33 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       display: inline;
     }
 
-    /* Estilos do Modal de Edição */
+    /* Estilos do Modal de Edição & Detalhes */
+    .modal-content {
+      max-height: calc(100vh - 2.5rem);
+      max-height: calc(100dvh - 2.5rem);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: auto;
+      box-sizing: border-box;
+    }
+
     .modal-content-lg {
       max-width: 640px !important;
       width: 100%;
+    }
+
+    .modal-header {
+      flex-shrink: 0;
+    }
+
+    .modal-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 12rem);
+      max-height: calc(100dvh - 12rem);
+      padding-right: 0.25rem;
     }
 
     .modal-title-with-icon {
@@ -1282,7 +1305,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .modal-form-body {
-      padding: 0.5rem 0;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 10rem);
+      max-height: calc(100dvh - 10rem);
+      padding: 0.5rem 0.25rem 0.5rem 0;
     }
 
     .form-grid-2col {
