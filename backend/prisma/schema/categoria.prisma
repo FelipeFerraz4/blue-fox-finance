@@ -1,22 +1,29 @@
 model CategoriaItem {
   id        String   @id @default(uuid())
-  nome      String   @unique
+  userId    String
+  nome      String
   cor       String?  // Cor hexadecimal para badges (ex: #38b6ff, #10b981)
   icone     String?  // Identificador de ícone ou tag
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([userId, nome])
+  @@index([userId])
   @@map("categorias_itens")
 }
 
 model CategoriaLoja {
   id        String   @id @default(uuid())
-  nome      String   @unique
+  userId    String
+  nome      String
   descricao String?
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([userId, nome])
+  @@index([userId])
   @@map("categorias_lojas")
 }
+

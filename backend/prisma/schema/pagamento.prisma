@@ -7,6 +7,7 @@ enum ModalidadePagamento {
 
 model PaymentMethod {
   id               String              @id @default(uuid())
+  userId           String
   nome             String
   modalidade       ModalidadePagamento
   diaFechamento    Int?
@@ -18,5 +19,7 @@ model PaymentMethod {
 
   lancamentos      Lancamento[]
 
+  @@index([userId])
   @@map("payment_methods")
 }
+

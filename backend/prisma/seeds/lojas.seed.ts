@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 export async function seedLojas(prisma: PrismaClient) {
   console.log('🏪 Iniciando seed de Lojas padrão...');
 
+  const seedUserId = process.env.SEED_USER_ID || 'system-seed';
+
   const defaultStores = [
     { nome: 'Amazon', categoria: 'E-commerce' },
     { nome: 'Mercado Livre', categoria: 'E-commerce' },
@@ -14,12 +16,18 @@ export async function seedLojas(prisma: PrismaClient) {
 
   for (const store of defaultStores) {
     const existing = await prisma.loja.findFirst({
-      where: { nome: store.nome },
+      where: {
+        userId: seedUserId,
+        nome: store.nome,
+      },
     });
 
     if (!existing) {
       await prisma.loja.create({
-        data: store,
+        data: {
+          ...store,
+          userId: seedUserId,
+        },
       });
       console.log(`  ✅ Loja criada: ${store.nome} (${store.categoria})`);
     } else {
@@ -27,3 +35,4 @@ export async function seedLojas(prisma: PrismaClient) {
     }
   }
 }
+

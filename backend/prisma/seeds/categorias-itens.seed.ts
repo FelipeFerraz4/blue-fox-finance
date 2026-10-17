@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 export async function seedCategoriasItens(prisma: PrismaClient) {
   console.log('🏷️ Iniciando seed de Categorias de Itens / Despesas...');
 
+  const seedUserId = process.env.SEED_USER_ID || 'system-seed';
+
   const defaultItemCategories = [
     { nome: 'Alimentação', cor: '#ef4444' },
     { nome: 'Supermercado', cor: '#10b981' },
@@ -18,12 +20,18 @@ export async function seedCategoriasItens(prisma: PrismaClient) {
 
   for (const ic of defaultItemCategories) {
     const existing = await prisma.categoriaItem.findFirst({
-      where: { nome: ic.nome },
+      where: {
+        userId: seedUserId,
+        nome: ic.nome,
+      },
     });
 
     if (!existing) {
       await prisma.categoriaItem.create({
-        data: ic,
+        data: {
+          ...ic,
+          userId: seedUserId,
+        },
       });
       console.log(`  ✅ Categoria de Item criada: ${ic.nome}`);
     } else {
@@ -31,3 +39,4 @@ export async function seedCategoriasItens(prisma: PrismaClient) {
     }
   }
 }
+

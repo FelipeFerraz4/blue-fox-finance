@@ -3,13 +3,17 @@ import { PrismaClient } from '@prisma/client';
 export async function seedUsuarios(prisma: PrismaClient) {
   console.log('👤 Iniciando seed de Compradores / Usuários padrão...');
 
+  const seedUserId = process.env.SEED_USER_ID || 'system-seed';
+
   const defaultBuyers = [
     {
+      userId: seedUserId,
       nome: 'Admin Finance',
       email: 'adminfinance@bluefoxglobalgroup.com',
       ativo: true,
     },
     {
+      userId: seedUserId,
       nome: 'Usuário Finance',
       email: 'felipe@bluefoxglobalgroup.com',
       ativo: true,
@@ -19,6 +23,7 @@ export async function seedUsuarios(prisma: PrismaClient) {
   for (const buyer of defaultBuyers) {
     const existing = await prisma.comprador.findFirst({
       where: {
+        userId: buyer.userId,
         OR: [{ nome: buyer.nome }, { email: buyer.email }],
       },
     });
@@ -33,3 +38,4 @@ export async function seedUsuarios(prisma: PrismaClient) {
     }
   }
 }
+

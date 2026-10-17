@@ -1,6 +1,7 @@
 model Comprador {
   id          String       @id @default(uuid())
-  nome        String       @unique
+  userId      String
+  nome        String
   email       String?
   ativo       Boolean      @default(true)
   createdAt   DateTime     @default(now())
@@ -8,5 +9,8 @@ model Comprador {
 
   lancamentos Lancamento[]
 
+  @@unique([userId, nome])
+  @@index([userId])
   @@map("compradores")
 }
+

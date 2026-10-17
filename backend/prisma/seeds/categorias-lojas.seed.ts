@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 export async function seedCategoriasLojas(prisma: PrismaClient) {
   console.log('🏬 Iniciando seed de Categorias de Lojas...');
 
+  const seedUserId = process.env.SEED_USER_ID || 'system-seed';
+
   const defaultStoreCategories = [
     { nome: 'Supermercado', descricao: 'Alimentos, bebidas e itens essenciais do lar' },
     { nome: 'E-commerce', descricao: 'Lojas online e marketplaces' },
@@ -16,12 +18,18 @@ export async function seedCategoriasLojas(prisma: PrismaClient) {
 
   for (const sc of defaultStoreCategories) {
     const existing = await prisma.categoriaLoja.findFirst({
-      where: { nome: sc.nome },
+      where: {
+        userId: seedUserId,
+        nome: sc.nome,
+      },
     });
 
     if (!existing) {
       await prisma.categoriaLoja.create({
-        data: sc,
+        data: {
+          ...sc,
+          userId: seedUserId,
+        },
       });
       console.log(`  ✅ Categoria de Loja criada: ${sc.nome}`);
     } else {
@@ -29,3 +37,4 @@ export async function seedCategoriasLojas(prisma: PrismaClient) {
     }
   }
 }
+

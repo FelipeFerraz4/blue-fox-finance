@@ -3,6 +3,8 @@ import { PrismaClient, ModalidadePagamento } from '@prisma/client';
 export async function seedPagamentos(prisma: PrismaClient) {
   console.log('💳 Iniciando seed de Meios de Pagamento padrão...');
 
+  const seedUserId = process.env.SEED_USER_ID || 'system-seed';
+
   const defaultMethods: Array<{
     nome: string;
     modalidade: ModalidadePagamento;
@@ -42,12 +44,18 @@ export async function seedPagamentos(prisma: PrismaClient) {
 
   for (const method of defaultMethods) {
     const existing = await prisma.paymentMethod.findFirst({
-      where: { nome: method.nome },
+      where: {
+        userId: seedUserId,
+        nome: method.nome,
+      },
     });
 
     if (!existing) {
       await prisma.paymentMethod.create({
-        data: method,
+        data: {
+          ...method,
+          userId: seedUserId,
+        },
       });
       console.log(`  ✅ Meio de pagamento criado: ${method.nome}`);
     } else {
@@ -55,3 +63,4 @@ export async function seedPagamentos(prisma: PrismaClient) {
     }
   }
 }
+

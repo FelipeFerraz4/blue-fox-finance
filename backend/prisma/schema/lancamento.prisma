@@ -5,6 +5,7 @@ enum TipoLancamento {
 
 model Lancamento {
   id              String         @id @default(uuid())
+  userId          String
   codigo          String         @default(uuid())
   comprador       String
   compradorId     String?
@@ -28,6 +29,7 @@ model Lancamento {
 
   parcelas        Parcela[]
 
+  @@index([userId])
   @@map("lancamentos")
 }
 
