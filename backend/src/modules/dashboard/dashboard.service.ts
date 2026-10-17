@@ -34,7 +34,7 @@ export interface DashboardOverview {
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getOverview(month?: string): Promise<DashboardOverview> {
+  async getOverview(userId: string, month?: string): Promise<DashboardOverview> {
     // Definir mês de referência (formato YYYY-MM)
     const now = new Date();
     const currentMonthStr =
@@ -47,9 +47,12 @@ export class DashboardService {
     const nextDate = new Date(year, m, 1); // m é 1-indexed, logo m no Date é o próximo mês
     const nextMonthStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
 
-    // 1. Parcelas do Mês Atual
+    // 1. Parcelas do Mês Atual do usuário
     const parcelasMesAtual = await this.prisma.parcela.findMany({
-      where: { mesReferencia: currentMonthStr },
+      where: {
+        mesReferencia: currentMonthStr,
+        lancamento: { userId },
+      },
       include: {
         lancamento: {
           include: {
@@ -64,26 +67,32 @@ export class DashboardService {
       parcelasMesAtual.reduce((acc, p) => acc + Number(p.valor), 0).toFixed(2),
     );
 
-    // 2. Parcelas do Próximo Mês
+    // 2. Parcelas do Próximo Mês do usuário
     const parcelasProximoMes = await this.prisma.parcela.findMany({
-      where: { mesReferencia: nextMonthStr },
+      where: {
+        mesReferencia: nextMonthStr,
+        lancamento: { userId },
+      },
     });
     const totalPagarProximoMes = Number(
       parcelasProximoMes.reduce((acc, p) => acc + Number(p.valor), 0).toFixed(2),
     );
 
-    // 3. Saldo Devedor Futuro (meses > nextMonthStr)
+    // 3. Saldo Devedor Futuro (meses > nextMonthStr) do usuário
     const parcelasFuturas = await this.prisma.parcela.findMany({
       where: {
         mesReferencia: { gt: nextMonthStr },
+        lancamento: { userId },
       },
     });
     const saldoDevedorFuturo = Number(
       parcelasFuturas.reduce((acc, p) => acc + Number(p.valor), 0).toFixed(2),
     );
 
-    // 4. Total Geral Contratado (soma de todos os lançamentos)
-    const allLancamentos = await this.prisma.lancamento.findMany();
+    // 4. Total Geral Contratado (soma de todos os lançamentos do usuário)
+    const allLancamentos = await this.prisma.lancamento.findMany({
+      where: { userId },
+    });
     const totalGeralContratado = Number(
       allLancamentos.reduce((acc, l) => acc + Number(l.valorTotal), 0).toFixed(2),
     );

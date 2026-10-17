@@ -13,16 +13,19 @@ export class CategoriesService {
 
   // ===================== CATEGORIAS DE ITENS =====================
 
-  async findAllItemCategories(activeOnly?: boolean) {
+  async findAllItemCategories(userId: string, activeOnly?: boolean) {
     return this.prisma.categoriaItem.findMany({
-      where: activeOnly ? { ativo: true } : undefined,
+      where: {
+        userId,
+        ...(activeOnly ? { ativo: true } : {}),
+      },
       orderBy: { nome: 'asc' },
     });
   }
 
-  async findItemCategoryById(id: string) {
-    const cat = await this.prisma.categoriaItem.findUnique({
-      where: { id },
+  async findItemCategoryById(userId: string, id: string) {
+    const cat = await this.prisma.categoriaItem.findFirst({
+      where: { id, userId },
     });
     if (!cat) {
       throw new NotFoundException(`Categoria de item com ID ${id} não encontrada.`);
@@ -30,9 +33,12 @@ export class CategoriesService {
     return cat;
   }
 
-  async createItemCategory(dto: CreateItemCategoryDto) {
+  async createItemCategory(userId: string, dto: CreateItemCategoryDto) {
     const existing = await this.prisma.categoriaItem.findFirst({
-      where: { nome: { equals: dto.nome.trim(), mode: 'insensitive' } },
+      where: {
+        userId,
+        nome: { equals: dto.nome.trim(), mode: 'insensitive' },
+      },
     });
 
     if (existing) {
@@ -41,6 +47,7 @@ export class CategoriesService {
 
     return this.prisma.categoriaItem.create({
       data: {
+        userId,
         nome: dto.nome.trim(),
         cor: dto.cor?.trim() || null,
         icone: dto.icone?.trim() || null,
@@ -49,12 +56,13 @@ export class CategoriesService {
     });
   }
 
-  async updateItemCategory(id: string, dto: UpdateItemCategoryDto) {
-    await this.findItemCategoryById(id);
+  async updateItemCategory(userId: string, id: string, dto: UpdateItemCategoryDto) {
+    await this.findItemCategoryById(userId, id);
 
     if (dto.nome) {
       const existing = await this.prisma.categoriaItem.findFirst({
         where: {
+          userId,
           nome: { equals: dto.nome.trim(), mode: 'insensitive' },
           id: { not: id },
         },
@@ -76,8 +84,8 @@ export class CategoriesService {
     });
   }
 
-  async removeItemCategory(id: string) {
-    await this.findItemCategoryById(id);
+  async removeItemCategory(userId: string, id: string) {
+    await this.findItemCategoryById(userId, id);
     return this.prisma.categoriaItem.delete({
       where: { id },
     });
@@ -85,16 +93,19 @@ export class CategoriesService {
 
   // ===================== CATEGORIAS DE LOJAS =====================
 
-  async findAllStoreCategories(activeOnly?: boolean) {
+  async findAllStoreCategories(userId: string, activeOnly?: boolean) {
     return this.prisma.categoriaLoja.findMany({
-      where: activeOnly ? { ativo: true } : undefined,
+      where: {
+        userId,
+        ...(activeOnly ? { ativo: true } : {}),
+      },
       orderBy: { nome: 'asc' },
     });
   }
 
-  async findStoreCategoryById(id: string) {
-    const cat = await this.prisma.categoriaLoja.findUnique({
-      where: { id },
+  async findStoreCategoryById(userId: string, id: string) {
+    const cat = await this.prisma.categoriaLoja.findFirst({
+      where: { id, userId },
     });
     if (!cat) {
       throw new NotFoundException(`Categoria de loja com ID ${id} não encontrada.`);
@@ -102,9 +113,12 @@ export class CategoriesService {
     return cat;
   }
 
-  async createStoreCategory(dto: CreateStoreCategoryDto) {
+  async createStoreCategory(userId: string, dto: CreateStoreCategoryDto) {
     const existing = await this.prisma.categoriaLoja.findFirst({
-      where: { nome: { equals: dto.nome.trim(), mode: 'insensitive' } },
+      where: {
+        userId,
+        nome: { equals: dto.nome.trim(), mode: 'insensitive' },
+      },
     });
 
     if (existing) {
@@ -113,6 +127,7 @@ export class CategoriesService {
 
     return this.prisma.categoriaLoja.create({
       data: {
+        userId,
         nome: dto.nome.trim(),
         descricao: dto.descricao?.trim() || null,
         ativo: dto.ativo !== undefined ? dto.ativo : true,
@@ -120,12 +135,13 @@ export class CategoriesService {
     });
   }
 
-  async updateStoreCategory(id: string, dto: UpdateStoreCategoryDto) {
-    await this.findStoreCategoryById(id);
+  async updateStoreCategory(userId: string, id: string, dto: UpdateStoreCategoryDto) {
+    await this.findStoreCategoryById(userId, id);
 
     if (dto.nome) {
       const existing = await this.prisma.categoriaLoja.findFirst({
         where: {
+          userId,
           nome: { equals: dto.nome.trim(), mode: 'insensitive' },
           id: { not: id },
         },
@@ -146,10 +162,11 @@ export class CategoriesService {
     });
   }
 
-  async removeStoreCategory(id: string) {
-    await this.findStoreCategoryById(id);
+  async removeStoreCategory(userId: string, id: string) {
+    await this.findStoreCategoryById(userId, id);
     return this.prisma.categoriaLoja.delete({
       where: { id },
     });
   }
 }
+

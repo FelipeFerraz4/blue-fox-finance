@@ -8,13 +8,31 @@ import { randomUUID } from 'crypto';
 export class ExpensesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateExpenseDto) {
-    const paymentMethod = await this.prisma.paymentMethod.findUnique({
-      where: { id: dto.meioPagamentoId },
+  async create(userId: string, dto: CreateExpenseDto) {
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: { id: dto.meioPagamentoId, userId },
     });
 
     if (!paymentMethod) {
-      throw new NotFoundException('Meio de pagamento informado não existe.');
+      throw new NotFoundException('Meio de pagamento informado não existe ou não pertence ao seu usuário.');
+    }
+
+    if (dto.lojaId) {
+      const store = await this.prisma.loja.findFirst({
+        where: { id: dto.lojaId, userId },
+      });
+      if (!store) {
+        throw new NotFoundException('Loja informada não existe ou não pertence ao seu usuário.');
+      }
+    }
+
+    if (dto.compradorId) {
+      const buyer = await this.prisma.comprador.findFirst({
+        where: { id: dto.compradorId, userId },
+      });
+      if (!buyer) {
+        throw new NotFoundException('Comprador informado não existe ou não pertence ao seu usuário.');
+      }
     }
 
     const calculatedTotal =
@@ -37,6 +55,7 @@ export class ExpensesService {
 
     return this.prisma.lancamento.create({
       data: {
+        userId,
         codigo,
         comprador: dto.comprador,
         compradorId: dto.compradorId || null,
@@ -73,20 +92,23 @@ export class ExpensesService {
     });
   }
 
-  async findAll(params?: {
-    page?: number;
-    limit?: number;
-    mesReferencia?: string;
-    loja?: string;
-    lojaId?: string;
-    categoriaLoja?: string;
-    meioPagamentoId?: string;
-    categoria?: string;
-    comprador?: string;
-    compradorId?: string;
-    search?: string;
-  }) {
-    const where: any = {};
+  async findAll(
+    userId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      mesReferencia?: string;
+      loja?: string;
+      lojaId?: string;
+      categoriaLoja?: string;
+      meioPagamentoId?: string;
+      categoria?: string;
+      comprador?: string;
+      compradorId?: string;
+      search?: string;
+    },
+  ) {
+    const where: any = { userId };
 
     if (params?.lojaId) {
       where.lojaId = params.lojaId;
@@ -167,8 +189,8 @@ export class ExpensesService {
     };
   }
 
-  async findGroupedByDayAndStore(month?: string) {
-    const where: any = {};
+  async findGroupedByDayAndStore(userId: string, month?: string) {
+    const where: any = { userId };
     if (month) {
       // Filtrar pelo mês da compra (ex: 2026-09)
       const [year, m] = month.split('-').map(Number);
@@ -229,13 +251,13 @@ export class ExpensesService {
     return Array.from(groupedMap.values());
   }
 
-  async previewInstallments(dto: PreviewInstallmentsDto) {
-    const paymentMethod = await this.prisma.paymentMethod.findUnique({
-      where: { id: dto.meioPagamentoId },
+  async previewInstallments(userId: string, dto: PreviewInstallmentsDto) {
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: { id: dto.meioPagamentoId, userId },
     });
 
     if (!paymentMethod) {
-      throw new NotFoundException('Meio de pagamento não encontrado.');
+      throw new NotFoundException('Meio de pagamento não encontrado ou não pertence ao seu usuário.');
     }
 
     return InvoiceCalculatorHelper.calculateInstallments({
@@ -248,9 +270,9 @@ export class ExpensesService {
     });
   }
 
-  async findOne(id: string) {
-    const lancamento = await this.prisma.lancamento.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    const lancamento = await this.prisma.lancamento.findFirst({
+      where: { id, userId },
       include: {
         meioPagamento: true,
         lojaRel: true,
@@ -268,15 +290,33 @@ export class ExpensesService {
     return lancamento;
   }
 
-  async update(id: string, dto: UpdateExpenseDto) {
-    const existing = await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateExpenseDto) {
+    const existing = await this.findOne(userId, id);
 
     const paymentMethodId = dto.meioPagamentoId ?? existing.meioPagamentoId;
-    const paymentMethod = await this.prisma.paymentMethod.findUnique({
-      where: { id: paymentMethodId },
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: { id: paymentMethodId, userId },
     });
     if (!paymentMethod) {
-      throw new NotFoundException('Meio de pagamento não encontrado.');
+      throw new NotFoundException('Meio de pagamento não encontrado ou não pertence ao seu usuário.');
+    }
+
+    if (dto.lojaId) {
+      const store = await this.prisma.loja.findFirst({
+        where: { id: dto.lojaId, userId },
+      });
+      if (!store) {
+        throw new NotFoundException('Loja informada não existe ou não pertence ao seu usuário.');
+      }
+    }
+
+    if (dto.compradorId) {
+      const buyer = await this.prisma.comprador.findFirst({
+        where: { id: dto.compradorId, userId },
+      });
+      if (!buyer) {
+        throw new NotFoundException('Comprador informado não existe ou não pertence ao seu usuário.');
+      }
     }
 
     const quantidade = dto.quantidade !== undefined ? dto.quantidade : Number(existing.quantidade);
@@ -375,10 +415,11 @@ export class ExpensesService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(userId: string, id: string) {
+    await this.findOne(userId, id);
     return this.prisma.lancamento.delete({
       where: { id },
     });
   }
 }
+

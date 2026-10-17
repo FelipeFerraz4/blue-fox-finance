@@ -6,16 +6,19 @@ import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from './dto/payment-me
 export class PaymentMethodsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(onlyActive: boolean = false) {
+  async findAll(userId: string, onlyActive: boolean = false) {
     return this.prisma.paymentMethod.findMany({
-      where: onlyActive ? { ativo: true } : undefined,
+      where: {
+        userId,
+        ...(onlyActive ? { ativo: true } : {}),
+      },
       orderBy: { nome: 'asc' },
     });
   }
 
-  async findOne(id: string) {
-    const method = await this.prisma.paymentMethod.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    const method = await this.prisma.paymentMethod.findFirst({
+      where: { id, userId },
     });
     if (!method) {
       throw new NotFoundException(`Meio de pagamento com ID ${id} não encontrado.`);
@@ -23,9 +26,10 @@ export class PaymentMethodsService {
     return method;
   }
 
-  async create(dto: CreatePaymentMethodDto) {
+  async create(userId: string, dto: CreatePaymentMethodDto) {
     return this.prisma.paymentMethod.create({
       data: {
+        userId,
         nome: dto.nome,
         modalidade: dto.modalidade,
         diaFechamento: dto.diaFechamento || null,
@@ -36,18 +40,18 @@ export class PaymentMethodsService {
     });
   }
 
-  async update(id: string, dto: UpdatePaymentMethodDto) {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdatePaymentMethodDto) {
+    await this.findOne(userId, id);
     return this.prisma.paymentMethod.update({
       where: { id },
       data: dto,
     });
   }
 
-  async remove(id: string, force: boolean = false) {
-    await this.findOne(id);
+  async remove(userId: string, id: string, force: boolean = false) {
+    await this.findOne(userId, id);
     const countExpenses = await this.prisma.lancamento.count({
-      where: { meioPagamentoId: id },
+      where: { meioPagamentoId: id, userId },
     });
 
     if (countExpenses > 0) {
@@ -56,9 +60,9 @@ export class PaymentMethodsService {
           `Este meio de pagamento possui ${countExpenses} lançamento(s) vinculado(s).`,
         );
       }
-      // Se force for verdadeiro, remove os lançamentos vinculados (as parcelas são removidas em cascata)
+      // Se force for verdadeiro, remove os lançamentos vinculados do usuário
       await this.prisma.lancamento.deleteMany({
-        where: { meioPagamentoId: id },
+        where: { meioPagamentoId: id, userId },
       });
     }
 
@@ -67,3 +71,4 @@ export class PaymentMethodsService {
     });
   }
 }
+

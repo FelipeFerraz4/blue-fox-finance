@@ -6,16 +6,19 @@ import { CreateBuyerDto, UpdateBuyerDto } from './dto/buyer.dto';
 export class BuyersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(activeOnly?: boolean) {
+  async findAll(userId: string, activeOnly?: boolean) {
     return this.prisma.comprador.findMany({
-      where: activeOnly ? { ativo: true } : undefined,
+      where: {
+        userId,
+        ...(activeOnly ? { ativo: true } : {}),
+      },
       orderBy: { nome: 'asc' },
     });
   }
 
-  async findOne(id: string) {
-    const buyer = await this.prisma.comprador.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    const buyer = await this.prisma.comprador.findFirst({
+      where: { id, userId },
     });
     if (!buyer) {
       throw new NotFoundException(`Comprador com ID ${id} não encontrado.`);
@@ -23,9 +26,12 @@ export class BuyersService {
     return buyer;
   }
 
-  async create(dto: CreateBuyerDto) {
+  async create(userId: string, dto: CreateBuyerDto) {
     const existing = await this.prisma.comprador.findFirst({
-      where: { nome: { equals: dto.nome.trim(), mode: 'insensitive' } },
+      where: {
+        userId,
+        nome: { equals: dto.nome.trim(), mode: 'insensitive' },
+      },
     });
 
     if (existing) {
@@ -34,6 +40,7 @@ export class BuyersService {
 
     return this.prisma.comprador.create({
       data: {
+        userId,
         nome: dto.nome.trim(),
         email: dto.email?.trim() || null,
         ativo: dto.ativo !== undefined ? dto.ativo : true,
@@ -41,12 +48,13 @@ export class BuyersService {
     });
   }
 
-  async update(id: string, dto: UpdateBuyerDto) {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateBuyerDto) {
+    await this.findOne(userId, id);
 
     if (dto.nome) {
       const existing = await this.prisma.comprador.findFirst({
         where: {
+          userId,
           nome: { equals: dto.nome.trim(), mode: 'insensitive' },
           id: { not: id },
         },
@@ -67,10 +75,11 @@ export class BuyersService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(userId: string, id: string) {
+    await this.findOne(userId, id);
     return this.prisma.comprador.delete({
       where: { id },
     });
   }
 }
+

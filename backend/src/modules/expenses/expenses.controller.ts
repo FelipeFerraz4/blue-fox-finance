@@ -10,23 +10,34 @@ import {
 } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto, PreviewInstallmentsDto, UpdateExpenseDto } from './dto/expense.dto';
+import { Roles } from '../auth/roles.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { FINANCE_ACCESS_ROLES } from '../auth/roles.constants';
 
+@Roles(...FINANCE_ACCESS_ROLES)
 @Controller('expenses')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Post()
-  create(@Body() dto: CreateExpenseDto) {
-    return this.expensesService.create(dto);
+  create(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: CreateExpenseDto,
+  ) {
+    return this.expensesService.create(userId, dto);
   }
 
   @Post('preview-installments')
-  previewInstallments(@Body() dto: PreviewInstallmentsDto) {
-    return this.expensesService.previewInstallments(dto);
+  previewInstallments(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: PreviewInstallmentsDto,
+  ) {
+    return this.expensesService.previewInstallments(userId, dto);
   }
 
   @Get()
   findAll(
+    @CurrentUser('sub') userId: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('mesReferencia') mesReferencia?: string,
@@ -39,7 +50,7 @@ export class ExpensesController {
     @Query('compradorId') compradorId?: string,
     @Query('search') search?: string,
   ) {
-    return this.expensesService.findAll({
+    return this.expensesService.findAll(userId, {
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
       mesReferencia,
@@ -55,22 +66,36 @@ export class ExpensesController {
   }
 
   @Get('grouped')
-  findGroupedByDayAndStore(@Query('month') month?: string) {
-    return this.expensesService.findGroupedByDayAndStore(month);
+  findGroupedByDayAndStore(
+    @CurrentUser('sub') userId: string,
+    @Query('month') month?: string,
+  ) {
+    return this.expensesService.findGroupedByDayAndStore(userId, month);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.expensesService.findOne(id);
+  findOne(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.expensesService.findOne(userId, id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateExpenseDto) {
-    return this.expensesService.update(id, dto);
+  update(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateExpenseDto,
+  ) {
+    return this.expensesService.update(userId, id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.expensesService.remove(id);
+  remove(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.expensesService.remove(userId, id);
   }
 }
+

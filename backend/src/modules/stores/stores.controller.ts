@@ -1,38 +1,59 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
+import { Roles } from '../auth/roles.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { FINANCE_ACCESS_ROLES } from '../auth/roles.constants';
 
+@Roles(...FINANCE_ACCESS_ROLES)
 @Controller('stores')
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
   @Get()
-  findAll(@Query('categoria') categoria?: string) {
-    return this.storesService.findAll(categoria);
+  findAll(
+    @CurrentUser('sub') userId: string,
+    @Query('categoria') categoria?: string,
+  ) {
+    return this.storesService.findAll(userId, categoria);
   }
 
   @Get('categories')
-  getCategories() {
-    return this.storesService.getCategories();
+  getCategories(@CurrentUser('sub') userId: string) {
+    return this.storesService.getCategories(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.storesService.findOne(id);
+  findOne(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.storesService.findOne(userId, id);
   }
 
   @Post()
-  create(@Body() dto: CreateStoreDto) {
-    return this.storesService.create(dto);
+  create(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: CreateStoreDto,
+  ) {
+    return this.storesService.create(userId, dto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateStoreDto) {
-    return this.storesService.update(id, dto);
+  update(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreDto,
+  ) {
+    return this.storesService.update(userId, id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.storesService.remove(id);
+  remove(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.storesService.remove(userId, id);
   }
 }
+

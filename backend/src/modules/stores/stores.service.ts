@@ -6,18 +6,22 @@ import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
 export class StoresService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(category?: string) {
+  async findAll(userId: string, category?: string) {
     return this.prisma.loja.findMany({
-      where: category ? { categoria: { equals: category, mode: 'insensitive' } } : undefined,
+      where: {
+        userId,
+        ...(category ? { categoria: { equals: category, mode: 'insensitive' } } : {}),
+      },
       orderBy: { nome: 'asc' },
     });
   }
 
-  async getCategories(): Promise<string[]> {
+  async getCategories(userId: string): Promise<string[]> {
     const stores = await this.prisma.loja.findMany({
       select: { categoria: true },
       distinct: ['categoria'],
       where: {
+        userId,
         categoria: { not: null },
       },
     });
@@ -28,9 +32,9 @@ export class StoresService {
       .sort();
   }
 
-  async findOne(id: string) {
-    const store = await this.prisma.loja.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    const store = await this.prisma.loja.findFirst({
+      where: { id, userId },
     });
     if (!store) {
       throw new NotFoundException(`Loja com ID ${id} não encontrada.`);
@@ -38,9 +42,12 @@ export class StoresService {
     return store;
   }
 
-  async create(dto: CreateStoreDto) {
-    const existing = await this.prisma.loja.findUnique({
-      where: { nome: dto.nome.trim() },
+  async create(userId: string, dto: CreateStoreDto) {
+    const existing = await this.prisma.loja.findFirst({
+      where: {
+        userId,
+        nome: { equals: dto.nome.trim(), mode: 'insensitive' },
+      },
     });
 
     if (existing) {
@@ -49,14 +56,29 @@ export class StoresService {
 
     return this.prisma.loja.create({
       data: {
+        userId,
         nome: dto.nome.trim(),
         categoria: dto.categoria?.trim() || null,
       },
     });
   }
 
-  async update(id: string, dto: UpdateStoreDto) {
-    await this.findOne(id);
+  async update(userId: string, id: string, dto: UpdateStoreDto) {
+    await this.findOne(userId, id);
+
+    if (dto.nome) {
+      const existing = await this.prisma.loja.findFirst({
+        where: {
+          userId,
+          nome: { equals: dto.nome.trim(), mode: 'insensitive' },
+          id: { not: id },
+        },
+      });
+
+      if (existing) {
+        throw new ConflictException(`Outra loja com o nome "${dto.nome}" já está cadastrada.`);
+      }
+    }
 
     return this.prisma.loja.update({
       where: { id },
@@ -67,10 +89,11 @@ export class StoresService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(userId: string, id: string) {
+    await this.findOne(userId, id);
     return this.prisma.loja.delete({
       where: { id },
     });
   }
 }
+
