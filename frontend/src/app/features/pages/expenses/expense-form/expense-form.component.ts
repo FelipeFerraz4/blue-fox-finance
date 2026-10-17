@@ -20,9 +20,10 @@ export interface ExpenseItemForm {
   nome: string;
   categoria: string;
   quantidade: number | string;
-  valorUnitario: number | string;
-  valorTotal: number | string;
+  valorUnitario: number | string | null;
+  valorTotal: number | string | null;
   observacoes: string;
+  showObservacoes?: boolean;
 }
 
 @Component({
@@ -245,7 +246,7 @@ export interface ExpenseItemForm {
                   <line x1="12" y1="5" x2="12" y2="19"/>
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                <span>+ Adicionar Item</span>
+                <span>Adicionar Item</span>
               </button>
             </div>
 
@@ -343,6 +344,7 @@ export interface ExpenseItemForm {
                         inputmode="decimal"
                         [name]="'item_unit_' + item.id"
                         [(ngModel)]="item.valorUnitario"
+                        (focus)="clearZeroOnFocus(item, 'valorUnitario')"
                         (input)="recalculateItemTotal(i)"
                         class="form-control"
                         placeholder="0,00"
@@ -356,6 +358,7 @@ export interface ExpenseItemForm {
                         inputmode="decimal"
                         [name]="'item_total_' + item.id"
                         [(ngModel)]="item.valorTotal"
+                        (focus)="clearZeroOnFocus(item, 'valorTotal')"
                         (input)="onItemTotalInput(i)"
                         [class.is-invalid]="formSubmitted && isTotalInvalid(item)"
                         class="form-control font-bold text-total"
@@ -367,16 +370,41 @@ export interface ExpenseItemForm {
                     </div>
                   </div>
 
-                  <!-- Linha 3: Observações do Item -->
-                  <div class="form-group mb-0">
-                    <label class="form-label text-xs">Observações do item (opcional)</label>
-                    <input
-                      type="text"
-                      [name]="'item_obs_' + item.id"
-                      [(ngModel)]="item.observacoes"
-                      class="form-control form-control-sm"
-                      placeholder="Detalhes ou anotações específicas deste item..."
-                    />
+                  <!-- Linha 3: Observações do Item (Expansível / Compacto) -->
+                  <div class="item-obs-container">
+                    <button
+                      *ngIf="!item.showObservacoes && !item.observacoes"
+                      type="button"
+                      class="btn-toggle-obs"
+                      (click)="item.showObservacoes = true"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      <span>Adicionar observação</span>
+                    </button>
+
+                    <div *ngIf="item.showObservacoes || item.observacoes" class="obs-expanded-group">
+                      <div class="obs-header">
+                        <label class="form-label text-xs mb-0">Observações do item (opcional)</label>
+                        <button
+                          type="button"
+                          class="btn-close-obs"
+                          (click)="item.showObservacoes = false; item.observacoes = ''"
+                          title="Remover / Ocultar observação"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        [name]="'item_obs_' + item.id"
+                        [(ngModel)]="item.observacoes"
+                        class="form-control form-control-sm"
+                        placeholder="Detalhes ou anotações específicas deste item..."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -908,6 +936,59 @@ export interface ExpenseItemForm {
       font-size: 1.05rem;
     }
 
+    /* Observações Expansíveis / Card Compacto */
+    .item-obs-container {
+      margin-top: 0.5rem;
+    }
+
+    .btn-toggle-obs {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: transparent;
+      border: 1px dashed rgba(0, 74, 173, 0.25);
+      border-radius: 8px;
+      padding: 0.3rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #004aad;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-obs:hover {
+      background: rgba(0, 74, 173, 0.05);
+      border-color: #004aad;
+    }
+
+    .obs-expanded-group {
+      animation: fadeIn 0.2s ease;
+    }
+
+    .obs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .btn-close-obs {
+      background: transparent;
+      border: none;
+      color: var(--gray-400);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0.1rem 0.35rem;
+      line-height: 1;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-close-obs:hover {
+      color: #b91c1c;
+      background: #fee2e2;
+    }
+
     /* Botão Largo de Adicionar Item (Final da Lista) */
     .btn-add-item-block {
       display: flex;
@@ -1284,9 +1365,10 @@ export class ExpenseFormComponent implements OnInit {
       nome: '',
       categoria: '',
       quantidade: 1,
-      valorUnitario: 0,
-      valorTotal: 0,
+      valorUnitario: null,
+      valorTotal: null,
       observacoes: '',
+      showObservacoes: false,
     },
   ];
 
@@ -1496,9 +1578,10 @@ export class ExpenseFormComponent implements OnInit {
       nome: '',
       categoria: defaultCat,
       quantidade: 1,
-      valorUnitario: 0,
-      valorTotal: 0,
+      valorUnitario: null,
+      valorTotal: null,
       observacoes: '',
+      showObservacoes: false,
     });
     this.onValuesChanged();
   }
@@ -1537,6 +1620,12 @@ export class ExpenseFormComponent implements OnInit {
     return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
   }
 
+  clearZeroOnFocus(item: ExpenseItemForm, field: 'valorUnitario' | 'valorTotal') {
+    if (item[field] === 0 || item[field] === '0' || item[field] === '0,00' || item[field] === '0.00') {
+      item[field] = null;
+    }
+  }
+
   recalculateItemTotal(index: number) {
     const item = this.items[index];
     if (!item) return;
@@ -1545,6 +1634,8 @@ export class ExpenseFormComponent implements OnInit {
     const unit = this.parseMoney(item.valorUnitario);
     if (qty > 0 && unit > 0) {
       item.valorTotal = Number((qty * unit).toFixed(2));
+    } else if (unit === 0) {
+      item.valorTotal = null;
     }
     this.onValuesChanged();
   }
@@ -1557,6 +1648,8 @@ export class ExpenseFormComponent implements OnInit {
     const total = this.parseMoney(item.valorTotal);
     if (qty > 0 && total > 0) {
       item.valorUnitario = Number((total / qty).toFixed(2));
+    } else if (total === 0) {
+      item.valorUnitario = null;
     }
     this.onValuesChanged();
   }
