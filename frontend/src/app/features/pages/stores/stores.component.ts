@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StoresService } from '../../../core/services/stores/stores.service';
+import { ExpensePreferencesService } from '../../../core/services/expense-preferences/expense-preferences.service';
 import { CategoriesService } from '../../../core/services/categories/categories.service';
 import { Store, CreateStoreDto } from '../../../shared/model/types/store.model';
 import { CategoriaLoja } from '../../../shared/model/types/category.model';
@@ -87,7 +88,10 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 <tbody>
                   <tr *ngFor="let s of filteredStores">
                     <td>
-                      <strong class="text-gray-900 font-semibold">{{ s.nome }}</strong>
+                      <div class="store-info-cell">
+                        <strong class="text-gray-900 font-semibold">{{ s.nome }}</strong>
+                        <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">★ Padrão</span>
+                      </div>
                     </td>
                     <td>
                       <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
@@ -96,17 +100,30 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     </td>
                     <td>{{ s.createdAt | date:'dd/MM/yyyy' }}</td>
                     <td class="text-center">
-                      <button
-                        (click)="promptDeleteStore(s)"
-                        class="btn btn-danger btn-sm"
-                        title="Excluir Loja"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="3 6 5 6 21 6"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        Excluir
-                      </button>
+                      <div class="table-actions-row">
+                        <button
+                          (click)="openEditModal(s)"
+                          class="btn btn-outline btn-sm"
+                          title="Editar Loja"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                          Editar
+                        </button>
+                        <button
+                          (click)="promptDeleteStore(s)"
+                          class="btn btn-danger btn-sm"
+                          title="Excluir Loja"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                          Excluir
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -118,7 +135,10 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
           <div class="mobile-cards-container">
             <div *ngFor="let s of filteredStores" class="store-mobile-card">
               <div class="store-card-header">
-                <span class="store-card-name">{{ s.nome }}</span>
+                <div>
+                  <span class="store-card-name">{{ s.nome }}</span>
+                  <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">★ Padrão</span>
+                </div>
                 <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
                   {{ s.categoria || 'Não categorizado' }}
                 </span>
@@ -128,6 +148,17 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 <span class="font-medium text-xs">{{ s.createdAt | date:'dd/MM/yyyy' }}</span>
               </div>
               <div class="store-card-actions">
+                <button
+                  (click)="openEditModal(s)"
+                  class="btn btn-outline btn-sm mr-2"
+                  title="Editar Loja"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span>Editar</span>
+                </button>
                 <button
                   (click)="promptDeleteStore(s)"
                   class="btn btn-danger btn-sm mobile-store-delete-btn"
@@ -154,7 +185,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>Adicionar Nova Loja</h3>
+            <h3>{{ editingId ? 'Editar Loja' : 'Adicionar Nova Loja' }}</h3>
             <button class="btn-close" (click)="closeModal()">✕</button>
           </div>
 
@@ -185,6 +216,21 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   (createNew)="newStore.categoria = $event"
                 ></app-searchable-dropdown>
               </div>
+
+              <div class="form-group status-switch-box">
+                <label class="switch-container">
+                  <input
+                    type="checkbox"
+                    name="definirComoPadrao"
+                    [(ngModel)]="definirComoPadrao"
+                  />
+                  <span class="switch-slider"></span>
+                </label>
+                <div class="switch-label-text">
+                  <strong>Definir como loja padrão</strong>
+                  <span class="text-xs text-muted block">Será pré-selecionada automaticamente ao abrir novos lançamentos</span>
+                </div>
+              </div>
             </div>
 
             <div class="modal-footer mt-4">
@@ -194,7 +240,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 [disabled]="!modalForm.valid || saving"
                 class="btn btn-primary"
               >
-                {{ saving ? 'Salvando...' : 'Cadastrar Loja' }}
+                {{ saving ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Cadastrar Loja') }}
               </button>
             </div>
           </form>
@@ -221,6 +267,96 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+    }
+
+    .badge-default-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 50px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .store-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-actions-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .status-switch-box {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      margin-top: 1rem;
+    }
+
+    .switch-container {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .switch-container input:checked + .switch-slider {
+      background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
+    }
+
+    .switch-container input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    .switch-label-text strong {
+      font-size: 0.9rem;
+      color: #0b132b;
     }
 
     .page-header-content {
@@ -454,6 +590,8 @@ export class StoresComponent implements OnInit {
   loading: boolean = true;
   showModal: boolean = false;
   saving: boolean = false;
+  editingId: string | null = null;
+  definirComoPadrao: boolean = false;
 
   newStore: CreateStoreDto = {
     nome: '',
@@ -482,12 +620,18 @@ export class StoresComponent implements OnInit {
   constructor(
     private readonly storesService: StoresService,
     private readonly categoriesService: CategoriesService,
+    private readonly preferencesService: ExpensePreferencesService,
   ) {}
 
   ngOnInit() {
     this.loadStores();
     this.loadCategories();
     this.loadRegisteredCategories();
+    this.preferencesService.loadPreferences().subscribe({ error: () => {} });
+  }
+
+  isStoreDefault(id: string): boolean {
+    return this.preferencesService.currentPreferences?.lojaPadraoId === id;
   }
 
   loadRegisteredCategories() {
@@ -544,33 +688,72 @@ export class StoresComponent implements OnInit {
   }
 
   openAddModal() {
+    this.editingId = null;
     this.newStore = {
       nome: '',
       categoria: '',
     };
+    this.definirComoPadrao = false;
+    this.showModal = true;
+  }
+
+  openEditModal(store: Store) {
+    this.editingId = store.id;
+    this.newStore = {
+      nome: store.nome,
+      categoria: store.categoria || '',
+    };
+    this.definirComoPadrao = this.isStoreDefault(store.id);
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
+    this.editingId = null;
+    this.definirComoPadrao = false;
   }
 
   saveStore() {
     if (!this.newStore.nome.trim()) return;
 
     this.saving = true;
-    this.storesService.create(this.newStore).subscribe({
-      next: () => {
-        this.saving = false;
-        this.closeModal();
-        this.loadStores();
-        this.loadCategories();
-      },
-      error: (err) => {
-        this.saving = false;
-        alert('Erro ao salvar loja: ' + (err.error?.message || err.message));
-      },
-    });
+
+    if (this.editingId) {
+      const id = this.editingId;
+      this.storesService.update(id, this.newStore).subscribe({
+        next: () => {
+          if (this.definirComoPadrao) {
+            this.preferencesService.setDefaultStore(id).subscribe({ error: () => {} });
+          } else if (this.isStoreDefault(id)) {
+            this.preferencesService.setDefaultStore(null).subscribe({ error: () => {} });
+          }
+          this.saving = false;
+          this.closeModal();
+          this.loadStores();
+          this.loadCategories();
+        },
+        error: (err) => {
+          this.saving = false;
+          alert('Erro ao atualizar loja: ' + (err.error?.message || err.message));
+        },
+      });
+    } else {
+      this.storesService.create(this.newStore).subscribe({
+        next: (created) => {
+          if (this.definirComoPadrao && created?.id) {
+            this.preferencesService.setDefaultStore(created.id).subscribe({ error: () => {} });
+          }
+          this.saving = false;
+          this.closeModal();
+          this.loadStores();
+          this.loadCategories();
+        },
+        error: (err) => {
+          this.saving = false;
+          alert('Erro ao salvar loja: ' + (err.error?.message || err.message));
+        },
+      });
+    }
   }
 
   showDeleteModal = false;

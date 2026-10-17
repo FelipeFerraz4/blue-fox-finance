@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CategoriesService } from '../../../../core/services/categories/categories.service';
+import { ExpensePreferencesService } from '../../../../core/services/expense-preferences/expense-preferences.service';
 import { CategoriaItem, CreateCategoriaItemDto, UpdateCategoriaItemDto } from '../../../../shared/model/types/category.model';
 import { ConfirmModalComponent } from '../../../../shared/components/general/confirm-modal/confirm-modal.component';
 
@@ -130,6 +131,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <td>
                     <div class="category-name-cell">
                       <span class="category-title">{{ cat.nome }}</span>
+                      <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">★ Padrão</span>
                     </div>
                   </td>
                   <td>
@@ -200,6 +202,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   [style.backgroundColor]="cat.cor || '#004aad'"
                 ></span>
                 <span class="category-title font-bold">{{ cat.nome }}</span>
+                <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">★ Padrão</span>
               </div>
               <span
                 class="badge"
@@ -336,6 +339,19 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   />
                   <span>Categoria Ativa no Sistema</span>
                 </label>
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="definirComoPadrao"
+                    [(ngModel)]="definirComoPadrao"
+                    class="checkbox-input"
+                  />
+                  <span>Definir como categoria padrão</span>
+                </label>
+                <small class="text-muted text-xs block mt-1">Será pré-selecionada automaticamente ao adicionar itens em novos lançamentos.</small>
               </div>
             </div>
 
@@ -1101,6 +1117,22 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       margin-top: 0.25rem;
     }
 
+    .badge-default-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 50px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
     .mobile-action-btn {
       flex: 1;
       display: inline-flex;
@@ -1131,6 +1163,7 @@ export class ItemCategoriesComponent implements OnInit {
     cor: '#004aad',
     ativo: true,
   };
+  definirComoPadrao = false;
 
   // Delete State
   showDeleteConfirm = false;
@@ -1151,10 +1184,18 @@ export class ItemCategoriesComponent implements OnInit {
     '#64748b', // Slate
   ];
 
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly preferencesService: ExpensePreferencesService
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    this.preferencesService.loadPreferences().subscribe({ error: () => {} });
+  }
+
+  isCategoryDefault(name: string): boolean {
+    return this.preferencesService.currentPreferences?.categoriaPadrao === name;
   }
 
   get deleteConfirmationMessage(): string {
@@ -1195,6 +1236,7 @@ export class ItemCategoriesComponent implements OnInit {
       cor: '#004aad',
       ativo: true,
     };
+    this.definirComoPadrao = false;
     this.showModal = true;
   }
 
@@ -1206,6 +1248,7 @@ export class ItemCategoriesComponent implements OnInit {
       cor: category.cor || '#004aad',
       ativo: category.ativo,
     };
+    this.definirComoPadrao = this.isCategoryDefault(category.nome);
     this.showModal = true;
   }
 
@@ -1220,15 +1263,25 @@ export class ItemCategoriesComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
+    const catName = this.formData.nome.trim();
+
     if (this.isEditing && this.currentEditId) {
+      const editingCat = this.categories.find(c => c.id === this.currentEditId);
+      const wasDefault = editingCat ? this.isCategoryDefault(editingCat.nome) : false;
+
       const dto: UpdateCategoriaItemDto = {
-        nome: this.formData.nome.trim(),
+        nome: catName,
         cor: this.formData.cor,
         ativo: this.formData.ativo,
       };
 
       this.categoriesService.updateItemCategory(this.currentEditId, dto).subscribe({
         next: () => {
+          if (this.definirComoPadrao) {
+            this.preferencesService.setDefaultCategory(catName).subscribe({ error: () => {} });
+          } else if (wasDefault) {
+            this.preferencesService.setDefaultCategory(null).subscribe({ error: () => {} });
+          }
           this.isSaving = false;
           this.showModal = false;
           this.showSuccess('Categoria atualizada com sucesso!');
@@ -1241,13 +1294,16 @@ export class ItemCategoriesComponent implements OnInit {
       });
     } else {
       const dto: CreateCategoriaItemDto = {
-        nome: this.formData.nome.trim(),
+        nome: catName,
         cor: this.formData.cor,
         ativo: this.formData.ativo,
       };
 
       this.categoriesService.createItemCategory(dto).subscribe({
         next: () => {
+          if (this.definirComoPadrao) {
+            this.preferencesService.setDefaultCategory(catName).subscribe({ error: () => {} });
+          }
           this.isSaving = false;
           this.showModal = false;
           this.showSuccess('Categoria cadastrada com sucesso!');
@@ -1270,10 +1326,15 @@ export class ItemCategoriesComponent implements OnInit {
     if (!this.categoryToDelete) return;
 
     const id = this.categoryToDelete.id;
+    const catName = this.categoryToDelete.nome;
+    const wasDefault = this.isCategoryDefault(catName);
     this.showDeleteConfirm = false;
 
     this.categoriesService.deleteItemCategory(id).subscribe({
       next: () => {
+        if (wasDefault) {
+          this.preferencesService.setDefaultCategory(null).subscribe({ error: () => {} });
+        }
         this.showSuccess('Categoria removida com sucesso!');
         this.loadCategories();
       },

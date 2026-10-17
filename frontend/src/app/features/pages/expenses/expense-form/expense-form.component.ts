@@ -8,6 +8,7 @@ import { PaymentMethodsService } from '../../../../core/services/payment-methods
 import { StoresService } from '../../../../core/services/stores/stores.service';
 import { BuyersService } from '../../../../core/services/buyers/buyers.service';
 import { CategoriesService } from '../../../../core/services/categories/categories.service';
+import { ExpensePreferencesService } from '../../../../core/services/expense-preferences/expense-preferences.service';
 import { PaymentMethod } from '../../../../shared/model/types/payment-method.model';
 import { Store } from '../../../../shared/model/types/store.model';
 import { Buyer } from '../../../../shared/model/types/buyer.model';
@@ -300,7 +301,16 @@ export interface ExpenseItemForm {
                     </div>
 
                     <div class="form-group flex-1">
-                      <label class="form-label">Categoria *</label>
+                      <div class="label-with-action">
+                        <label class="form-label">Categoria *</label>
+                        <a routerLink="/admin/item-categories" class="btn-manage-link" title="Gerenciar Categorias de Itens">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                            <line x1="7" y1="7" x2="7.01" y2="7"/>
+                          </svg>
+                          <span>Gerenciar Categorias</span>
+                        </a>
+                      </div>
                       <app-searchable-dropdown
                         [options]="itemCategoryOptions"
                         [(ngModel)]="item.categoria"
@@ -1382,14 +1392,53 @@ export class ExpenseFormComponent implements OnInit {
     private readonly storesService: StoresService,
     private readonly buyersService: BuyersService,
     private readonly categoriesService: CategoriesService,
+    private readonly preferencesService: ExpensePreferencesService,
     private readonly router: Router,
   ) {}
 
   ngOnInit() {
+    this.preferencesService.loadPreferences().subscribe({
+      next: (prefs) => {
+        if (prefs?.categoriaPadrao && this.items.length > 0 && !this.items[0].categoria) {
+          this.items[0].categoria = prefs.categoriaPadrao;
+        }
+        this.applyDefaultsFromPreferences();
+      },
+      error: () => {}
+    });
     this.loadStores();
     this.loadBuyers();
     this.loadPaymentMethods();
     this.loadItemCategories();
+  }
+
+  private applyDefaultsFromPreferences(): void {
+    const prefs = this.preferencesService.currentPreferences;
+    if (!prefs) return;
+
+    if (prefs.compradorPadraoId && this.buyers.length > 0 && this.buyers.some((b) => b.id === prefs.compradorPadraoId)) {
+      this.selectedBuyerId = prefs.compradorPadraoId;
+      this.onBuyerSelected();
+    }
+
+    if (prefs.lojaPadraoId && this.stores.length > 0 && this.stores.some((s) => s.id === prefs.lojaPadraoId)) {
+      this.selectedStoreId = prefs.lojaPadraoId;
+      this.onStoreSelected();
+    }
+
+    if (prefs.meioPagamentoPadraoId && this.paymentMethods.length > 0 && this.paymentMethods.some((m) => m.id === prefs.meioPagamentoPadraoId)) {
+      this.commonData.meioPagamentoId = prefs.meioPagamentoPadraoId;
+      this.selectedPaymentMethod = this.paymentMethods.find((m) => m.id === prefs.meioPagamentoPadraoId) || null;
+      this.onValuesChanged();
+    }
+
+    if (prefs.categoriaPadrao) {
+      for (const it of this.items) {
+        if (!it.categoria || !it.categoria.trim()) {
+          it.categoria = prefs.categoriaPadrao;
+        }
+      }
+    }
   }
 
   loadItemCategories() {
@@ -1493,7 +1542,11 @@ export class ExpenseFormComponent implements OnInit {
     this.buyersService.getAll(true).subscribe({
       next: (buyers) => {
         this.buyers = buyers;
-        if (buyers.length > 0 && !this.selectedBuyerId) {
+        const defaultBuyerId = this.preferencesService.currentPreferences?.compradorPadraoId;
+        if (defaultBuyerId && buyers.some((b) => b.id === defaultBuyerId)) {
+          this.selectedBuyerId = defaultBuyerId;
+          this.onBuyerSelected();
+        } else if (buyers.length > 0 && !this.selectedBuyerId) {
           this.selectedBuyerId = buyers[0].id;
           this.onBuyerSelected();
         }
@@ -1519,7 +1572,11 @@ export class ExpenseFormComponent implements OnInit {
     this.storesService.getAll().subscribe({
       next: (stores) => {
         this.stores = stores;
-        if (stores.length > 0 && !this.selectedStoreId) {
+        const defaultStoreId = this.preferencesService.currentPreferences?.lojaPadraoId;
+        if (defaultStoreId && stores.some((s) => s.id === defaultStoreId)) {
+          this.selectedStoreId = defaultStoreId;
+          this.onStoreSelected();
+        } else if (stores.length > 0 && !this.selectedStoreId) {
           this.selectedStoreId = stores[0].id;
           this.onStoreSelected();
         }
@@ -1554,7 +1611,12 @@ export class ExpenseFormComponent implements OnInit {
     this.paymentMethodsService.getAll(true).subscribe({
       next: (methods) => {
         this.paymentMethods = methods;
-        if (methods.length > 0 && !this.commonData.meioPagamentoId) {
+        const defaultMethodId = this.preferencesService.currentPreferences?.meioPagamentoPadraoId;
+        if (defaultMethodId && methods.some((m) => m.id === defaultMethodId)) {
+          this.commonData.meioPagamentoId = defaultMethodId;
+          this.selectedPaymentMethod = methods.find((m) => m.id === defaultMethodId) || null;
+          this.onValuesChanged();
+        } else if (methods.length > 0 && !this.commonData.meioPagamentoId) {
           this.commonData.meioPagamentoId = methods[0].id;
           this.selectedPaymentMethod = methods[0];
           this.onValuesChanged();
@@ -1565,6 +1627,8 @@ export class ExpenseFormComponent implements OnInit {
   }
 
   getDefaultCategory(): string {
+    const prefCat = this.preferencesService.currentPreferences?.categoriaPadrao;
+    if (prefCat) return prefCat;
     if (this.selectedStoreId && this.selectedStoreId !== 'OUTRA') {
       const found = this.stores.find((s) => s.id === this.selectedStoreId);
       if (found?.categoria) return found.categoria;

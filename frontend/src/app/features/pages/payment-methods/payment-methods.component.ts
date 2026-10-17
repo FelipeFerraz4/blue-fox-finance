@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentMethodsService } from '../../../core/services/payment-methods/payment-methods.service';
+import { ExpensePreferencesService } from '../../../core/services/expense-preferences/expense-preferences.service';
 import { PaymentMethod, CreatePaymentMethodDto, ModalidadePagamento } from '../../../shared/model/types/payment-method.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
@@ -70,6 +71,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     <td>
                       <div class="method-name-col">
                         <strong class="text-gray-900">{{ m.nome }}</strong>
+                        <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">★ Padrão</span>
                       </div>
                     </td>
                     <td>
@@ -95,6 +97,17 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     </td>
                     <td class="text-center">
                       <div class="table-actions">
+                        <button
+                          (click)="openEditModal(m)"
+                          class="btn btn-outline btn-sm"
+                          title="Editar meio de pagamento"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                          Editar
+                        </button>
                         <button
                           (click)="toggleStatus(m)"
                           class="btn btn-secondary btn-sm"
@@ -128,6 +141,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               <div class="method-card-header">
                 <div class="method-card-title-wrap">
                   <span class="method-card-name">{{ m.nome }}</span>
+                  <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">★ Padrão</span>
                   <span class="banco-tag" *ngIf="m.instituicaoBanco">{{ m.instituicaoBanco }}</span>
                 </div>
                 <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
@@ -152,6 +166,17 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
 
               <!-- Ações Mobile -->
               <div class="method-card-actions">
+                <button
+                  (click)="openEditModal(m)"
+                  class="btn btn-outline btn-sm mobile-action-btn"
+                  title="Editar meio de pagamento"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span>Editar</span>
+                </button>
                 <button
                   (click)="toggleStatus(m)"
                   class="btn btn-secondary btn-sm mobile-action-btn"
@@ -184,7 +209,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>Adicionar Novo Meio de Pagamento</h3>
+            <h3>{{ editingId ? 'Editar Meio de Pagamento' : 'Adicionar Novo Meio de Pagamento' }}</h3>
             <button class="btn-close" (click)="closeModal()">✕</button>
           </div>
 
@@ -267,6 +292,21 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   [invalid]="modalForm.submitted && !newMethod.instituicaoBanco"
                 ></app-searchable-dropdown>
               </div>
+
+              <div class="form-group status-switch-box">
+                <label class="switch-container">
+                  <input
+                    type="checkbox"
+                    name="definirComoPadrao"
+                    [(ngModel)]="definirComoPadrao"
+                  />
+                  <span class="switch-slider"></span>
+                </label>
+                <div class="switch-label-text">
+                  <strong>Definir como meio de pagamento padrão</strong>
+                  <span class="text-xs text-muted block">Será pré-selecionado automaticamente ao abrir novos lançamentos</span>
+                </div>
+              </div>
             </div>
 
             <div class="modal-footer mt-4">
@@ -276,7 +316,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 [disabled]="!modalForm.valid || saving"
                 class="btn btn-primary"
               >
-                {{ saving ? 'Salvando...' : 'Salvar Meio de Pagamento' }}
+                {{ saving ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Salvar Meio de Pagamento') }}
               </button>
             </div>
           </form>
@@ -303,6 +343,83 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+    }
+
+    .badge-default-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 50px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .status-switch-box {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      margin-top: 1rem;
+    }
+
+    .switch-container {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .switch-container input:checked + .switch-slider {
+      background: linear-gradient(135deg, #38b6ff 0%, #004aad 100%);
+    }
+
+    .switch-container input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    .switch-label-text strong {
+      font-size: 0.9rem;
+      color: #0b132b;
     }
 
     .page-header-content {
@@ -535,6 +652,8 @@ export class PaymentMethodsComponent implements OnInit {
   loading: boolean = true;
   showModal: boolean = false;
   saving: boolean = false;
+  editingId: string | null = null;
+  definirComoPadrao: boolean = false;
 
   newMethod: CreatePaymentMethodDto = {
     nome: '',
@@ -569,10 +688,18 @@ export class PaymentMethodsComponent implements OnInit {
     'XP Investimentos',
   ];
 
-  constructor(private readonly paymentMethodsService: PaymentMethodsService) {}
+  constructor(
+    private readonly paymentMethodsService: PaymentMethodsService,
+    private readonly preferencesService: ExpensePreferencesService,
+  ) {}
 
   ngOnInit() {
     this.loadMethods();
+    this.preferencesService.loadPreferences().subscribe({ error: () => {} });
+  }
+
+  isMethodDefault(id: string): boolean {
+    return this.preferencesService.currentPreferences?.meioPagamentoPadraoId === id;
   }
 
   loadMethods() {
@@ -608,6 +735,7 @@ export class PaymentMethodsComponent implements OnInit {
   }
 
   openAddModal() {
+    this.editingId = null;
     this.newMethod = {
       nome: '',
       modalidade: 'CREDITO',
@@ -616,26 +744,67 @@ export class PaymentMethodsComponent implements OnInit {
       instituicaoBanco: '',
       ativo: true,
     };
+    this.definirComoPadrao = false;
+    this.showModal = true;
+  }
+
+  openEditModal(method: PaymentMethod) {
+    this.editingId = method.id;
+    this.newMethod = {
+      nome: method.nome,
+      modalidade: method.modalidade,
+      diaFechamento: method.diaFechamento || 25,
+      diaVencimento: method.diaVencimento || 5,
+      instituicaoBanco: method.instituicaoBanco,
+      ativo: method.ativo,
+    };
+    this.definirComoPadrao = this.isMethodDefault(method.id);
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
+    this.editingId = null;
+    this.definirComoPadrao = false;
   }
 
   saveMethod() {
     this.saving = true;
-    this.paymentMethodsService.create(this.newMethod).subscribe({
-      next: () => {
-        this.saving = false;
-        this.closeModal();
-        this.loadMethods();
-      },
-      error: (err) => {
-        this.saving = false;
-        alert('Erro ao salvar meio de pagamento: ' + (err.error?.message || err.message));
-      },
-    });
+
+    if (this.editingId) {
+      const id = this.editingId;
+      this.paymentMethodsService.update(id, this.newMethod).subscribe({
+        next: () => {
+          if (this.definirComoPadrao) {
+            this.preferencesService.setDefaultPaymentMethod(id).subscribe({ error: () => {} });
+          } else if (this.isMethodDefault(id)) {
+            this.preferencesService.setDefaultPaymentMethod(null).subscribe({ error: () => {} });
+          }
+          this.saving = false;
+          this.closeModal();
+          this.loadMethods();
+        },
+        error: (err) => {
+          this.saving = false;
+          alert('Erro ao atualizar meio de pagamento: ' + (err.error?.message || err.message));
+        },
+      });
+    } else {
+      this.paymentMethodsService.create(this.newMethod).subscribe({
+        next: (created) => {
+          if (this.definirComoPadrao && created?.id) {
+            this.preferencesService.setDefaultPaymentMethod(created.id).subscribe({ error: () => {} });
+          }
+          this.saving = false;
+          this.closeModal();
+          this.loadMethods();
+        },
+        error: (err) => {
+          this.saving = false;
+          alert('Erro ao salvar meio de pagamento: ' + (err.error?.message || err.message));
+        },
+      });
+    }
   }
 
   toggleStatus(method: PaymentMethod) {

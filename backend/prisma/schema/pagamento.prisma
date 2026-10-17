@@ -17,7 +17,8 @@ model PaymentMethod {
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 
-  lancamentos      Lancamento[]
+  lancamentos            Lancamento[]
+  preferenciasLancamento PreferenciaLancamento[]
 
   @@index([userId])
   @@map("payment_methods")

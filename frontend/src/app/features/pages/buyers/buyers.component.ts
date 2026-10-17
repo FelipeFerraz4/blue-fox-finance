@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BuyersService } from '../../../core/services/buyers/buyers.service';
+import { ExpensePreferencesService } from '../../../core/services/expense-preferences/expense-preferences.service';
 import { Buyer, CreateBuyerDto, UpdateBuyerDto } from '../../../shared/model/types/buyer.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 
@@ -171,6 +172,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                       <div class="buyer-avatar">{{ getInitials(b.nome) }}</div>
                       <div>
                         <strong class="text-gray-900 font-semibold">{{ b.nome }}</strong>
+                        <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">★ Padrão</span>
                       </div>
                     </div>
                   </td>
@@ -240,6 +242,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <div class="buyer-avatar">{{ getInitials(b.nome) }}</div>
                 <div>
                   <strong class="mobile-buyer-name">{{ b.nome }}</strong>
+                  <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">★ Padrão</span>
                   <span class="text-xs text-muted block">Cadastrado em {{ b.createdAt | date:'dd/MM/yyyy' }}</span>
                 </div>
               </div>
@@ -375,6 +378,21 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                   <span class="text-xs text-muted block">Disponível para seleção em novos lançamentos</span>
                 </div>
               </div>
+
+              <div class="form-group status-switch-box">
+                <label class="switch-container">
+                  <input
+                    type="checkbox"
+                    name="definirComoPadrao"
+                    [(ngModel)]="definirComoPadrao"
+                  />
+                  <span class="switch-slider"></span>
+                </label>
+                <div class="switch-label-text">
+                  <strong>Definir como comprador padrão</strong>
+                  <span class="text-xs text-muted block">Será pré-selecionado automaticamente ao abrir novos lançamentos</span>
+                </div>
+              </div>
             </div>
 
             <div class="modal-footer">
@@ -417,6 +435,23 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+    }
+
+    .badge-default-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 50px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      margin-left: 0.5rem;
+      vertical-align: middle;
     }
 
     /* Cabeçalho */
@@ -1185,16 +1220,25 @@ export class BuyersComponent implements OnInit {
   };
   saving = false;
   errorMessage = '';
+  definirComoPadrao = false;
 
   // Delete Confirm Modal State
   showDeleteModal = false;
   buyerToDelete: Buyer | null = null;
   deleting = false;
 
-  constructor(private readonly buyersService: BuyersService) {}
+  constructor(
+    private readonly buyersService: BuyersService,
+    private readonly preferencesService: ExpensePreferencesService,
+  ) {}
 
   ngOnInit() {
     this.loadBuyers();
+    this.preferencesService.loadPreferences().subscribe({ error: () => {} });
+  }
+
+  isBuyerDefault(id: string): boolean {
+    return this.preferencesService.currentPreferences?.compradorPadraoId === id;
   }
 
   loadBuyers() {
@@ -1254,6 +1298,7 @@ export class BuyersComponent implements OnInit {
   openAddModal() {
     this.editingId = null;
     this.formData = { nome: '', email: '', ativo: true };
+    this.definirComoPadrao = false;
     this.errorMessage = '';
     this.showModal = true;
   }
@@ -1265,6 +1310,7 @@ export class BuyersComponent implements OnInit {
       email: buyer.email || '',
       ativo: buyer.ativo,
     };
+    this.definirComoPadrao = this.isBuyerDefault(buyer.id);
     this.errorMessage = '';
     this.showModal = true;
   }
@@ -1272,6 +1318,7 @@ export class BuyersComponent implements OnInit {
   closeModal() {
     this.showModal = false;
     this.editingId = null;
+    this.definirComoPadrao = false;
     this.errorMessage = '';
   }
 
@@ -1291,8 +1338,14 @@ export class BuyersComponent implements OnInit {
     };
 
     if (this.editingId) {
-      this.buyersService.update(this.editingId, payload).subscribe({
+      const id = this.editingId;
+      this.buyersService.update(id, payload).subscribe({
         next: () => {
+          if (this.definirComoPadrao) {
+            this.preferencesService.setDefaultBuyer(id).subscribe({ error: () => {} });
+          } else if (this.isBuyerDefault(id)) {
+            this.preferencesService.setDefaultBuyer(null).subscribe({ error: () => {} });
+          }
           this.saving = false;
           this.closeModal();
           this.loadBuyers();
@@ -1304,7 +1357,10 @@ export class BuyersComponent implements OnInit {
       });
     } else {
       this.buyersService.create(payload).subscribe({
-        next: () => {
+        next: (created) => {
+          if (this.definirComoPadrao && created?.id) {
+            this.preferencesService.setDefaultBuyer(created.id).subscribe({ error: () => {} });
+          }
           this.saving = false;
           this.closeModal();
           this.loadBuyers();

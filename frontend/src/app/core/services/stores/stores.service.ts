@@ -32,6 +32,10 @@ export class StoresService {
     return this.http.post<Store>(this.baseUrl, dto);
   }
 
+  update(id: string, dto: Partial<CreateStoreDto>): Observable<Store> {
+    return this.http.put<Store>(`${this.baseUrl}/${id}`, dto);
+  }
+
   delete(id: string): Observable<Store> {
     return this.http.delete<Store>(`${this.baseUrl}/${id}`);
   }

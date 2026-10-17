@@ -7,7 +7,8 @@ model Comprador {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  lancamentos Lancamento[]
+  lancamentos            Lancamento[]
+  preferenciasLancamento PreferenciaLancamento[]
 
   @@unique([userId, nome])
   @@index([userId])

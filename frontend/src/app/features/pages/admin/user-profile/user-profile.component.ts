@@ -3,11 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { UserService, UserProfile, SystemAvatar } from '../../../../core/services/user/user.service';
+import { ExpensePreferencesService } from '../../../../core/services/expense-preferences/expense-preferences.service';
+import { BuyersService } from '../../../../core/services/buyers/buyers.service';
+import { StoresService } from '../../../../core/services/stores/stores.service';
+import { PaymentMethodsService } from '../../../../core/services/payment-methods/payment-methods.service';
+import { CategoriesService } from '../../../../core/services/categories/categories.service';
+import { Buyer } from '../../../../shared/model/types/buyer.model';
+import { Store } from '../../../../shared/model/types/store.model';
+import { PaymentMethod } from '../../../../shared/model/types/payment-method.model';
+import { CategoriaItem } from '../../../../shared/model/types/category.model';
+import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent],
   template: `
     <div class="profile-page">
       <!-- Breadcrumb & Cabeçalho -->
@@ -249,6 +259,104 @@ import { UserService, UserProfile, SystemAvatar } from '../../../../core/service
                 </button>
               </div>
             </form>
+          </div>
+
+          <!-- Card de Preferências de Novos Lançamentos -->
+          <div class="card form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div class="card-header-text">
+                <h3 class="card-title">Padrões de Lançamento</h3>
+                <p class="card-subtitle">Configure quais opções virão selecionadas automaticamente ao abrir a tela de novo lançamento</p>
+              </div>
+            </div>
+
+            <!-- Feedback de Sucesso das Preferências -->
+            <div *ngIf="prefsSuccessMessage" class="feedback-banner success mb-3" style="margin-bottom: 1.25rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>{{ prefsSuccessMessage }}</span>
+            </div>
+
+            <div class="profile-form">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label">Comprador Padrão</label>
+                  <app-searchable-dropdown
+                    [options]="buyerDropdownOptions"
+                    [(ngModel)]="prefBuyerId"
+                    placeholder="Nenhum (seleção manual)"
+                    searchPlaceholder="Pesquisar comprador..."
+                    [clearable]="true"
+                  ></app-searchable-dropdown>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label class="form-label">Loja Padrão</label>
+                  <app-searchable-dropdown
+                    [options]="storeDropdownOptions"
+                    [(ngModel)]="prefStoreId"
+                    placeholder="Nenhuma (seleção manual)"
+                    searchPlaceholder="Pesquisar loja..."
+                    [clearable]="true"
+                  ></app-searchable-dropdown>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label">Meio de Pagamento Padrão</label>
+                  <app-searchable-dropdown
+                    [options]="paymentMethodDropdownOptions"
+                    [(ngModel)]="prefPaymentMethodId"
+                    placeholder="Nenhum (seleção manual)"
+                    searchPlaceholder="Pesquisar meio de pagamento..."
+                    [clearable]="true"
+                  ></app-searchable-dropdown>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label class="form-label">Categoria de Item Padrão</label>
+                  <app-searchable-dropdown
+                    [options]="categoryDropdownOptions"
+                    [(ngModel)]="prefCategoria"
+                    placeholder="Nenhuma (seleção manual)"
+                    searchPlaceholder="Pesquisar categoria..."
+                    [clearable]="true"
+                  ></app-searchable-dropdown>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-pill"
+                  (click)="clearPreferences()"
+                  [disabled]="isSavingPrefs"
+                >
+                  Limpar Todos
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-pill shadow-glow"
+                  (click)="savePreferences()"
+                  [disabled]="isSavingPrefs"
+                >
+                  <svg *ngIf="!isSavingPrefs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                  </svg>
+                  <span>{{ isSavingPrefs ? 'Salvando Padrões...' : 'Salvar Padrões' }}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -875,7 +983,27 @@ export class UserProfileComponent implements OnInit {
   isSaving = false;
   successMessage = '';
 
-  constructor(public readonly userService: UserService) {
+  // Preferências de Novos Lançamentos
+  prefBuyerId: string | null = null;
+  prefStoreId: string | null = null;
+  prefPaymentMethodId: string | null = null;
+  prefCategoria: string | null = null;
+  isSavingPrefs = false;
+  prefsSuccessMessage = '';
+
+  buyers: Buyer[] = [];
+  stores: Store[] = [];
+  paymentMethods: PaymentMethod[] = [];
+  categories: CategoriaItem[] = [];
+
+  constructor(
+    public readonly userService: UserService,
+    private readonly preferencesService: ExpensePreferencesService,
+    private readonly buyersService: BuyersService,
+    private readonly storesService: StoresService,
+    private readonly paymentMethodsService: PaymentMethodsService,
+    private readonly categoriesService: CategoriesService
+  ) {
     this.profile = this.userService.currentProfile;
     this.formData = {
       name: this.profile.name,
@@ -892,6 +1020,131 @@ export class UserProfileComponent implements OnInit {
     this.userService.profile$.subscribe((p) => {
       this.profile = p;
       this.selectedAvatar = this.userService.getAvatarById(p.avatarId);
+    });
+
+    this.loadEntities();
+    this.loadPreferences();
+  }
+
+  private loadEntities(): void {
+    this.buyersService.getAll().subscribe({
+      next: (b) => (this.buyers = b),
+      error: () => {},
+    });
+
+    this.storesService.getAll().subscribe({
+      next: (s) => (this.stores = s),
+      error: () => {},
+    });
+
+    this.paymentMethodsService.getAll().subscribe({
+      next: (p) => (this.paymentMethods = p),
+      error: () => {},
+    });
+
+    this.categoriesService.getItemCategories().subscribe({
+      next: (c) => (this.categories = c),
+      error: () => {},
+    });
+  }
+
+  private loadPreferences(): void {
+    this.preferencesService.loadPreferences().subscribe({
+      next: (prefs) => {
+        this.prefBuyerId = prefs.compradorPadraoId || null;
+        this.prefStoreId = prefs.lojaPadraoId || null;
+        this.prefPaymentMethodId = prefs.meioPagamentoPadraoId || null;
+        this.prefCategoria = prefs.categoriaPadrao || null;
+      },
+      error: () => {},
+    });
+  }
+
+  get buyerDropdownOptions(): DropdownOption[] {
+    return this.buyers.map((b) => ({
+      value: b.id,
+      label: b.nome,
+      sublabel: b.email || undefined,
+    }));
+  }
+
+  get storeDropdownOptions(): DropdownOption[] {
+    return this.stores.map((s) => ({
+      value: s.id,
+      label: s.nome,
+      sublabel: s.categoria || undefined,
+    }));
+  }
+
+  get paymentMethodDropdownOptions(): DropdownOption[] {
+    return this.paymentMethods.map((m) => ({
+      value: m.id,
+      label: m.nome,
+      sublabel: m.instituicaoBanco,
+    }));
+  }
+
+  get categoryDropdownOptions(): DropdownOption[] {
+    const defaults = [
+      'Alimentação',
+      'Supermercado',
+      'Moradia',
+      'Transporte',
+      'Tecnologia',
+      'Saúde',
+      'Lazer',
+      'Educação',
+      'Vestuário',
+      'Outros',
+    ];
+    const registered = this.categories.map((c) => c.nome);
+    const unique = Array.from(new Set([...registered, ...defaults])).filter(Boolean);
+    return unique.map((cat) => ({
+      value: cat,
+      label: cat,
+    }));
+  }
+
+  savePreferences(): void {
+    this.isSavingPrefs = true;
+    this.preferencesService
+      .updatePreferences({
+        compradorPadraoId: this.prefBuyerId,
+        lojaPadraoId: this.prefStoreId,
+        meioPagamentoPadraoId: this.prefPaymentMethodId,
+        categoriaPadrao: this.prefCategoria,
+      })
+      .subscribe({
+        next: () => {
+          this.isSavingPrefs = false;
+          this.prefsSuccessMessage = 'Padrões de lançamento salvos com sucesso no banco de dados!';
+          setTimeout(() => {
+            this.prefsSuccessMessage = '';
+          }, 3500);
+        },
+        error: () => {
+          this.isSavingPrefs = false;
+        },
+      });
+  }
+
+  clearPreferences(): void {
+    this.isSavingPrefs = true;
+    this.preferencesService.clearPreferences().subscribe({
+      next: () => {
+        this.prefBuyerId = null;
+        this.prefStoreId = null;
+        this.prefPaymentMethodId = null;
+        this.prefCategoria = null;
+        this.isSavingPrefs = false;
+        this.prefsSuccessMessage = 'Todos os padrões foram limpos com sucesso!';
+        setTimeout(() => {
+          this.prefsSuccessMessage = '';
+        }, 3500);
+      },
+      error: () => {
+        this.isSavingPrefs = false;
+      },
     });
   }
 

@@ -1,0 +1,17 @@
+model PreferenciaLancamento {
+  id                    String         @id @default(uuid())
+  userId                String         @unique
+  compradorPadraoId     String?
+  lojaPadraoId          String?
+  meioPagamentoPadraoId String?
+  categoriaPadrao       String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  compradorPadrao       Comprador?     @relation(fields: [compradorPadraoId], references: [id], onDelete: SetNull)
+  lojaPadrao            Loja?          @relation(fields: [lojaPadraoId], references: [id], onDelete: SetNull)
+  meioPagamentoPadrao   PaymentMethod? @relation(fields: [meioPagamentoPadraoId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("preferencias_lancamento")
+}
