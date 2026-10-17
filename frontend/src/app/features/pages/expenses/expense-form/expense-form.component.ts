@@ -344,7 +344,8 @@ export interface ExpenseItemForm {
                         inputmode="decimal"
                         [name]="'item_unit_' + item.id"
                         [(ngModel)]="item.valorUnitario"
-                        (focus)="clearZeroOnFocus(item, 'valorUnitario')"
+                        (focus)="onMoneyFocus(item, 'valorUnitario')"
+                        (blur)="onMoneyBlur(item, 'valorUnitario', i)"
                         (input)="recalculateItemTotal(i)"
                         class="form-control"
                         placeholder="0,00"
@@ -358,7 +359,8 @@ export interface ExpenseItemForm {
                         inputmode="decimal"
                         [name]="'item_total_' + item.id"
                         [(ngModel)]="item.valorTotal"
-                        (focus)="clearZeroOnFocus(item, 'valorTotal')"
+                        (focus)="onMoneyFocus(item, 'valorTotal')"
+                        (blur)="onMoneyBlur(item, 'valorTotal', i)"
                         (input)="onItemTotalInput(i)"
                         [class.is-invalid]="formSubmitted && isTotalInvalid(item)"
                         class="form-control font-bold text-total"
@@ -1620,9 +1622,50 @@ export class ExpenseFormComponent implements OnInit {
     return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
   }
 
-  clearZeroOnFocus(item: ExpenseItemForm, field: 'valorUnitario' | 'valorTotal') {
-    if (item[field] === 0 || item[field] === '0' || item[field] === '0,00' || item[field] === '0.00') {
+  formatCurrencyString(num: number): string {
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  onMoneyFocus(item: ExpenseItemForm, field: 'valorUnitario' | 'valorTotal') {
+    const val = item[field];
+    if (val === null || val === undefined || val === 0 || val === '0' || val === '0,00' || val === '0.00') {
       item[field] = null;
+      return;
+    }
+    const num = this.parseMoney(val);
+    if (num > 0) {
+      // Exibe formato limpo sem separadores de milhar para facilitar a edição pelo usuário
+      item[field] = num.toFixed(2).replace('.', ',');
+    }
+  }
+
+  onMoneyBlur(item: ExpenseItemForm, field: 'valorUnitario' | 'valorTotal', index: number) {
+    const val = item[field];
+    if (val === null || val === undefined || String(val).trim() === '') {
+      item[field] = null;
+      if (field === 'valorUnitario') {
+        this.recalculateItemTotal(index);
+      } else {
+        this.onItemTotalInput(index);
+      }
+      return;
+    }
+
+    const num = this.parseMoney(val);
+    if (num > 0) {
+      item[field] = this.formatCurrencyString(num);
+      if (field === 'valorUnitario') {
+        this.recalculateItemTotal(index);
+      } else {
+        this.onItemTotalInput(index);
+      }
+    } else {
+      item[field] = null;
+      if (field === 'valorUnitario') {
+        this.recalculateItemTotal(index);
+      } else {
+        this.onItemTotalInput(index);
+      }
     }
   }
 
@@ -1633,7 +1676,8 @@ export class ExpenseFormComponent implements OnInit {
     const qty = this.parseQuantity(item.quantidade);
     const unit = this.parseMoney(item.valorUnitario);
     if (qty > 0 && unit > 0) {
-      item.valorTotal = Number((qty * unit).toFixed(2));
+      const total = Number((qty * unit).toFixed(2));
+      item.valorTotal = this.formatCurrencyString(total);
     } else if (unit === 0) {
       item.valorTotal = null;
     }
@@ -1647,7 +1691,8 @@ export class ExpenseFormComponent implements OnInit {
     const qty = this.parseQuantity(item.quantidade);
     const total = this.parseMoney(item.valorTotal);
     if (qty > 0 && total > 0) {
-      item.valorUnitario = Number((total / qty).toFixed(2));
+      const unit = Number((total / qty).toFixed(2));
+      item.valorUnitario = this.formatCurrencyString(unit);
     } else if (total === 0) {
       item.valorUnitario = null;
     }
