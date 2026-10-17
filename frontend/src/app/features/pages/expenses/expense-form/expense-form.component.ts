@@ -54,10 +54,10 @@ export interface ExpenseItemForm {
         </a>
       </div>
 
-      <div class="form-layout-grid">
-        <!-- Coluna Principal (Formulário) -->
-        <div class="form-main-content">
-          <form (ngSubmit)="onSubmit()" novalidate>
+      <form (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-layout-grid">
+          <!-- Coluna Principal (Formulário) -->
+          <div class="form-main-content">
             <!-- Alerta de Erro de Validação ou Servidor -->
             <div *ngIf="formErrorMessage" class="alert-box alert-error mb-4">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -398,38 +398,10 @@ export interface ExpenseItemForm {
                 <span>Adicionar Mais Um Item a Esta Compra</span>
               </button>
             </div>
+          </div>
 
-            <!-- Botão de Salvar Lançamentos -->
-            <div class="form-actions mt-4">
-              <button
-                type="submit"
-                [disabled]="submitting"
-                class="btn btn-primary btn-pill btn-block"
-              >
-                <span *ngIf="!submitting" class="btn-submit-content">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                    <polyline points="17 21 17 13 7 13 7 21"/>
-                    <polyline points="7 3 7 8 15 8"/>
-                  </svg>
-                  <span>
-                    Salvar {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}
-                  </span>
-                </span>
-                <span *ngIf="submitting" class="btn-submit-content">
-                  <svg class="spinner-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
-                  </svg>
-                  <span>Gravando {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}...</span>
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Painel Lateral: Resumo da Compra & Simulação da Fatura -->
-        <div class="side-panel">
+          <!-- Painel Lateral: Resumo da Compra & Simulação da Fatura -->
+          <div class="side-panel">
           <div class="card preview-card">
             <h3 class="card-title">
               <span>Resumo da Compra</span>
@@ -478,7 +450,7 @@ export interface ExpenseItemForm {
 
             <div *ngIf="previewInstallmentsList.length > 0; else noPreview" class="mt-2">
               <div class="desktop-table-container">
-                <div class="table-responsive">
+                <div class="table-responsive preview-table-responsive">
                   <table class="data-table">
                     <thead>
                       <tr>
@@ -538,8 +510,46 @@ export interface ExpenseItemForm {
               </div>
             </ng-template>
           </div>
+
+          <!-- Botão de Salvar Lançamentos (Logo abaixo do Resumo da Compra) -->
+          <div class="side-panel-actions">
+            <!-- Mini alerta de validação junto ao botão de ação -->
+            <div *ngIf="formErrorMessage" class="side-error-alert">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ formErrorMessage }}</span>
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="submitting"
+              class="btn btn-primary btn-pill btn-block btn-save-action"
+            >
+              <span *ngIf="!submitting" class="btn-submit-content">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                <span>
+                  Salvar {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}
+                </span>
+              </span>
+              <span *ngIf="submitting" class="btn-submit-content">
+                <svg class="spinner-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+                </svg>
+                <span>Gravando {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}...</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
+    </form>
     </div>
   `,
   styles: [`
@@ -649,6 +659,14 @@ export interface ExpenseItemForm {
     @media (max-width: 1024px) {
       .form-layout-grid {
         grid-template-columns: 1fr;
+      }
+      .side-panel {
+        position: static !important;
+        top: auto !important;
+        order: 2;
+      }
+      .form-main-content {
+        order: 1;
       }
     }
 
@@ -952,15 +970,64 @@ export interface ExpenseItemForm {
       to { transform: rotate(360deg); }
     }
 
-    /* Painel Lateral */
+    /* Painel Lateral Sticky no Desktop */
+    .side-panel {
+      position: sticky;
+      top: 5.25rem;
+      align-self: flex-start;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      z-index: 20;
+    }
+
     .preview-card {
       background: #ffffff;
       border: 1px solid rgba(0, 74, 173, 0.12);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.05);
-      position: sticky;
-      top: 5rem;
       padding: 1.5rem;
+    }
+
+    .preview-table-responsive {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .side-panel-actions {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-error-alert {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #b91c1c;
+      font-size: 0.84rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      animation: fadeIn 0.2s ease;
+      box-shadow: 0 2px 8px rgba(185, 28, 28, 0.08);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-save-action {
+      box-shadow: 0 4px 14px rgba(0, 74, 173, 0.28);
+      transition: all 0.2s ease;
+    }
+
+    .btn-save-action:hover:not(:disabled) {
+      box-shadow: 0 6px 22px rgba(0, 74, 173, 0.4);
+      transform: translateY(-1px);
     }
 
     .card-title {
