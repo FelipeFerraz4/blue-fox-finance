@@ -1042,10 +1042,10 @@ export class UpdatesComponent {
       ],
     },
     {
-      title: 'Central de Administração & Perfil de Usuário',
+      title: 'Central de Serviços & Perfil de Usuário',
       badge: 'Lançado v1.1',
       badgeClass: 'success',
-      description: 'Hub administrativo com atalhos operacionais rápidos e seleção de avatares oficiais Blue Fox.',
+      description: 'Hub de serviços com atalhos operacionais rápidos e seleção de avatares oficiais Blue Fox.',
       details: [
         'Edição de dados de perfil do usuário',
         'Avatares temáticos do ecossistema Blue Fox',

@@ -18,7 +18,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../../core/service
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Voltar para Administração
+            Voltar para Serviços
           </a>
           <span class="breadcrumb-separator">/</span>
           <span class="breadcrumb-current">Perfil do Usuário</span>

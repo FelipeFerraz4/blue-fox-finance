@@ -24,8 +24,8 @@ interface AdminModuleCard {
       <div class="admin-header">
         <div class="header-titles">
           <div class="title-with-pill">
-            <h1 class="page-title">Central de Administração</h1>
-            <span class="hub-pill">Hub Geral do Sistema</span>
+            <h1 class="page-title">Central de Serviços</h1>
+            <span class="hub-pill">Hub Geral de Serviços</span>
           </div>
           <p class="page-subtitle">
             Gerencie módulos, categorias de despesas, lojas, cadastros essenciais e credenciais de acesso.
