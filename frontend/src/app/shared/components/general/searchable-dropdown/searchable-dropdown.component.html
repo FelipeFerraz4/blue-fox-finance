@@ -6,34 +6,25 @@
   [class.is-invalid]="invalid"
   [class]="'size-' + size + ' variant-' + variant + ' rounded-' + rounded + ' ' + (customClass || '')"
 >
-  <!-- Gatilho Principal (Trigger / Select Button) -->
-  <button
-    type="button"
-    #triggerBtn
-    class="dropdown-trigger"
-    [disabled]="disabled"
-    [attr.aria-expanded]="isOpen"
-    [attr.aria-haspopup]="'listbox'"
+  <!-- Gatilho Principal / Campo Unificado (Combobox) -->
+  <div
+    #triggerContainer
+    class="dropdown-trigger combobox-trigger"
+    [class.has-focus]="isOpen"
     (click)="toggleDropdown()"
-    (keydown)="onTriggerKeydown($event)"
   >
-    <!-- Conteúdo Customizado via Template -->
+    <!-- Template Customizado (se fornecido) -->
     <ng-container *ngIf="customTriggerTemplate; else defaultTriggerContent">
       <ng-container
         *ngTemplateOutlet="customTriggerTemplate; context: { $implicit: selectedOptions, selected: selectedOptions, isOpen: isOpen, clear: clearSelection.bind(this) }"
       ></ng-container>
     </ng-container>
 
-    <!-- Conteúdo Padrão do Gatilho -->
+    <!-- Conteúdo Padrão Unificado -->
     <ng-template #defaultTriggerContent>
-      <!-- Modo Multi-seleção -->
+      <!-- Modo 1: Multi-seleção -->
       <div *ngIf="multiple" class="trigger-multi-content">
-        <ng-container *ngIf="selectedOptions.length === 0">
-          <span class="placeholder-text">{{ placeholder }}</span>
-        </ng-container>
-
-        <!-- Tags/Chips das opções selecionadas -->
-        <div *ngIf="selectedOptions.length > 0" class="tags-container">
+        <div class="tags-container">
           <ng-container *ngFor="let opt of displayedTags; trackBy: trackByOptionValue">
             <span class="selected-chip" (click)="$event.stopPropagation()">
               <span *ngIf="opt.icon" class="chip-icon">{{ opt.icon }}</span>
@@ -50,45 +41,66 @@
             </span>
           </ng-container>
 
-          <!-- Indicador de itens restantes quando excede maxDisplayedTags -->
           <span *ngIf="extraTagsCount > 0" class="more-tags-badge">
             +{{ extraTagsCount }}
           </span>
+
+          <!-- Input direto para busca na multi-seleção -->
+          <input
+            #multiInput
+            type="text"
+            class="combobox-inline-input"
+            [placeholder]="selectedOptions.length === 0 ? placeholder : ''"
+            [(ngModel)]="searchTerm"
+            (focus)="onInputFocus()"
+            (input)="onMultiInputChange()"
+            (keydown)="onMultiInputKeydown($event)"
+            [disabled]="disabled"
+            autocomplete="off"
+            (click)="$event.stopPropagation()"
+          />
         </div>
       </div>
 
-      <!-- Modo Seleção Única -->
+      <!-- Modo 2: Seleção Única (Campo de Busca e Seleção Unificado) -->
       <div *ngIf="!multiple" class="trigger-single-content">
-        <ng-container *ngIf="selectedOption; else singlePlaceholder">
-          <span *ngIf="selectedOption.icon" class="option-icon-prefix">
-            {{ selectedOption.icon }}
-          </span>
-          <span class="selected-label">{{ selectedOption.label }}</span>
-          <span *ngIf="selectedOption.sublabel" class="selected-sublabel">
-            ({{ selectedOption.sublabel }})
-          </span>
-          <span
-            *ngIf="selectedOption.badge"
-            class="badge-pill"
-            [class]="'badge-' + (selectedOption.badgeColor || 'primary')"
-          >
-            {{ selectedOption.badge }}
-          </span>
-        </ng-container>
-        <ng-template #singlePlaceholder>
-          <span class="placeholder-text">{{ placeholder }}</span>
-        </ng-template>
+        <span *ngIf="selectedOption?.icon" class="option-icon-prefix">
+          {{ selectedOption?.icon }}
+        </span>
+
+        <input
+          #mainInput
+          type="text"
+          class="combobox-main-input"
+          [placeholder]="placeholder"
+          [(ngModel)]="displayValue"
+          (focus)="onInputFocus()"
+          (input)="onInputChange($event)"
+          (blur)="onInputBlur()"
+          (keydown)="onInputKeydown($event)"
+          [disabled]="disabled"
+          autocomplete="off"
+          (click)="$event.stopPropagation()"
+        />
+
+        <span
+          *ngIf="selectedOption?.badge && !isTyping"
+          class="badge-pill inline-badge"
+          [class]="'badge-' + (selectedOption?.badgeColor || 'primary')"
+        >
+          {{ selectedOption?.badge }}
+        </span>
       </div>
     </ng-template>
 
-    <!-- Ações do Gatilho (Clear e Chevron) -->
+    <!-- Ações no Canto Direito (Clear e Chevron) -->
     <div class="trigger-actions" (click)="$event.stopPropagation()">
       <!-- Spinner de Carregamento -->
       <div *ngIf="loading" class="spinner-icon" title="Carregando..."></div>
 
       <!-- Botão de Limpar Seleção -->
       <button
-        *ngIf="clearable && !disabled && hasValue"
+        *ngIf="clearable && !disabled && (hasValue || displayValue)"
         type="button"
         class="btn-clear"
         title="Limpar seleção"
@@ -107,9 +119,9 @@
         </svg>
       </div>
     </div>
-  </button>
+  </div>
 
-  <!-- Painel Dropdown Flutuante -->
+  <!-- Painel Flutuante com a Lista de Opções (Sem campo de busca duplicado) -->
   <div
     *ngIf="isOpen"
     class="dropdown-panel"
@@ -123,48 +135,19 @@
       ></ng-container>
     </div>
 
-    <!-- Barra de Busca -->
-    <div *ngIf="showSearch" class="dropdown-search-box">
-      <div class="search-input-wrapper">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          #searchInput
-          type="text"
-          class="search-input"
-          [placeholder]="searchPlaceholder"
-          [(ngModel)]="searchTerm"
-          (input)="onSearchInput()"
-          (keydown)="onSearchKeydown($event)"
-          autocomplete="off"
-        />
-        <button
-          *ngIf="searchTerm"
-          type="button"
-          class="btn-clear-search"
-          title="Limpar busca"
-          (click)="clearSearch()"
-        >
-          ✕
-        </button>
-      </div>
-
-      <!-- Ações Rápidas de Multi-seleção -->
-      <div *ngIf="multiple && filteredOptions.length > 0" class="multi-quick-actions">
-        <button type="button" class="btn-quick-action" (click)="selectAllFiltered()">
-          Selecionar todos ({{ filteredOptions.length }})
-        </button>
-        <button
-          *ngIf="selectedOptions.length > 0"
-          type="button"
-          class="btn-quick-action btn-danger-action"
-          (click)="clearSelection()"
-        >
-          Limpar seleção
-        </button>
-      </div>
+    <!-- Ações Rápidas de Multi-seleção -->
+    <div *ngIf="multiple && filteredOptions.length > 0" class="multi-quick-actions">
+      <button type="button" class="btn-quick-action" (click)="selectAllFiltered()">
+        Selecionar todos ({{ filteredOptions.length }})
+      </button>
+      <button
+        *ngIf="selectedOptions.length > 0"
+        type="button"
+        class="btn-quick-action btn-danger-action"
+        (click)="clearSelection()"
+      >
+        Limpar seleção
+      </button>
     </div>
 
     <!-- Lista de Opções -->
@@ -193,7 +176,7 @@
         </ng-container>
       </ng-template>
 
-      <!-- Ação Opcional: Criar Novo Item com o Termo de Busca -->
+      <!-- Ação Opcional: Criar Novo Item com o Termo Digitado -->
       <div
         *ngIf="allowCreate && canCreateCustomOption"
         class="create-option-item"
@@ -207,7 +190,7 @@
         </div>
         <div class="create-option-text">
           <span>{{ createOptionText }}</span>
-          <strong class="create-option-value">"{{ searchTerm }}"</strong>
+          <strong class="create-option-value">"{{ currentCreateTerm }}"</strong>
         </div>
       </div>
 
@@ -215,20 +198,20 @@
       <div *ngIf="filteredOptions.length === 0 && (!allowCreate || !canCreateCustomOption)" class="empty-state">
         <ng-container *ngIf="emptyTemplate; else defaultEmptyState">
           <ng-container
-            *ngTemplateOutlet="emptyTemplate; context: { searchTerm: searchTerm }"
+            *ngTemplateOutlet="emptyTemplate; context: { searchTerm: currentCreateTerm }"
           ></ng-container>
         </ng-container>
         <ng-template #defaultEmptyState>
           <div class="empty-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               <line x1="8" y1="11" x2="14" y2="11"/>
             </svg>
           </div>
           <p class="empty-message">{{ emptyMessage }}</p>
-          <span *ngIf="searchTerm" class="empty-hint">
-            Não encontramos resultados para "{{ searchTerm }}"
+          <span *ngIf="currentCreateTerm" class="empty-hint">
+            Não encontramos resultados para "{{ currentCreateTerm }}"
           </span>
         </ng-template>
       </div>

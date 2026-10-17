@@ -6,11 +6,12 @@ import { CategoriesService } from '../../../core/services/categories/categories.
 import { Store, CreateStoreDto } from '../../../shared/model/types/store.model';
 import { CategoriaLoja } from '../../../shared/model/types/category.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
 
 @Component({
   selector: 'app-stores',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="stores-page">
       <div class="page-header">
@@ -78,7 +79,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <thead>
                   <tr>
                     <th>Nome da Loja</th>
-                    <th>Categoria do Estabelecimento</th>
+                    <th>Categoria</th>
                     <th>Data de Cadastro</th>
                     <th class="text-center">Ações</th>
                   </tr>
@@ -160,7 +161,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
           <form (ngSubmit)="saveStore()" #modalForm="ngForm">
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Nome da Loja / Estabelecimento *</label>
+                <label class="form-label">Nome da Loja *</label>
                 <input
                   type="text"
                   name="nome"
@@ -172,27 +173,17 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
               </div>
 
               <div class="form-group">
-                <label class="form-label">Categoria do Estabelecimento</label>
-                <input
-                  type="text"
-                  name="categoria"
+                <label class="form-label">Categoria</label>
+                <app-searchable-dropdown
+                  [options]="categoryOptions"
                   [(ngModel)]="newStore.categoria"
-                  list="categorySuggestions"
-                  class="form-control"
-                  placeholder="ex: Supermercado, E-commerce, Farmácia, Eletrônicos..."
-                />
-                <datalist id="categorySuggestions">
-                  <option *ngFor="let sc of registeredCategories" [value]="sc.nome">
-                  <option value="E-commerce">
-                  <option value="Supermercado">
-                  <option value="Farmácia">
-                  <option value="Eletrônicos & Informática">
-                  <option value="Restaurante & Alimentação">
-                  <option value="Vestuário & Calçados">
-                  <option value="Casa & Decoração">
-                  <option value="Serviços">
-                  <option value="Outros">
-                </datalist>
+                  name="categoria"
+                  placeholder="Selecione ou busque uma categoria..."
+                  searchPlaceholder="Pesquisar categoria..."
+                  [allowCreate]="true"
+                  createOptionText="+ Criar nova categoria:"
+                  (createNew)="newStore.categoria = $event"
+                ></app-searchable-dropdown>
               </div>
             </div>
 
@@ -470,6 +461,23 @@ export class StoresComponent implements OnInit {
   };
 
   registeredCategories: CategoriaLoja[] = [];
+
+  get categoryOptions(): string[] {
+    const defaults = [
+      'Supermercado',
+      'E-commerce',
+      'Farmácia',
+      'Eletrônicos & Informática',
+      'Restaurante & Alimentação',
+      'Vestuário & Calçados',
+      'Casa & Decoração',
+      'Serviços',
+      'Outros',
+    ];
+    const registered = this.registeredCategories.map((c) => c.nome);
+    const existing = this.categories;
+    return Array.from(new Set([...registered, ...existing, ...defaults])).filter(Boolean);
+  }
 
   constructor(
     private readonly storesService: StoresService,

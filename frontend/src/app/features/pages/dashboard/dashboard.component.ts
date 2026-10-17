@@ -163,7 +163,7 @@ import { DashboardOverview } from '../../../shared/model/types/dashboard.model';
                     <thead>
                       <tr>
                         <th>Comprador</th>
-                        <th>Item / Compra</th>
+                        <th>Item</th>
                         <th>Data</th>
                         <th>Meio de Pagamento</th>
                         <th>Tipo</th>

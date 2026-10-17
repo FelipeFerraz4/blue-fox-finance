@@ -13,6 +13,7 @@ import { Store } from '../../../../shared/model/types/store.model';
 import { Buyer } from '../../../../shared/model/types/buyer.model';
 import { CategoriaItem } from '../../../../shared/model/types/category.model';
 import { CreateLancamentoDto, PreviewInstallmentItem, TipoLancamento } from '../../../../shared/model/types/lancamento.model';
+import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
 
 export interface ExpenseItemForm {
   id: string;
@@ -27,7 +28,7 @@ export interface ExpenseItemForm {
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent],
   template: `
     <div class="expense-form-page">
       <!-- Cabeçalho da Página -->
@@ -105,41 +106,26 @@ export interface ExpenseItemForm {
                       <span>Gerenciar Compradores</span>
                     </a>
                   </div>
-                  <!-- Conforme solicitado: exibe APENAS o nome do comprador -->
-                  <select
-                    name="compradorSelect"
-                    [(ngModel)]="selectedBuyerId"
-                    (change)="onBuyerSelected()"
-                    [class.is-invalid]="formSubmitted && !selectedBuyerId"
-                    class="form-control"
-                  >
-                    <option value="" disabled>Selecione um comprador...</option>
-                    <option *ngFor="let b of buyers" [value]="b.id">
-                      {{ b.nome }}
-                    </option>
-                    <option value="OUTRO">Outro comprador (digitar manualmente)...</option>
-                  </select>
+                  <!-- Campo Unificado de Comprador -->
+                  <app-searchable-dropdown
+                    [options]="buyerDropdownOptions"
+                    [value]="selectedBuyerId"
+                    (valueChange)="onBuyerOptionSelect($event)"
+                    placeholder="Selecione ou digite um comprador..."
+                    searchPlaceholder="Pesquisar comprador..."
+                    [allowCreate]="true"
+                    createOptionText="+ Usar novo comprador:"
+                    (createNew)="onBuyerCreateNew($event)"
+                    [invalid]="formSubmitted && !selectedBuyerId"
+                  ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedBuyerId" class="field-error-msg">
-                    Selecione um comprador da lista ou escolha "Outro comprador"
-                  </span>
-
-                  <input
-                    *ngIf="selectedBuyerId === 'OUTRO'"
-                    type="text"
-                    name="compradorManual"
-                    [(ngModel)]="commonData.comprador"
-                    [class.is-invalid]="formSubmitted && (!commonData.comprador || !commonData.comprador.trim())"
-                    placeholder="Digite o nome do comprador..."
-                    class="form-control mt-2"
-                  />
-                  <span *ngIf="formSubmitted && selectedBuyerId === 'OUTRO' && (!commonData.comprador || !commonData.comprador.trim())" class="field-error-msg">
-                    Digite o nome do comprador
+                    Selecione ou digite um comprador
                   </span>
                 </div>
 
                 <div class="form-group">
                   <div class="label-with-action">
-                    <label class="form-label">Loja / Estabelecimento *</label>
+                    <label class="form-label">Loja *</label>
                     <a routerLink="/stores" class="btn-manage-link" title="Gerenciar Lojas e Categorias">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -148,34 +134,20 @@ export interface ExpenseItemForm {
                       <span>Gerenciar Lojas</span>
                     </a>
                   </div>
-                  <select
-                    name="lojaSelect"
-                    [(ngModel)]="selectedStoreId"
-                    (change)="onStoreSelected()"
-                    [class.is-invalid]="formSubmitted && !selectedStoreId"
-                    class="form-control"
-                  >
-                    <option value="" disabled>Selecione uma loja cadastrada...</option>
-                    <option *ngFor="let s of stores" [value]="s.id">
-                      {{ s.nome }} {{ s.categoria ? '(' + s.categoria + ')' : '' }}
-                    </option>
-                    <option value="OUTRA">Outra loja (digitar manualmente)...</option>
-                  </select>
+                  <!-- Campo Unificado de Loja -->
+                  <app-searchable-dropdown
+                    [options]="storeDropdownOptions"
+                    [value]="selectedStoreId"
+                    (valueChange)="onStoreOptionSelect($event)"
+                    placeholder="Selecione ou digite uma loja..."
+                    searchPlaceholder="Pesquisar loja..."
+                    [allowCreate]="true"
+                    createOptionText="+ Usar nova loja:"
+                    (createNew)="onStoreCreateNew($event)"
+                    [invalid]="formSubmitted && !selectedStoreId"
+                  ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedStoreId" class="field-error-msg">
-                    Selecione uma loja da lista ou escolha "Outra loja"
-                  </span>
-
-                  <input
-                    *ngIf="selectedStoreId === 'OUTRA'"
-                    type="text"
-                    name="lojaManual"
-                    [(ngModel)]="commonData.loja"
-                    [class.is-invalid]="formSubmitted && (!commonData.loja || !commonData.loja.trim())"
-                    placeholder="Digite o nome da loja..."
-                    class="form-control mt-2"
-                  />
-                  <span *ngIf="formSubmitted && selectedStoreId === 'OUTRA' && (!commonData.loja || !commonData.loja.trim())" class="field-error-msg">
-                    Digite o nome da loja
+                    Selecione ou digite uma loja
                   </span>
                 </div>
               </div>
@@ -208,18 +180,16 @@ export interface ExpenseItemForm {
                       <span>Gerenciar Meios</span>
                     </a>
                   </div>
-                  <select
-                    name="meioPagamentoId"
-                    [(ngModel)]="commonData.meioPagamentoId"
-                    (change)="onPaymentMethodChange()"
-                    [class.is-invalid]="formSubmitted && !commonData.meioPagamentoId"
-                    class="form-control"
-                  >
-                    <option value="" disabled>Selecione um meio de pagamento...</option>
-                    <option *ngFor="let m of paymentMethods" [value]="m.id">
-                      {{ m.nome }} ({{ m.instituicaoBanco }} - {{ formatModalidade(m.modalidade) }})
-                    </option>
-                  </select>
+                  <!-- Searchable Dropdown de Meio de Pagamento -->
+                  <app-searchable-dropdown
+                    [options]="paymentMethodDropdownOptions"
+                    [value]="commonData.meioPagamentoId"
+                    (valueChange)="onPaymentMethodSelect($event)"
+                    placeholder="Selecione um meio de pagamento..."
+                    searchPlaceholder="Pesquisar cartão ou banco..."
+                    [clearable]="false"
+                    [invalid]="formSubmitted && !commonData.meioPagamentoId"
+                  ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !commonData.meioPagamentoId" class="field-error-msg">
                     Selecione o meio de pagamento
                   </span>
@@ -260,7 +230,7 @@ export interface ExpenseItemForm {
             <div class="items-section-header mt-4">
               <div class="items-title-wrap">
                 <h2 class="items-section-title">
-                  Itens / Produtos da Compra
+                  Itens da Compra
                   <span class="badge-count">{{ items.length }}</span>
                 </h2>
                 <p class="section-desc">Cada card abaixo será registrado como um lançamento individual mantendo os dados da compra</p>
@@ -314,7 +284,7 @@ export interface ExpenseItemForm {
                   <!-- Linha 1: Nome & Categoria -->
                   <div class="form-row">
                     <div class="form-group flex-2">
-                      <label class="form-label">Nome / Descrição do Item *</label>
+                      <label class="form-label">Nome *</label>
                       <input
                         type="text"
                         [name]="'item_nome_' + item.id"
@@ -324,34 +294,23 @@ export interface ExpenseItemForm {
                         placeholder="ex: Teclado Mecânico, Arroz 5kg, Remédio..."
                       />
                       <span *ngIf="formSubmitted && (!item.nome || !item.nome.trim())" class="field-error-msg">
-                        Informe o nome ou descrição do item
+                        Informe o nome do item
                       </span>
                     </div>
 
                     <div class="form-group flex-1">
                       <label class="form-label">Categoria *</label>
-                      <input
-                        type="text"
-                        [name]="'item_categoria_' + item.id"
+                      <app-searchable-dropdown
+                        [options]="itemCategoryOptions"
                         [(ngModel)]="item.categoria"
-                        list="categoriasList"
-                        [class.is-invalid]="formSubmitted && (!item.categoria || !item.categoria.trim())"
-                        class="form-control"
+                        [name]="'item_categoria_' + item.id"
                         placeholder="Selecione ou digite..."
-                      />
-                      <datalist id="categoriasList">
-                        <option *ngFor="let cat of itemCategoriesList" [value]="cat.nome">
-                        <option value="Alimentação">
-                        <option value="Supermercado">
-                        <option value="Moradia">
-                        <option value="Transporte">
-                        <option value="Tecnologia">
-                        <option value="Saúde">
-                        <option value="Lazer">
-                        <option value="Educação">
-                        <option value="Vestuário">
-                        <option value="Outros">
-                      </datalist>
+                        searchPlaceholder="Pesquisar categoria..."
+                        [allowCreate]="true"
+                        createOptionText="+ Usar nova categoria:"
+                        (createNew)="item.categoria = $event"
+                        [invalid]="formSubmitted && (!item.categoria || !item.categoria.trim())"
+                      ></app-searchable-dropdown>
                       <span *ngIf="formSubmitted && (!item.categoria || !item.categoria.trim())" class="field-error-msg">
                         Informe a categoria
                       </span>
@@ -1293,6 +1252,92 @@ export class ExpenseFormComponent implements OnInit {
     return item.id;
   }
 
+  get buyerDropdownOptions(): DropdownOption[] {
+    const list: DropdownOption[] = this.buyers.map((b) => ({
+      value: b.id,
+      label: b.nome,
+      sublabel: b.email || undefined,
+    }));
+    if (this.selectedBuyerId === 'OUTRO' && this.commonData.comprador) {
+      list.push({
+        value: 'OUTRO',
+        label: this.commonData.comprador,
+        sublabel: 'Comprador personalizado',
+      });
+    }
+    return list;
+  }
+
+  onBuyerOptionSelect(val: any) {
+    this.selectedBuyerId = val;
+    this.onBuyerSelected();
+  }
+
+  onBuyerCreateNew(name: string) {
+    this.selectedBuyerId = 'OUTRO';
+    this.commonData.comprador = name;
+    this.commonData.compradorId = undefined;
+  }
+
+  get storeDropdownOptions(): DropdownOption[] {
+    const list: DropdownOption[] = this.stores.map((s) => ({
+      value: s.id,
+      label: s.nome,
+      sublabel: s.categoria || undefined,
+    }));
+    if (this.selectedStoreId === 'OUTRA' && this.commonData.loja) {
+      list.push({
+        value: 'OUTRA',
+        label: this.commonData.loja,
+        sublabel: 'Loja personalizada',
+      });
+    }
+    return list;
+  }
+
+  onStoreOptionSelect(val: any) {
+    this.selectedStoreId = val;
+    this.onStoreSelected();
+  }
+
+  onStoreCreateNew(name: string) {
+    this.selectedStoreId = 'OUTRA';
+    this.commonData.loja = name;
+    this.commonData.lojaId = undefined;
+  }
+
+  get paymentMethodDropdownOptions(): DropdownOption[] {
+    return this.paymentMethods.map((m) => ({
+      value: m.id,
+      label: m.nome,
+      sublabel: m.instituicaoBanco,
+      badge: this.formatModalidade(m.modalidade),
+      badgeColor: (m.modalidade === 'CREDITO' ? 'primary' : m.modalidade === 'DEBITO' ? 'warning' : 'success') as any,
+    }));
+  }
+
+  onPaymentMethodSelect(val: any) {
+    this.commonData.meioPagamentoId = val;
+    this.onPaymentMethodChange();
+  }
+
+  get itemCategoryOptions(): string[] {
+    const defaults = [
+      'Alimentação',
+      'Supermercado',
+      'Moradia',
+      'Transporte',
+      'Tecnologia',
+      'Saúde',
+      'Lazer',
+      'Educação',
+      'Vestuário',
+      'Outros',
+    ];
+    const registered = this.itemCategoriesList.map((c) => c.nome);
+    return Array.from(new Set([...registered, ...defaults])).filter(Boolean);
+  }
+
   loadBuyers() {
     this.buyersService.getAll(true).subscribe({
       next: (buyers) => {
@@ -1530,7 +1575,7 @@ export class ExpenseFormComponent implements OnInit {
 
     // 2. Validação de Loja
     if (!this.selectedStoreId) {
-      this.formErrorMessage = 'Por favor, selecione uma Loja / Estabelecimento.';
+      this.formErrorMessage = 'Por favor, selecione uma Loja.';
       return;
     }
 
@@ -1575,7 +1620,7 @@ export class ExpenseFormComponent implements OnInit {
       const itemNum = i + 1;
 
       if (!item.nome || !item.nome.trim()) {
-        this.formErrorMessage = `Por favor, informe o Nome / Descrição do Item #${itemNum}.`;
+        this.formErrorMessage = `Por favor, informe o Nome do Item #${itemNum}.`;
         return;
       }
 

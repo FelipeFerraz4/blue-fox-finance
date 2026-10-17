@@ -11,11 +11,12 @@ import { PaymentMethod } from '../../../../shared/model/types/payment-method.mod
 import { Store } from '../../../../shared/model/types/store.model';
 import { Buyer } from '../../../../shared/model/types/buyer.model';
 import { ConfirmModalComponent } from '../../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
 
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="expense-list-page">
       <!-- Header da Página -->
@@ -108,66 +109,70 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
         <div class="filter-divider"></div>
 
-        <!-- Linha Inferior: Dropdowns e Seletores de Filtro -->
+        <!-- Linha Inferior: Dropdowns e Seletores de Filtro com Busca -->
         <div class="filter-grid">
           <!-- Filtro: Categoria da Loja -->
           <div class="filter-item">
             <label class="filter-label">Categoria da Loja:</label>
-            <select
+            <app-searchable-dropdown
+              [options]="storeCategories"
               [(ngModel)]="selectedCategoriaLoja"
-              (change)="onFilterChange()"
-              class="form-control form-control-sm"
-            >
-              <option value="">Todas as Categorias</option>
-              <option *ngFor="let cat of storeCategories" [value]="cat">
-                {{ cat }}
-              </option>
-            </select>
+              (valueChange)="onFilterChange()"
+              placeholder="Todas as Categorias"
+              searchPlaceholder="Pesquisar categoria..."
+              size="sm"
+              [clearable]="true"
+            ></app-searchable-dropdown>
           </div>
 
           <!-- Filtro: Loja -->
           <div class="filter-item">
-            <label class="filter-label">Loja / Estabelecimento:</label>
-            <select
+            <label class="filter-label">Loja:</label>
+            <app-searchable-dropdown
+              [options]="storesList"
+              valueField="id"
+              labelField="nome"
+              sublabelField="categoria"
               [(ngModel)]="selectedLojaId"
-              (change)="onFilterChange()"
-              class="form-control form-control-sm"
-            >
-              <option value="">Todas as Lojas</option>
-              <option *ngFor="let store of storesList" [value]="store.id">
-                {{ store.nome }} {{ store.categoria ? '(' + store.categoria + ')' : '' }}
-              </option>
-            </select>
+              (valueChange)="onFilterChange()"
+              placeholder="Todas as Lojas"
+              searchPlaceholder="Pesquisar loja..."
+              size="sm"
+              [clearable]="true"
+            ></app-searchable-dropdown>
           </div>
 
           <!-- Filtro: Comprador -->
           <div class="filter-item">
             <label class="filter-label">Comprador:</label>
-            <select
+            <app-searchable-dropdown
+              [options]="buyersList"
+              valueField="id"
+              labelField="nome"
               [(ngModel)]="selectedCompradorId"
-              (change)="onFilterChange()"
-              class="form-control form-control-sm"
-            >
-              <option value="">Todos os Compradores</option>
-              <option *ngFor="let b of buyersList" [value]="b.id">
-                {{ b.nome }}
-              </option>
-            </select>
+              (valueChange)="onFilterChange()"
+              placeholder="Todos os Compradores"
+              searchPlaceholder="Pesquisar comprador..."
+              size="sm"
+              [clearable]="true"
+            ></app-searchable-dropdown>
           </div>
 
           <!-- Filtro: Meio de Pagamento -->
           <div class="filter-item">
             <label class="filter-label">Meio de Pagamento:</label>
-            <select
+            <app-searchable-dropdown
+              [options]="paymentFilterOptions"
+              valueField="id"
+              labelField="label"
+              sublabelField="sublabel"
               [(ngModel)]="selectedMeioPagamentoId"
-              (change)="onFilterChange()"
-              class="form-control form-control-sm"
-            >
-              <option value="">Todos os Meios</option>
-              <option *ngFor="let m of paymentMethodsList" [value]="m.id">
-                {{ m.nome }} ({{ m.instituicaoBanco }})
-              </option>
-            </select>
+              (valueChange)="onFilterChange()"
+              placeholder="Todos os Meios"
+              searchPlaceholder="Pesquisar cartão ou banco..."
+              size="sm"
+              [clearable]="true"
+            ></app-searchable-dropdown>
           </div>
 
           <!-- Filtro: Mês / Competência -->
@@ -215,15 +220,15 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 <thead>
                   <tr>
                     <th>Data</th>
-                    <th>Loja / Estabelecimento</th>
-                    <th>Item / Nome</th>
+                    <th>Loja</th>
+                    <th>Nome</th>
                     <th>Comprador</th>
                     <th>Categoria</th>
                     <th class="text-center">Qtd</th>
                     <th class="text-right">Valor Unit.</th>
                     <th class="text-right">Valor Total</th>
                     <th>Meio de Pagamento</th>
-                    <th>Tipo / Parcelas</th>
+                    <th>Parcelas</th>
                     <th class="text-center">Ações</th>
                   </tr>
                 </thead>
@@ -456,14 +461,14 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Item / Nome</th>
+                        <th>Nome</th>
                         <th>Comprador</th>
                         <th>Categoria</th>
                         <th class="text-center">Qtd</th>
                         <th class="text-right">Valor Unit.</th>
                         <th class="text-right">Valor Total</th>
                         <th>Meio Pagamento</th>
-                        <th>Tipo / Parcelas</th>
+                        <th>Parcelas</th>
                         <th class="text-center">Ações</th>
                       </tr>
                     </thead>
@@ -746,92 +751,59 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <!-- Comprador -->
               <div class="form-group">
                 <label class="form-label">Comprador *</label>
-                <select
-                  [(ngModel)]="editSelectedBuyerId"
-                  (change)="onEditBuyerChange()"
-                  name="editCompradorSelect"
-                  class="form-control"
-                >
-                  <option value="" disabled>Selecione um comprador...</option>
-                  <option *ngFor="let b of buyersList" [value]="b.id">
-                    {{ b.nome }}
-                  </option>
-                  <option value="OUTRO">Outro comprador (digitar manualmente)...</option>
-                </select>
-
-                <input
-                  *ngIf="editSelectedBuyerId === 'OUTRO'"
-                  type="text"
-                  [(ngModel)]="editForm.comprador"
-                  name="editCompradorManual"
-                  placeholder="Digite o nome do comprador..."
-                  class="form-control mt-2"
-                />
+                <app-searchable-dropdown
+                  [options]="editBuyerOptions"
+                  [value]="editSelectedBuyerId"
+                  (valueChange)="onEditBuyerOptionSelect($event)"
+                  placeholder="Selecione ou digite um comprador..."
+                  searchPlaceholder="Pesquisar comprador..."
+                  [allowCreate]="true"
+                  createOptionText="+ Usar novo comprador:"
+                  (createNew)="onEditBuyerCreateNew($event)"
+                ></app-searchable-dropdown>
               </div>
 
               <!-- Loja -->
               <div class="form-group">
-                <label class="form-label">Loja / Estabelecimento *</label>
-                <select
-                  [(ngModel)]="editSelectedStoreId"
-                  (change)="onEditStoreChange()"
-                  name="editLojaSelect"
-                  class="form-control"
-                >
-                  <option value="" disabled>Selecione uma loja...</option>
-                  <option *ngFor="let s of storesList" [value]="s.id">
-                    {{ s.nome }} {{ s.categoria ? '(' + s.categoria + ')' : '' }}
-                  </option>
-                  <option value="OUTRA">Outra loja (digitar manualmente)...</option>
-                </select>
-
-                <input
-                  *ngIf="editSelectedStoreId === 'OUTRA'"
-                  type="text"
-                  [(ngModel)]="editForm.loja"
-                  name="editLojaManual"
-                  placeholder="Digite o nome da loja..."
-                  class="form-control mt-2"
-                />
+                <label class="form-label">Loja *</label>
+                <app-searchable-dropdown
+                  [options]="editStoreOptions"
+                  [value]="editSelectedStoreId"
+                  (valueChange)="onEditStoreOptionSelect($event)"
+                  placeholder="Selecione ou digite uma loja..."
+                  searchPlaceholder="Pesquisar loja..."
+                  [allowCreate]="true"
+                  createOptionText="+ Usar nova loja:"
+                  (createNew)="onEditStoreCreateNew($event)"
+                ></app-searchable-dropdown>
               </div>
 
-              <!-- Item / Nome -->
+              <!-- Nome -->
               <div class="form-group">
-                <label class="form-label">Nome / Descrição do Item *</label>
+                <label class="form-label">Nome *</label>
                 <input
                   type="text"
                   [(ngModel)]="editForm.nome"
                   name="editNome"
                   required
                   class="form-control"
-                  placeholder="Descrição do item"
+                  placeholder="Nome do item"
                 />
               </div>
 
               <!-- Categoria -->
               <div class="form-group">
                 <label class="form-label">Categoria *</label>
-                <input
-                  type="text"
+                <app-searchable-dropdown
+                  [options]="itemCategoryOptions"
                   [(ngModel)]="editForm.categoria"
                   name="editCategoria"
-                  list="editCategoriasList"
-                  required
-                  class="form-control"
-                  placeholder="Categoria do item"
-                />
-                <datalist id="editCategoriasList">
-                  <option value="Alimentação">
-                  <option value="Supermercado">
-                  <option value="Moradia">
-                  <option value="Transporte">
-                  <option value="Tecnologia">
-                  <option value="Saúde">
-                  <option value="Lazer">
-                  <option value="Educação">
-                  <option value="Vestuário">
-                  <option value="Outros">
-                </datalist>
+                  placeholder="Selecione ou digite..."
+                  searchPlaceholder="Pesquisar categoria..."
+                  [allowCreate]="true"
+                  createOptionText="+ Usar nova categoria:"
+                  (createNew)="editForm.categoria = $event"
+                ></app-searchable-dropdown>
               </div>
 
               <!-- Data da Compra -->
@@ -849,17 +821,17 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <!-- Meio de Pagamento -->
               <div class="form-group">
                 <label class="form-label">Meio de Pagamento *</label>
-                <select
+                <app-searchable-dropdown
+                  [options]="paymentFilterOptions"
+                  valueField="id"
+                  labelField="label"
+                  sublabelField="sublabel"
                   [(ngModel)]="editForm.meioPagamentoId"
                   name="editMeioPagamento"
-                  required
-                  class="form-control"
-                >
-                  <option value="" disabled>Selecione um meio de pagamento...</option>
-                  <option *ngFor="let m of paymentMethodsList" [value]="m.id">
-                    {{ m.nome }} ({{ m.instituicaoBanco }})
-                  </option>
-                </select>
+                  placeholder="Selecione um meio de pagamento..."
+                  searchPlaceholder="Pesquisar meio de pagamento..."
+                  [clearable]="false"
+                ></app-searchable-dropdown>
               </div>
             </div>
 
@@ -1860,6 +1832,81 @@ export class ExpenseListComponent implements OnInit {
   expenseToDelete: Lancamento | null = null;
   deletingExpense: boolean = false;
 
+  get paymentFilterOptions() {
+    return this.paymentMethodsList.map((m) => ({
+      id: m.id,
+      label: m.nome,
+      sublabel: m.instituicaoBanco,
+    }));
+  }
+
+  get editBuyerOptions(): DropdownOption[] {
+    const list: DropdownOption[] = this.buyersList.map((b) => ({
+      value: b.id,
+      label: b.nome,
+      sublabel: b.email || undefined,
+    }));
+    if (this.editSelectedBuyerId === 'OUTRO' && this.editForm.comprador) {
+      list.push({
+        value: 'OUTRO',
+        label: this.editForm.comprador,
+        sublabel: 'Comprador personalizado',
+      });
+    }
+    return list;
+  }
+
+  onEditBuyerOptionSelect(val: any) {
+    this.editSelectedBuyerId = val;
+    this.onEditBuyerChange();
+  }
+
+  onEditBuyerCreateNew(name: string) {
+    this.editSelectedBuyerId = 'OUTRO';
+    this.editForm.comprador = name;
+    this.editForm.compradorId = undefined;
+  }
+
+  get editStoreOptions(): DropdownOption[] {
+    const list: DropdownOption[] = this.storesList.map((s) => ({
+      value: s.id,
+      label: s.nome,
+      sublabel: s.categoria || undefined,
+    }));
+    if (this.editSelectedStoreId === 'OUTRA' && this.editForm.loja) {
+      list.push({
+        value: 'OUTRA',
+        label: this.editForm.loja,
+        sublabel: 'Loja personalizada',
+      });
+    }
+    return list;
+  }
+
+  onEditStoreOptionSelect(val: any) {
+    this.editSelectedStoreId = val;
+    this.onEditStoreChange();
+  }
+
+  onEditStoreCreateNew(name: string) {
+    this.editSelectedStoreId = 'OUTRA';
+    this.editForm.loja = name;
+    this.editForm.lojaId = undefined;
+  }
+
+  itemCategoryOptions: string[] = [
+    'Alimentação',
+    'Supermercado',
+    'Moradia',
+    'Transporte',
+    'Tecnologia',
+    'Saúde',
+    'Lazer',
+    'Educação',
+    'Vestuário',
+    'Outros',
+  ];
+
   constructor(
     private readonly expensesService: ExpensesService,
     private readonly paymentMethodsService: PaymentMethodsService,
@@ -2205,11 +2252,11 @@ export class ExpenseListComponent implements OnInit {
       return;
     }
     if (!this.editForm.loja?.trim()) {
-      this.editError = 'A loja / estabelecimento é obrigatório.';
+      this.editError = 'A loja é obrigatória.';
       return;
     }
     if (!this.editForm.nome?.trim()) {
-      this.editError = 'O nome / descrição do item é obrigatório.';
+      this.editError = 'O nome do item é obrigatório.';
       return;
     }
     if (!this.editForm.categoria?.trim()) {

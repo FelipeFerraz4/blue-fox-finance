@@ -205,7 +205,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../../core/service
                 </div>
 
                 <div class="form-group flex-1">
-                  <label for="userPhone" class="form-label">Telefone / WhatsApp</label>
+                  <label for="userPhone" class="form-label">Telefone</label>
                   <input
                     id="userPhone"
                     type="text"
@@ -219,7 +219,7 @@ import { UserService, UserProfile, SystemAvatar } from '../../../../core/service
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="userRole" class="form-label">Cargo / Função no Sistema</label>
+                  <label for="userRole" class="form-label">Cargo</label>
                   <input
                     id="userRole"
                     type="text"

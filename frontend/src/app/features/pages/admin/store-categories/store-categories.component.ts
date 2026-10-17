@@ -111,7 +111,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <thead>
                 <tr>
                   <th style="width: 260px;">Nome da Categoria</th>
-                  <th>Descrição / Segmento</th>
+                  <th>Descrição</th>
                   <th style="width: 140px;">Status</th>
                   <th style="width: 120px;" class="text-right">Ações</th>
                 </tr>
@@ -274,7 +274,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
             <div class="modal-body">
               <div class="form-group">
                 <label for="storeCatNome" class="form-label">
-                  Nome da Categoria / Segmento <span class="required">*</span>
+                  Nome da Categoria <span class="required">*</span>
                 </label>
                 <input
                   id="storeCatNome"
@@ -288,7 +288,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               </div>
 
               <div class="form-group">
-                <label for="storeCatDesc" class="form-label">Descrição / Observações</label>
+                <label for="storeCatDesc" class="form-label">Descrição</label>
                 <textarea
                   id="storeCatDesc"
                   name="descricao"

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { PaymentMethodsService } from '../../../core/services/payment-methods/payment-methods.service';
 import { PaymentMethod, CreatePaymentMethodDto, ModalidadePagamento } from '../../../shared/model/types/payment-method.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
 
 @Component({
   selector: 'app-payment-methods',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="payment-methods-page">
       <div class="page-header">
@@ -59,7 +60,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                     <th>Modalidade</th>
                     <th class="text-center">Dia de Fechamento</th>
                     <th class="text-center">Dia de Vencimento</th>
-                    <th>Instituição / Banco</th>
+                    <th>Banco</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Ações</th>
                   </tr>
@@ -203,17 +204,17 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
 
               <div class="form-group">
                 <label class="form-label">Modalidade *</label>
-                <select
-                  name="modalidade"
+                <app-searchable-dropdown
+                  [options]="modalidadeOptions"
+                  valueField="value"
+                  labelField="label"
+                  sublabelField="sublabel"
                   [(ngModel)]="newMethod.modalidade"
-                  required
-                  class="form-control"
-                >
-                  <option value="CREDITO">Cartão de Crédito</option>
-                  <option value="DEBITO">Cartão de Débito</option>
-                  <option value="DINHEIRO_CONTA">Dinheiro / Saldo em Conta</option>
-                  <option value="OUTRO">Outro / Boleto / Financiamento</option>
-                </select>
+                  name="modalidade"
+                  [showSearch]="false"
+                  [clearable]="false"
+                  placeholder="Selecione a modalidade..."
+                ></app-searchable-dropdown>
               </div>
 
               <div class="form-row" *ngIf="newMethod.modalidade === 'CREDITO'">
@@ -247,21 +248,24 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                     placeholder="ex: 5"
                   />
                   <small class="text-muted text-xs">
-                    Dia em que o valor é debitado / vence para pagamento.
+                    Dia em que o valor vence para pagamento.
                   </small>
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Instituição / Banco *</label>
-                <input
-                  type="text"
-                  name="instituicaoBanco"
+                <label class="form-label">Banco *</label>
+                <app-searchable-dropdown
+                  [options]="bankOptions"
                   [(ngModel)]="newMethod.instituicaoBanco"
-                  required
-                  class="form-control"
-                  placeholder="ex: Nubank, Itaú, Bradesco, Santander..."
-                />
+                  name="instituicaoBanco"
+                  placeholder="Selecione ou digite o banco..."
+                  searchPlaceholder="Pesquisar instituição financeira..."
+                  [allowCreate]="true"
+                  createOptionText="+ Inserir outro banco:"
+                  (createNew)="newMethod.instituicaoBanco = $event"
+                  [invalid]="modalForm.submitted && !newMethod.instituicaoBanco"
+                ></app-searchable-dropdown>
               </div>
             </div>
 
@@ -540,6 +544,30 @@ export class PaymentMethodsComponent implements OnInit {
     instituicaoBanco: '',
     ativo: true,
   };
+
+  modalidadeOptions = [
+    { value: 'CREDITO', label: 'Cartão de Crédito', sublabel: 'Fatura mensal com fechamento e vencimento' },
+    { value: 'DEBITO', label: 'Cartão de Débito', sublabel: 'Débito imediato em conta corrente' },
+    { value: 'DINHEIRO_CONTA', label: 'Dinheiro / Saldo em Conta', sublabel: 'Dinheiro em espécie ou Pix' },
+    { value: 'OUTRO', label: 'Outro / Boleto / Financiamento', sublabel: 'Outras formas de pagamento' },
+  ];
+
+  bankOptions: string[] = [
+    'Nubank',
+    'Itaú',
+    'Bradesco',
+    'Banco do Brasil',
+    'Santander',
+    'Caixa Econômica',
+    'Inter',
+    'C6 Bank',
+    'Mercado Pago',
+    'PicPay',
+    'BTG Pactual',
+    'Sicredi',
+    'Sicoob',
+    'XP Investimentos',
+  ];
 
   constructor(private readonly paymentMethodsService: PaymentMethodsService) {}
 

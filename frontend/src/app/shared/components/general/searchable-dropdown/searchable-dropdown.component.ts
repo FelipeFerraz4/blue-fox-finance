@@ -38,8 +38,9 @@ import {
   styleUrl: './searchable-dropdown.component.css'
 })
 export class SearchableDropdownComponent implements ControlValueAccessor, OnInit, OnChanges {
-  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('triggerBtn') triggerBtn?: ElementRef<HTMLButtonElement>;
+  @ViewChild('mainInput') mainInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('multiInput') multiInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('triggerContainer') triggerContainer?: ElementRef<HTMLDivElement>;
 
   // === DADOS E CONFIGURAÇÃO ===
   @Input() options: any[] = [];
@@ -55,7 +56,7 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   @Input() disabledField: string = 'disabled';
 
   // === COMPORTAMENTO & TEXTOS ===
-  @Input() placeholder: string = 'Selecione uma opção...';
+  @Input() placeholder: string = 'Selecione ou pesquise...';
   @Input() searchPlaceholder: string = 'Pesquisar...';
   @Input() emptyMessage: string = 'Nenhum resultado encontrado';
   @Input() multiple: boolean = false;
@@ -76,7 +77,7 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
 
   // === CRIAÇÃO DE NOVOS ITENS DINÂMICOS ===
   @Input() allowCreate: boolean = false;
-  @Input() createOptionText: string = '+ Adicionar item personalizado:';
+  @Input() createOptionText: string = '+ Adicionar item:';
 
   // === FUNÇÕES CUSTOMIZADAS ===
   @Input() customFilter?: (search: string, option: DropdownOption) => boolean;
@@ -101,6 +102,8 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   // === ESTADO INTERNO ===
   isOpen: boolean = false;
   searchTerm: string = '';
+  displayValue: string = '';
+  isTyping: boolean = false;
   normalizedOptions: DropdownOption[] = [];
   filteredOptions: DropdownOption[] = [];
   groupedOptions: DropdownGroup[] = [];
@@ -116,11 +119,16 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
 
   ngOnInit(): void {
     this.refreshOptions();
+    this.syncDisplayValue();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['options'] || changes['valueField'] || changes['labelField']) {
       this.refreshOptions();
+      this.syncDisplayValue();
+    }
+    if (changes['value']) {
+      this.syncDisplayValue();
     }
   }
 
@@ -163,11 +171,137 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   }
 
   get canCreateCustomOption(): boolean {
-    if (!this.searchTerm || !this.searchTerm.trim()) return false;
-    const cleanSearch = this.normalizeSearchText(this.searchTerm);
+    const term = (this.isTyping ? this.displayValue : this.searchTerm).trim();
+    if (!term) return false;
+    const cleanSearch = this.normalizeSearchText(term);
     return !this.normalizedOptions.some(
       (opt) => this.normalizeSearchText(opt.label) === cleanSearch
     );
+  }
+
+  get currentCreateTerm(): string {
+    return (this.isTyping ? this.displayValue : this.searchTerm).trim();
+  }
+
+  // Sincroniza o texto visível no input com o valor selecionado
+  syncDisplayValue(): void {
+    if (this.multiple) {
+      this.displayValue = '';
+      return;
+    }
+    if (this.hasValue && this.selectedOption) {
+      this.displayValue = this.selectedOption.label;
+    } else {
+      this.displayValue = '';
+    }
+  }
+
+  // === INTERAÇÃO COM O CAMPO UNIFICADO ===
+  onInputFocus(): void {
+    if (this.disabled) return;
+    this.openDropdown();
+    // Seleciona o texto atual para que o usuário possa digitar direto ou ver as opções
+    if (this.mainInput) {
+      setTimeout(() => this.mainInput?.nativeElement.select(), 10);
+    }
+  }
+
+  onInputChange(event: Event): void {
+    if (this.disabled) return;
+    this.isTyping = true;
+    this.searchTerm = this.displayValue;
+    this.searchChange.emit(this.searchTerm);
+
+    if (!this.isOpen) {
+      this.openDropdown();
+    } else {
+      this.filterOptions();
+      this.highlightedIndex = this.filteredOptions.length > 0 ? 0 : -1;
+      this.updateHighlightedOption();
+    }
+  }
+
+  onInputBlur(): void {
+    this.onTouched();
+    // Pequeno atraso para permitir cliques nas opções do dropdown antes de fechar
+    setTimeout(() => {
+      if (!this.elementRef.nativeElement.contains(document.activeElement)) {
+        if (this.isTyping) {
+          this.isTyping = false;
+          // Se o usuário digitou e não selecionou uma opção existente
+          const term = this.displayValue.trim();
+          if (this.allowCreate && term && this.canCreateCustomOption) {
+            this.handleCreateNew();
+          } else {
+            // Restaura o valor válido anterior
+            this.syncDisplayValue();
+          }
+        }
+        this.closeDropdown();
+      }
+    }, 200);
+  }
+
+  onInputKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        if (!this.isOpen) {
+          this.openDropdown();
+        } else {
+          this.navigateOptions(1);
+        }
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        if (this.isOpen) {
+          this.navigateOptions(-1);
+        }
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (this.isOpen) {
+          if (this.highlightedOption) {
+            this.selectOption(this.highlightedOption);
+          } else if (this.allowCreate && this.canCreateCustomOption) {
+            this.handleCreateNew();
+          }
+        } else {
+          this.openDropdown();
+        }
+        break;
+      case 'Escape':
+        event.preventDefault();
+        this.closeDropdown();
+        this.syncDisplayValue();
+        break;
+      case 'Tab':
+        if (this.isOpen) {
+          this.closeDropdown();
+        }
+        break;
+    }
+  }
+
+  // Interação no modo Múltiplo
+  onMultiInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Backspace' && !this.searchTerm && this.selectedOptions.length > 0) {
+      const last = this.selectedOptions[this.selectedOptions.length - 1];
+      this.deselectOption(last);
+      return;
+    }
+    this.onInputKeydown(event);
+  }
+
+  onMultiInputChange(): void {
+    this.searchChange.emit(this.searchTerm);
+    if (!this.isOpen) {
+      this.openDropdown();
+    } else {
+      this.filterOptions();
+      this.highlightedIndex = this.filteredOptions.length > 0 ? 0 : -1;
+      this.updateHighlightedOption();
+    }
   }
 
   // === CONTROLE DE ABERTURA / FECHAMENTO ===
@@ -177,6 +311,11 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
       this.closeDropdown();
     } else {
       this.openDropdown();
+      if (!this.multiple && this.mainInput) {
+        this.mainInput.nativeElement.focus();
+      } else if (this.multiple && this.multiInput) {
+        this.multiInput.nativeElement.focus();
+      }
     }
   }
 
@@ -187,18 +326,13 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
     this.highlightedOption = null;
     this.filterOptions();
     this.opened.emit();
-
-    setTimeout(() => {
-      if (this.showSearch && this.searchInput) {
-        this.searchInput.nativeElement.focus();
-      }
-    }, 50);
   }
 
   closeDropdown(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
     this.searchTerm = '';
+    this.isTyping = false;
     this.filterOptions();
     this.onTouched();
     this.closed.emit();
@@ -207,46 +341,27 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.closeDropdown();
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
-    if (this.isOpen) {
-      this.closeDropdown();
-      if (this.triggerBtn) {
-        this.triggerBtn.nativeElement.focus();
+      if (this.isTyping && this.allowCreate && this.canCreateCustomOption && this.displayValue.trim()) {
+        this.handleCreateNew();
+      } else {
+        this.syncDisplayValue();
       }
+      this.closeDropdown();
     }
   }
 
   // === BUSCA E FILTRAGEM ===
-  onSearchInput(): void {
-    this.searchChange.emit(this.searchTerm);
-    this.filterOptions();
-    this.highlightedIndex = 0;
-    this.updateHighlightedOption();
-  }
-
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.searchChange.emit('');
-    this.filterOptions();
-    if (this.searchInput) {
-      this.searchInput.nativeElement.focus();
-    }
-  }
-
   private filterOptions(): void {
-    if (!this.searchTerm || !this.searchTerm.trim()) {
+    const term = (this.multiple ? this.searchTerm : (this.isTyping ? this.displayValue : '')).trim();
+
+    if (!term) {
       this.filteredOptions = [...this.normalizedOptions];
     } else {
-      const searchNormalized = this.normalizeSearchText(this.searchTerm);
+      const searchNormalized = this.normalizeSearchText(term);
 
       if (this.customFilter) {
         this.filteredOptions = this.normalizedOptions.filter((opt) =>
-          this.customFilter!(this.searchTerm, opt)
+          this.customFilter!(term, opt)
         );
       } else {
         this.filteredOptions = this.normalizedOptions.filter((opt) => {
@@ -297,12 +412,19 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
         this.optionSelect.emit(opt);
       }
       this.updateValue(currentList);
+      this.searchTerm = '';
+      this.filterOptions();
+      if (this.multiInput) {
+        this.multiInput.nativeElement.focus();
+      }
     } else {
       this.updateValue(opt.value);
+      this.isTyping = false;
+      this.displayValue = opt.label;
       this.optionSelect.emit(opt);
       this.closeDropdown();
-      if (this.triggerBtn) {
-        this.triggerBtn.nativeElement.focus();
+      if (this.mainInput) {
+        this.mainInput.nativeElement.blur();
       }
     }
   }
@@ -338,20 +460,27 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
 
     const emptyVal = this.multiple ? [] : null;
     this.updateValue(emptyVal);
+    this.displayValue = '';
+    this.searchTerm = '';
+    this.isTyping = false;
     this.clear.emit();
+    this.filterOptions();
   }
 
   handleCreateNew(): void {
-    const term = this.searchTerm.trim();
+    const term = (this.isTyping ? this.displayValue : this.searchTerm).trim();
     if (!term) return;
 
     this.createNew.emit(term);
 
     if (!this.multiple) {
+      this.displayValue = term;
+      this.isTyping = false;
       this.closeDropdown();
+    } else {
+      this.searchTerm = '';
+      this.filterOptions();
     }
-    this.searchTerm = '';
-    this.filterOptions();
   }
 
   private updateValue(newValue: any): void {
@@ -369,45 +498,6 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
       if (a.value !== undefined && b.value !== undefined) return a.value === b.value;
     }
     return false;
-  }
-
-  // === TECLADO E ACESSIBILIDADE ===
-  onTriggerKeydown(event: KeyboardEvent): void {
-    if (this.disabled) return;
-
-    switch (event.key) {
-      case 'Enter':
-      case ' ':
-      case 'ArrowDown':
-        event.preventDefault();
-        this.openDropdown();
-        break;
-    }
-  }
-
-  onSearchKeydown(event: KeyboardEvent): void {
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        this.navigateOptions(1);
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        this.navigateOptions(-1);
-        break;
-      case 'Enter':
-        event.preventDefault();
-        if (this.highlightedOption) {
-          this.selectOption(this.highlightedOption);
-        } else if (this.allowCreate && this.canCreateCustomOption) {
-          this.handleCreateNew();
-        }
-        break;
-      case 'Escape':
-        event.preventDefault();
-        this.closeDropdown();
-        break;
-    }
   }
 
   private navigateOptions(direction: number): void {
@@ -501,7 +591,6 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
     if (item.nome !== undefined) return String(item.nome);
     if (item.name !== undefined) return String(item.name);
     if (item.descricao !== undefined) return String(item.descricao);
-    if (item.title !== undefined) return String(item.title);
     return String(item);
   }
 
@@ -510,8 +599,8 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
       return String(item[this.sublabelField]);
     }
     if (item.sublabel !== undefined) return String(item.sublabel);
-    if (item.descricao !== undefined && this.labelField !== 'descricao') return String(item.descricao);
-    if (item.email !== undefined) return String(item.email);
+    if (item.categoria !== undefined) return String(item.categoria);
+    if (item.instituicaoBanco !== undefined) return String(item.instituicaoBanco);
     return undefined;
   }
 
@@ -547,6 +636,7 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   // === MÉTODOS CONTROL VALUE ACCESSOR ===
   writeValue(value: any): void {
     this.value = value;
+    this.syncDisplayValue();
   }
 
   registerOnChange(fn: any): void {
