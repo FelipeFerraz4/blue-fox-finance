@@ -347,7 +347,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                   [(ngModel)]="formData.nome"
                   required
                   class="form-control"
-                  placeholder="ex: Felipe Ferraz, Maria Silva..."
+                  placeholder="ex: João Silva, Maria Oliveira..."
                   autofocus
                 />
               </div>
