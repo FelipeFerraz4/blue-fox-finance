@@ -16,6 +16,25 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
 
+    # Banco descartável para validar as migrations do Prisma
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bluefox_finance_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/bluefox_finance_ci?schema=public
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -42,6 +61,15 @@ jobs:
       - name: "Backend: gerar Prisma Client"
         working-directory: backend
         run: npx prisma generate
+
+      - name: "Backend: aplicar migrations num banco limpo"
+        working-directory: backend
+        run: npx prisma migrate deploy
+
+      # Falha se o schema mudou e ninguém criou a migration (prisma migrate dev --name <nome>)
+      - name: "Backend: verificar se as migrations batem com o schema"
+        working-directory: backend
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema --exit-code
 
       - name: "Backend: build (NestJS)"
         working-directory: backend

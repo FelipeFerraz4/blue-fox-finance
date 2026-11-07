@@ -35,7 +35,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `prisma`: Módulo global com `PrismaService` conectado ao PostgreSQL.
 
 ### Modelagem Prisma (`backend/prisma`)
-- Esquema modular em `prisma/schema/*.prisma` (`base.prisma`, `usuario.prisma`, `categoria.prisma`, `loja.prisma`, `pagamento.prisma`, `lancamento.prisma`).
+- Esquema modular em `prisma/schema/*.prisma` (`base.prisma`, `usuario.prisma`, `categoria.prisma`, `loja.prisma`, `pagamento.prisma`, `lancamento.prisma`, `preferencia.prisma`).
+- **Migrations versionadas** em `prisma/migrations/` (o Prisma 5.22 procura ali mesmo com schema em pasta). Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy`, seed e `node dist/src/main`.
 - Seeds em `prisma/seeds/*.ts`.
 
 ## 🚀 Comandos Úteis
@@ -47,7 +48,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 ## 🚢 Deploy automático (CI/CD)
 - Workflow: `.github/workflows/quality-gate.yml` (mesmo padrão do Aquarismo e do Blog Backend).
 - Fluxo: trabalho na `develop` → PR `develop` → `main` roda o **Quality Gate** → o merge (push na `main`) ou `workflow_dispatch` dispara o **Deploy to VPS**.
-- Quality Gate (um job só, para backend e frontend): `npm ci`, `npm audit --audit-level=critical`, `prisma generate` + build do backend, build de produção do frontend e `docker build` das duas imagens.
+- Quality Gate (um job só, para backend e frontend): `npm ci`, `npm audit --audit-level=critical`, `prisma generate`, `migrate deploy` num Postgres de serviço + `migrate diff --exit-code` (falha se faltar migration), build do backend, build de produção do frontend e `docker build` das duas imagens.
 - Node do CI = Node dos Dockerfiles (22 / npm 10). Lockfile gerado com npm 11 quebra o `npm ci`; regenere com `npx -y npm@10 install --package-lock-only --ignore-scripts`.
 - O `frontend/package.json` tem `overrides` (`piscina`, `tar`) para zerar vulnerabilidades críticas que o Angular 19 fixa; podem ser removidos ao migrar o Angular.
 - Deploy: SSH (`appleboy/ssh-action`) na pasta `~/apps/blue-fox/blue-fox-finance` do usuário `deployer`, `git reset --hard origin/main` e `docker compose ... --env-file .env.prod up -d --build`. O `.env.prod` real precisa existir na VPS.

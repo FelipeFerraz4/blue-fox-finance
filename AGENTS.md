@@ -342,7 +342,8 @@ npm run build     # Compila a aplicação para produção (dist/)
 ### Backend (`backend/`)
 ```bash
 npm run start:dev        # Executa a API em modo watch (porta 3000)
-npx prisma migrate dev   # Aplica migrações no banco de dados
+npm run prisma:migrate:dev -- --name <nome>  # Cria migration a partir do schema (dev)
+npx prisma migrate deploy                    # Aplica migrations pendentes
 npx prisma db seed       # Executa sementes iniciais
 ```
 
