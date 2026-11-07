@@ -43,3 +43,12 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - **Frontend Dev:** `cd frontend && npm run start`
 - **Backend Dev:** `cd backend && npm run start:dev`
 - **Docker Dev:** `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d`
+
+## 🚢 Deploy automático (CI/CD)
+- Workflow: `.github/workflows/quality-gate.yml` (mesmo padrão do Aquarismo e do Blog Backend).
+- Fluxo: trabalho na `develop` → PR `develop` → `main` roda o **Quality Gate** → o merge (push na `main`) ou `workflow_dispatch` dispara o **Deploy to VPS**.
+- Quality Gate (um job só, para backend e frontend): `npm ci`, `npm audit --audit-level=critical`, `prisma generate` + build do backend, build de produção do frontend e `docker build` das duas imagens.
+- Node do CI = Node dos Dockerfiles (22 / npm 10). Lockfile gerado com npm 11 quebra o `npm ci`; regenere com `npx -y npm@10 install --package-lock-only --ignore-scripts`.
+- O `frontend/package.json` tem `overrides` (`piscina`, `tar`) para zerar vulnerabilidades críticas que o Angular 19 fixa; podem ser removidos ao migrar o Angular.
+- Deploy: SSH (`appleboy/ssh-action`) na pasta `~/apps/blue-fox/blue-fox-finance` do usuário `deployer`, `git reset --hard origin/main` e `docker compose ... --env-file .env.prod up -d --build`. O `.env.prod` real precisa existir na VPS.
+- Secrets do repo: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, opcionais `VPS_PORT` e `VPS_APP_PATH`.
