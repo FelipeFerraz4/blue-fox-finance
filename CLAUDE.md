@@ -4,7 +4,7 @@ Este documento serve como guia de contexto para assistentes de IA no repositóri
 
 ## 🌌 Visão Geral do Domínio
 A **Blue Fox Finance** é o sistema central de controle financeiro do ecossistema Blue Fox.
-- **Entidades principais:** Lançamentos/Despesas (`Lancamento`), Compradores (`Buyer`), Lojas (`Store`), Categorias (`CategoriaItem`, `CategoriaLoja`), Meios de Pagamento (`PaymentMethod`), Usuários (`Usuario`).
+- **Entidades principais:** Lançamentos/Despesas (`Lancamento`), Compradores (`Buyer`), Lojas (`Store`), Categorias (`CategoriaItem`, `CategoriaLoja`), Meios de Pagamento (`PaymentMethod`), Contas a Pagar (`ContaPagar` + ocorrências `PagamentoConta`), Usuários (`Usuario`).
 - **Autenticação & IAM:** SSO federado via Keycloak (Blue Fox IAM).
 
 ## 🏗️ Arquitetura do Frontend (Angular 19)
@@ -16,7 +16,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `main/`: Rotas públicas (`home/`, `about/`, `updates/`).
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação (`expense-form/`).
   - `admin/`: Painel administrativo com categorias de itens/lojas e perfil de usuário.
-  - `dashboard/`, `buyers/`, `stores/`, `payment-methods/`: Módulos de páginas de domínio.
+  - `dashboard/`, `buyers/`, `stores/`, `payment-methods/`, `bills/`: Módulos de páginas de domínio (`bills/` = Contas a Pagar, com `bill-alerts-card/` usado no dashboard).
 - `src/app/shared`:
   - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`).
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
@@ -31,6 +31,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `dashboard`: Métricas consolidadas e faturas mensais (`dashboard.controller.ts`, `dashboard.service.ts`).
 - `expenses`: Gestão de despesas, cálculo de parcelas e faturas de cartão (`expenses.controller.ts`, `expenses.service.ts`).
 - `payment-methods`: Meios de pagamento (`payment-methods.controller.ts`, `payment-methods.service.ts`).
+- `bills`: Contas a pagar recorrentes (mensal, anual, avulsa). `ContaPagar` é a regra; `PagamentoConta` é a ocorrência de cada mês, criada sob demanda (`ensureOccurrences`) desde `dataInicio`, então mês nunca aberto também aparece como atrasado. Nada é pago automaticamente: o usuário marca (`/occurrences/:id/pay`). Conta vinculada a cartão de crédito usa como valor a soma das parcelas do mês e, ao pagar, marca `Parcela.pago`. Status (`PAGA`, `ATRASADA`, `VENCE_HOJE`, `PROXIMA`, `PENDENTE`) é calculado com "hoje" no fuso `APP_TIMEZONE` (padrão `America/Sao_Paulo`). `/bills/alerts` alimenta o selo do menu e o card do dashboard.
+  - **Fase futura (notificações):** cron diário (`@nestjs/schedule`, 8h de SP) reaproveitando `getAlerts` para todos os usuários; canal a definir (e-mail via claim `email` do Keycloak, Web Push ou Telegram); colunas `notificadoAntesEm`/`notificadoNoDiaEm` em `PagamentoConta` para não notificar duas vezes.
 - `stores`: Gestão de lojas e fornecedores (`stores.controller.ts`, `stores.service.ts`).
 - `prisma`: Módulo global com `PrismaService` conectado ao PostgreSQL.
 

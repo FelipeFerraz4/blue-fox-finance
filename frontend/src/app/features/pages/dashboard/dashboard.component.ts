@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DashboardService } from '../../../core/services/dashboard/dashboard.service';
 import { DashboardOverview } from '../../../shared/model/types/dashboard.model';
+import { BillAlertsCardComponent } from '../bills/bill-alerts-card/bill-alerts-card.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, BillAlertsCardComponent],
   template: `
     <div class="dashboard-page">
       <!-- Cabeçalho com Seletor de Período -->
@@ -49,6 +50,9 @@ import { DashboardOverview } from '../../../shared/model/types/dashboard.model';
           </button>
         </div>
       </div>
+
+      <!-- Contas a pagar atrasadas / vencendo (some quando não há nada) -->
+      <app-bill-alerts-card></app-bill-alerts-card>
 
       <!-- Estado de Carregamento -->
       <div *ngIf="loading" class="loading-state card">

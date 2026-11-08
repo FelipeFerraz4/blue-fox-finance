@@ -7,7 +7,7 @@ Este documento serve como guia de arquitetura e convenções do frontend do **Bl
 O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e manutenção:
 
 ### 1. `src/app/core` (Singletons e Lógica Global)
-- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`auth/`, `buyers/`, `categories/`, `dashboard/`, `expenses/`, `payment-methods/`, `sidebar/`, `stores/`, `user/`).
+- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`auth/`, `buyers/`, `categories/`, `dashboard/`, `expenses/`, `bills/`, `payment-methods/`, `sidebar/`, `stores/`, `user/`).
 - **Guards (`core/guards/`):** Proteção de rotas com base em autenticação e papéis (`auth.guard.ts`).
 - **Interceptors (`core/interceptors/`):** Interceptação HTTP global como injeção de tokens JWT (`auth.interceptor.ts`).
 - **CoreModule (`core/core-module.ts`):** Módulo central de registro.
@@ -21,6 +21,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
   - `buyers/`: Gestão de compradores/pagadores.
   - `stores/`: Gestão de lojas e fornecedores.
   - `payment-methods/`: Gestão de meios e modalidades de pagamento.
+  - `bills/`: Contas a pagar (vencimentos do mês, marcar como paga, cadastro) e `bill-alerts-card/` (avisos no dashboard). O `BillsService` expõe o signal `alerts`, usado pelo selo da sidebar.
 
 ### 3. `src/app/shared` (Componentes Reutilizáveis e Tipos)
 - **Componentes Gerais (`shared/components/general/`):** Componentes comuns de layout e UI (`navbar/`, `sidebar/`, `confirm-modal/`, `notice-modal/`).

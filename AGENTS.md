@@ -233,7 +233,8 @@ backend/src/
 │
 ├── common/                                           # Utilitários, helpers e constantes compartilhadas
 │   └── helpers/
-│       └── invoice-calculator.helper.ts              # Cálculo de faturas de cartão e virada de ciclo
+│       ├── invoice-calculator.helper.ts              # Cálculo de faturas de cartão e virada de ciclo
+│       └── bill-schedule.helper.ts                   # Vencimentos de contas a pagar, "hoje" no fuso de SP e status
 │
 ├── prisma/                                           # Provedor do cliente Prisma
 │   ├── prisma.service.ts                             # Extensão do PrismaClient com lifecycle hooks
@@ -248,6 +249,13 @@ backend/src/
     │   ├── roles.decorator.ts                        # Decorator @Roles('admin', ...)
     │   ├── public.decorator.ts                       # Decorator @Public() para rotas abertas
     │   └── current-user.decorator.ts                 # Decorator @CurrentUser() para injeção do usuário
+    │
+    ├── bills/                                        # Contas a pagar recorrentes (energia, internet, fatura do cartão)
+    │   ├── bills.controller.ts                       # /api/bills (CRUD), /occurrences?month, /alerts, /occurrences/:id/pay|unpay
+    │   ├── bills.service.ts                          # Geração lazy de ocorrências, valor da fatura do cartão, pagamento
+    │   ├── bills.module.ts
+    │   └── dto/
+    │       └── bill.dto.ts
     │
     ├── buyers/                                       # Gestão de compradores/pagadores
     │   ├── buyers.controller.ts                      # Endpoints: GET, POST, PUT, DELETE /api/buyers
@@ -302,6 +310,7 @@ backend/prisma/
 │   ├── loja.prisma                                   # Modelo Loja vinculado à CategoriaLoja
 │   ├── pagamento.prisma                              # Modelo MeioPagamento e ModalidadePagamento
 │   ├── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
+│   ├── conta.prisma                                  # Contas a pagar (ContaPagar) e ocorrências (PagamentoConta)
 │   └── preferencia.prisma                            # Preferências de lançamento por usuário
 └── migrations/                                       # Migrations versionadas (prisma migrate deploy)
 ```
