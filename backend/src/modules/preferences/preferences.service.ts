@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateExpensePreferenceDto } from './dto/expense-preference.dto';
 
@@ -40,6 +40,8 @@ export class PreferencesService {
   }
 
   async updateExpensePreferences(userId: string, dto: UpdateExpensePreferenceDto) {
+    await this.assertReferencesBelongToUser(userId, dto);
+
     // Upsert garante que cria se não existir ou atualiza apenas os campos enviados
     return this.prisma.preferenciaLancamento.upsert({
       where: { userId },
@@ -68,6 +70,42 @@ export class PreferencesService {
         },
       },
     });
+  }
+
+  /**
+   * Garante que comprador, loja e meio de pagamento padrão pertencem ao usuário.
+   * Sem isso, um ID de outro usuário seria aceito e o GET exporia nome/e-mail dele.
+   */
+  private async assertReferencesBelongToUser(userId: string, dto: UpdateExpensePreferenceDto) {
+    if (dto.compradorPadraoId) {
+      const buyer = await this.prisma.comprador.findFirst({
+        where: { id: dto.compradorPadraoId, userId },
+        select: { id: true },
+      });
+      if (!buyer) {
+        throw new NotFoundException('Comprador informado não existe ou não pertence ao seu usuário.');
+      }
+    }
+
+    if (dto.lojaPadraoId) {
+      const store = await this.prisma.loja.findFirst({
+        where: { id: dto.lojaPadraoId, userId },
+        select: { id: true },
+      });
+      if (!store) {
+        throw new NotFoundException('Loja informada não existe ou não pertence ao seu usuário.');
+      }
+    }
+
+    if (dto.meioPagamentoPadraoId) {
+      const method = await this.prisma.paymentMethod.findFirst({
+        where: { id: dto.meioPagamentoPadraoId, userId },
+        select: { id: true },
+      });
+      if (!method) {
+        throw new NotFoundException('Meio de pagamento informado não existe ou não pertence ao seu usuário.');
+      }
+    }
   }
 
   async clearExpensePreferences(userId: string) {
