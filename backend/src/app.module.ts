@@ -13,6 +13,7 @@ import { BuyersModule } from './modules/buyers/buyers.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { BillsModule } from './modules/bills/bills.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { BillsModule } from './modules/bills/bills.module';
     CategoriesModule,
     PreferencesModule,
     BillsModule,
+    AnalyticsModule,
   ],
   providers: [
     {

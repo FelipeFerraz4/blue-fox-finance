@@ -159,6 +159,37 @@ export class BillsService {
     };
   }
 
+  /** Pago × pendente por mês do ano (usado pela página de Análises). */
+  async getYearSummary(userId: string, year: number) {
+    const currentMonth = BillScheduleHelper.currentMonth();
+    const lastMonth = `${year}-12`;
+    await this.ensureOccurrences(userId, lastMonth > currentMonth ? lastMonth : currentMonth);
+
+    const occurrences = await this.prisma.pagamentoConta.findMany({
+      where: { userId, mesReferencia: { startsWith: `${year}-` } },
+      include: { conta: true },
+    });
+    const views = await this.toViews(userId, occurrences, BillScheduleHelper.today());
+
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = `${year}-${String(i + 1).padStart(2, '0')}`;
+      const items = views.filter((o) => o.mesReferencia === month);
+      const pagas = items.filter((o) => o.status === 'PAGA');
+      const pendentes = items.filter((o) => o.status !== 'PAGA');
+      const sum = (list: BillOccurrenceView[]) =>
+        Number(list.reduce((acc, o) => acc + (o.valor ?? 0), 0).toFixed(2));
+      return {
+        mes: i + 1,
+        pago: sum(pagas),
+        pendente: sum(pendentes),
+        quantidadePaga: pagas.length,
+        quantidadePendente: pendentes.length,
+        quantidadeAtrasada: pendentes.filter((o) => o.status === 'ATRASADA').length,
+        semValor: pendentes.filter((o) => o.valor === null).length,
+      };
+    });
+  }
+
   /** Atrasadas, vencendo hoje e próximas (janela lembrarDiasAntes). Base dos avisos. */
   async getAlerts(userId: string) {
     const currentMonth = BillScheduleHelper.currentMonth();
