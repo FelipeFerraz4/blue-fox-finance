@@ -67,9 +67,9 @@ Os dados do banco de dados ficam salvos de forma persistente no diretório local
 
 ## 📦 Inicialização e Seeds Automáticos
 
-Na primeira inicialização, o container do backend executa automaticamente:
-1. `prisma db push` para criar as tabelas no PostgreSQL.
-2. `prisma:seed` para pré-carregar os meios de pagamento padrão:
+A cada inicialização, o container do backend executa automaticamente (`backend/docker-entrypoint.sh`):
+1. `prisma migrate deploy` para aplicar as migrations versionadas em `backend/prisma/migrations` (nunca `db push --accept-data-loss`). Bancos antigos criados com `db push` recebem um baseline automático na primeira subida, que falha em vez de apagar dados se houver divergência destrutiva.
+2. `prisma db seed` (idempotente) para pré-carregar os meios de pagamento padrão:
    - **Dinheiro**
    - **Pix**
    - **Boleto Bancário**
@@ -159,8 +159,8 @@ docker compose up -d postgres
 cd backend
 npm install
 npx prisma generate
-npx prisma db push
-npm run prisma:seed
+npx prisma migrate deploy
+npx prisma db seed
 npm run start:dev
 ```
 
@@ -171,3 +171,11 @@ npm install
 npm run start
 ```
 Acesse: `http://localhost:4200`.
+
+### Alterando o schema do banco
+1. Edite os arquivos em `backend/prisma/schema/*.prisma`.
+2. Gere a migration: `cd backend && npm run prisma:migrate:dev -- --name <descricao_curta>`.
+3. Revise o SQL gerado em `prisma/migrations/` (renomear campo vira DROP + ADD: ajuste à mão para `RENAME COLUMN` se quiser manter os dados) e commite junto com o schema.
+4. O Quality Gate falha se o schema mudar sem migration correspondente.
+
+> Banco local criado antes com `db push` (sem tabela `_prisma_migrations`)? Suba o backend uma vez pelo Docker para o baseline automático, ou rode `npx prisma db push` (sem `--accept-data-loss`) e depois `npx prisma migrate resolve --applied <pasta>` para cada pasta em `prisma/migrations`.

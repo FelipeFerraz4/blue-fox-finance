@@ -1,0 +1,147 @@
+name: Quality Gate & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+
+    # Banco descartável para validar as migrations do Prisma
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bluefox_finance_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/bluefox_finance_ci?schema=public
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Mesma versão dos Dockerfiles (node:22-alpine / npm 10), evita divergência de lockfile
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # ---------- Backend (NestJS + Prisma) ----------
+      - name: "Backend: instalar dependências (CI safe)"
+        working-directory: backend
+        run: npm ci
+
+      - name: "Backend: audit de segurança (falha apenas em falhas críticas)"
+        working-directory: backend
+        run: npm audit --audit-level=critical
+
+      - name: "Backend: gerar Prisma Client"
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: "Backend: aplicar migrations num banco limpo"
+        working-directory: backend
+        run: npx prisma migrate deploy
+
+      # Falha se o schema mudou e ninguém criou a migration (prisma migrate dev --name <nome>)
+      - name: "Backend: verificar se as migrations batem com o schema"
+        working-directory: backend
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema --exit-code
+
+      - name: "Backend: build (NestJS)"
+        working-directory: backend
+        run: npm run build
+
+      # ---------- Frontend (Angular) ----------
+      - name: "Frontend: instalar dependências (CI safe)"
+        working-directory: frontend
+        run: npm ci
+
+      - name: "Frontend: audit de segurança (falha apenas em falhas críticas)"
+        working-directory: frontend
+        run: npm audit --audit-level=critical
+
+      - name: "Frontend: build (Produção)"
+        working-directory: frontend
+        env:
+          NG_BUILD_MAX_WORKERS: 1
+        run: npm run build
+
+      # ---------- Imagens Docker (pega falha de Dockerfile/lockfile antes do deploy) ----------
+      - name: "Docker: build da imagem do backend"
+        run: docker build --target runner -t blue-fox-finance-api:ci ./backend
+
+      - name: "Docker: build da imagem do frontend"
+        run: docker build --build-arg CONFIGURATION=production -t blue-fox-finance:ci ./frontend
+
+  deploy:
+    name: Deploy to VPS
+    needs: quality-gate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Executar Deploy via SSH na VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+            echo "🚀 [Deploy] Iniciando deploy do Blue Fox Finance na VPS..."
+
+            # Localiza automaticamente o diretório no home do usuário deployer
+            if [ -d "$HOME/apps/blue-fox/blue-fox-finance" ]; then
+              TARGET_DIR="$HOME/apps/blue-fox/blue-fox-finance"
+            elif [ -d "$HOME/apps/blue-fox-finance" ]; then
+              TARGET_DIR="$HOME/apps/blue-fox-finance"
+            elif [ -n "${{ secrets.VPS_APP_PATH }}" ]; then
+              TARGET_DIR=$(echo "${{ secrets.VPS_APP_PATH }}" | tr -d '\r\n' | xargs)
+            else
+              TARGET_DIR="$HOME/apps/blue-fox/blue-fox-finance"
+            fi
+
+            echo "📂 Diretório de trabalho: $TARGET_DIR"
+            cd "$TARGET_DIR"
+
+            # Garante remote HTTPS para evitar erro de SSH Host Key na VPS
+            git remote set-url origin https://github.com/FelipeFerraz4/blue-fox-finance.git
+
+            echo "📥 Atualizando código fonte da branch main..."
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+
+            echo "🐳 Recriando containers com Docker Compose..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down || true
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+            echo "🧹 Removendo imagens órfãs/antigas..."
+            docker image prune -f
+
+            echo "✅ [Deploy] Deploy do Blue Fox Finance concluído com sucesso!"
