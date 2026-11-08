@@ -301,15 +301,9 @@ backend/prisma/
 │   ├── categoria.prisma                              # Modelos CategoriaItem e CategoriaLoja
 │   ├── loja.prisma                                   # Modelo Loja vinculado à CategoriaLoja
 │   ├── pagamento.prisma                              # Modelo MeioPagamento e ModalidadePagamento
-│   └── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
-├── seeds/                                            # Scripts de carga inicial de banco
-│   ├── index.ts
-│   ├── usuarios.seed.ts
-│   ├── categorias-itens.seed.ts
-│   ├── categorias-lojas.seed.ts
-│   ├── lojas.seed.ts
-│   └── pagamentos.seed.ts
-└── seed.ts                                           # Orquestrador do comando npx prisma db seed
+│   ├── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
+│   └── preferencia.prisma                            # Preferências de lançamento por usuário
+└── migrations/                                       # Migrations versionadas (prisma migrate deploy)
 ```
 
 ---
@@ -344,7 +338,6 @@ npm run build     # Compila a aplicação para produção (dist/)
 npm run start:dev        # Executa a API em modo watch (porta 3000)
 npm run prisma:migrate:dev -- --name <nome>  # Cria migration a partir do schema (dev)
 npx prisma migrate deploy                    # Aplica migrations pendentes
-npx prisma db seed       # Executa sementes iniciais
 ```
 
 ---

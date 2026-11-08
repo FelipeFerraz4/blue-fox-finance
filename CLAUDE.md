@@ -36,8 +36,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 
 ### Modelagem Prisma (`backend/prisma`)
 - Esquema modular em `prisma/schema/*.prisma` (`base.prisma`, `usuario.prisma`, `categoria.prisma`, `loja.prisma`, `pagamento.prisma`, `lancamento.prisma`, `preferencia.prisma`).
-- **Migrations versionadas** em `prisma/migrations/` (o Prisma 5.22 procura ali mesmo com schema em pasta). Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy`, seed e `node dist/src/main`.
-- Seeds em `prisma/seeds/*.ts`.
+- **Migrations versionadas** em `prisma/migrations/` (o Prisma 5.22 procura ali mesmo com schema em pasta). Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy` e `node dist/src/main`.
+- **Sem seeds de dados**: tudo é isolado por `userId` (`sub` do token, via `@CurrentUser('sub')`) e cada usuário começa vazio. Todo service filtra por `userId` e valida que IDs referenciados (comprador, loja, meio de pagamento) pertencem ao usuário.
 
 ## 🚀 Comandos Úteis
 - **Frontend Build:** `cd frontend && npm run build`

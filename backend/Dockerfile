@@ -24,10 +24,10 @@ RUN apk add --no-cache openssl libc6-compat
 
 ENV NODE_ENV=production
 
-COPY package*.json tsconfig*.json ./
-RUN npm install --omit=dev && npm install -g ts-node typescript@^5.6.2 prisma
-
-ENV NODE_PATH=/usr/local/lib/node_modules
+COPY package*.json ./
+# CLI do Prisma na mesma versão do lockfile (a do client), para migrate deploy na inicialização
+RUN npm install --omit=dev && \
+    npm install -g prisma@$(node -p "require('./package-lock.json').packages['node_modules/prisma'].version")
 
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
