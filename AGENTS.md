@@ -250,6 +250,13 @@ backend/src/
     │   ├── public.decorator.ts                       # Decorator @Public() para rotas abertas
     │   └── current-user.decorator.ts                 # Decorator @CurrentUser() para injeção do usuário
     │
+    ├── analytics/                                    # Página Análises (Power BI): linhas do ano para filtro cruzado no cliente
+    │   ├── analytics.controller.ts                   # GET /api/analytics?year=&basis=compra|fatura
+    │   ├── analytics.service.ts                      # facts, ano anterior, compromissos futuros, resumo de contas
+    │   ├── analytics.module.ts
+    │   └── dto/
+    │       └── analytics-query.dto.ts
+    │
     ├── bills/                                        # Contas a pagar recorrentes (energia, internet, fatura do cartão)
     │   ├── bills.controller.ts                       # /api/bills (CRUD), /occurrences?month, /alerts, /occurrences/:id/pay|unpay
     │   ├── bills.service.ts                          # Geração lazy de ocorrências, valor da fatura do cartão, pagamento
