@@ -22,7 +22,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 
-## 🏗️ Arquitetura do Backend (NestJS 10 + Prisma 5)
+## 🏗️ Arquitetura do Backend (NestJS 10 + Prisma 6)
 
 ### Estrutura de Módulos (`backend/src/modules`)
 - `auth`: Autenticação JWT via Keycloak, `JwtAuthGuard`, `RolesGuard`, decorators `@Roles()`, `@Public()`, `@CurrentUser()`. Roles em `roles.constants.ts` (espelho do realm). Todo controller de domínio leva `@Roles(...FINANCE_ACCESS_ROLES)` na classe (`ROLE_ADMIN`, `ROLE_FINANCE_ADMIN`, `ROLE_FINANCE_USER`); no frontend, as rotas internas usam `data: { roles: FINANCE_ACCESS_ROLES }`.
@@ -36,7 +36,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 
 ### Modelagem Prisma (`backend/prisma`)
 - Esquema modular em `prisma/schema/*.prisma` (`base.prisma`, `usuario.prisma`, `categoria.prisma`, `loja.prisma`, `pagamento.prisma`, `lancamento.prisma`, `preferencia.prisma`).
-- **Migrations versionadas** em `prisma/migrations/` (o Prisma 5.22 procura ali mesmo com schema em pasta). Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy` e `node dist/src/main`.
+- **Prisma 6** configurado por `backend/prisma.config.ts` (caminho do schema em pasta e das migrations; carrega o `.env` via `dotenv`). A CLI `prisma` é dependência de produção porque o container roda as migrations na inicialização.
+- **Migrations versionadas** em `prisma/migrations/`. Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy` e `node dist/src/main`.
 - **Sem seeds de dados**: tudo é isolado por `userId` (`sub` do token, via `@CurrentUser('sub')`) e cada usuário começa vazio. Todo service filtra por `userId` e valida que IDs referenciados (comprador, loja, meio de pagamento) pertencem ao usuário.
 
 ## 🚀 Comandos Úteis

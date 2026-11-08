@@ -219,7 +219,7 @@ O `SearchableDropdownComponent` é o componente padrão do ecossistema Blue Fox 
 
 ---
 
-## 🏗️ 2. Arquitetura do Backend (NestJS 10 + Prisma 5)
+## 🏗️ 2. Arquitetura do Backend (NestJS 10 + Prisma 6)
 
 O backend é uma API REST modular construída com NestJS, tipada com TypeScript, com documentação Prisma e integração nativa com o Keycloak.
 
@@ -292,7 +292,7 @@ backend/src/
 
 ### 📂 Modelagem de Dados (`backend/prisma`)
 
-O Prisma utiliza o recurso de múltiplos esquemas (`prismaSchemaFolder`):
+O Prisma utiliza schema dividido em vários arquivos, configurado em `backend/prisma.config.ts` (`schema: prisma/schema`, `migrations: prisma/migrations`):
 ```text
 backend/prisma/
 ├── schema/

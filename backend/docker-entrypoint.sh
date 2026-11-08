@@ -16,11 +16,11 @@ p.\$queryRawUnsafe(\"SELECT to_regclass('public._prisma_migrations') IS NULL AS 
 
 if [ "$STATE" = "baseline" ]; then
   echo "[entrypoint] Banco criado via db push detectado: fazendo baseline das migrations..."
-  prisma db push --skip-generate
+  npx prisma db push --skip-generate
   for dir in prisma/migrations/*/; do
-    prisma migrate resolve --applied "$(basename "$dir")"
+    npx prisma migrate resolve --applied "$(basename "$dir")"
   done
 fi
 
-prisma migrate deploy
+npx prisma migrate deploy
 exec node dist/src/main
