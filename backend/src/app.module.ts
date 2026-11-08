@@ -12,6 +12,7 @@ import { StoresModule } from './modules/stores/stores.module';
 import { BuyersModule } from './modules/buyers/buyers.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
+import { BillsModule } from './modules/bills/bills.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
     BuyersModule,
     CategoriesModule,
     PreferencesModule,
+    BillsModule,
   ],
   providers: [
     {
