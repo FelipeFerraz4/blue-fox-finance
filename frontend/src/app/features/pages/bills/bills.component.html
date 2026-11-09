@@ -183,7 +183,7 @@
             @if (o.status === 'PAGA') {
               <button class="btn btn-secondary btn-sm" (click)="occurrenceToUnpay = o">Desfazer</button>
             } @else {
-              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Pagar</button>
+              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Confirmar pagamento</button>
             }
           </div>
         </li>
@@ -203,7 +203,7 @@
               </svg>
             </div>
             <div>
-              <h3>Pagar</h3>
+              <h3>Confirmar pagamento</h3>
               <p class="modal-subtitle">{{ o.nome }}</p>
             </div>
           </div>
@@ -214,7 +214,7 @@
           <div class="modal-body">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Valor *</label>
+                <label class="form-label">Valor pago *</label>
                 <input
                   type="number"
                   name="valorPago"
@@ -227,7 +227,7 @@
                 />
               </div>
               <div class="form-group">
-                <label class="form-label">Data *</label>
+                <label class="form-label">Data do pagamento *</label>
                 <input type="date" name="pagoEm" [(ngModel)]="payDate" required class="form-control" />
               </div>
             </div>
