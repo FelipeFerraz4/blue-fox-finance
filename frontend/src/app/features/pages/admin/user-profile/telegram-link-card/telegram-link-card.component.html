@@ -1,0 +1,69 @@
+<section class="tg-card" aria-labelledby="tg-card-title">
+  <header class="tg-header">
+    <span class="tg-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+        <path d="M21.5 4.5 2.8 11.7c-.9.4-.9 1.6.1 1.9l4.6 1.4 1.8 5.6c.3.8 1.3 1 1.9.4l2.6-2.5 4.8 3.5c.7.5 1.7.1 1.9-.7l3.2-15.2c.2-1-.8-1.9-1.8-1.5Z" />
+        <path d="m7.5 15 10-7.5-6.7 8.6" />
+      </svg>
+    </span>
+    <div class="tg-header-text">
+      <h3 id="tg-card-title">Telegram</h3>
+      <p>Lance gastos e consulte contas pelo chat</p>
+    </div>
+    @if (status()?.vinculo) {
+      <span class="tg-badge">Conectado</span>
+    }
+  </header>
+
+  @if (error()) {
+    <p class="tg-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (status(); as s) {
+    @if (s.vinculo) {
+      @if (justConnected()) {
+        <p class="tg-success" role="status">Conta conectada! Já pode lançar pelo Telegram.</p>
+      }
+      <p class="tg-line">
+        Conectado como <strong>{{ s.vinculo.username ? '@' + s.vinculo.username : 'usuário do Telegram' }}</strong>
+        desde {{ s.vinculo.createdAt | date: 'dd/MM/yyyy' }}.
+      </p>
+      <ul class="tg-tips">
+        <li><code>/gasto</code> e responda às perguntas</li>
+        <li>ou direto: <code>45,90 pão &#64; padaria</code></li>
+        <li><code>/resumo</code>, <code>/contas</code>, <code>/ultimos</code></li>
+      </ul>
+      <div class="tg-actions">
+        @if (s.botUsername) {
+          <a class="btn btn-secondary btn-sm" [href]="'https://t.me/' + s.botUsername" target="_blank" rel="noopener">Abrir chat</a>
+        }
+        <button type="button" class="btn btn-danger btn-sm" (click)="unlink()" [disabled]="busy()">
+          {{ confirmingUnlink() ? 'Confirmar' : 'Desconectar' }}
+        </button>
+        @if (confirmingUnlink()) {
+          <button type="button" class="btn btn-secondary btn-sm" (click)="confirmingUnlink.set(false)">Voltar</button>
+        }
+      </div>
+    } @else if (!s.enabled) {
+      <p class="tg-muted">O bot ainda não está configurado neste ambiente.</p>
+    } @else if (pending()) {
+      <ol class="tg-steps">
+        <li>Toque em <strong>Abrir no Telegram</strong></li>
+        <li>No chat, toque em <strong>Iniciar</strong></li>
+      </ol>
+      <div class="tg-actions">
+        <a class="btn btn-primary btn-sm" [href]="pending()!.url" target="_blank" rel="noopener">Abrir no Telegram</a>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelPending()">Cancelar</button>
+        <span class="tg-wait" aria-live="polite">Aguardando · {{ countdown() }}</span>
+      </div>
+    } @else {
+      <div class="tg-actions">
+        <button type="button" class="btn btn-primary btn-sm" (click)="connect()" [disabled]="busy()">
+          Conectar Telegram
+        </button>
+      </div>
+    }
+  } @else {
+    <p class="tg-muted">Carregando…</p>
+  }
+</section>
