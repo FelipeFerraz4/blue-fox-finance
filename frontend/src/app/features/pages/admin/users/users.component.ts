@@ -68,7 +68,6 @@ export class UsersComponent implements OnInit {
       nome: this.form.nome.trim(),
       sobrenome: this.form.sobrenome?.trim() || undefined,
       email: this.form.email.trim().toLowerCase(),
-      username: this.form.username?.trim().toLowerCase() || undefined,
       senhaTemporaria: this.form.senhaTemporaria,
     };
 
@@ -93,7 +92,7 @@ export class UsersComponent implements OnInit {
   async copyCredentials(): Promise<void> {
     const c = this.created();
     if (!c) return;
-    const text = `Acesso ao Blue Fox Finance\nUsuário: ${c.username}\nSenha temporária: ${c.senha}\n(no primeiro acesso você vai definir uma nova senha)`;
+    const text = `Acesso ao Blue Fox Finance\nLogin (e-mail): ${c.username}\nSenha temporária: ${c.senha}\n(no primeiro acesso você vai definir uma nova senha)`;
     try {
       await navigator.clipboard.writeText(text);
       this.copied.set(true);
@@ -130,6 +129,6 @@ export class UsersComponent implements OnInit {
   }
 
   private emptyForm(): CreateAdminUserDto {
-    return { nome: '', sobrenome: '', email: '', username: '', senhaTemporaria: '' };
+    return { nome: '', sobrenome: '', email: '', senhaTemporaria: '' };
   }
 }

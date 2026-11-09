@@ -49,7 +49,7 @@ export class KeycloakAdminService {
     });
 
     if (res.status === 409) {
-      throw new ConflictException('Já existe um usuário com este e-mail ou nome de usuário.');
+      throw new ConflictException('Já existe um usuário com este e-mail.');
     }
     if (res.status === 400) {
       // Ex.: senha fora da política do realm

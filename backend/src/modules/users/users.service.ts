@@ -38,7 +38,8 @@ export class UsersService {
    * e registra no banco. Se o registro falhar, apaga a conta do Keycloak.
    */
   async create(adminId: string, dto: CreateUserDto) {
-    const username = dto.username || dto.email;
+    // O login é sempre o e-mail
+    const username = dto.email;
 
     const keycloakId = await this.keycloak.createUser(
       {
@@ -70,7 +71,7 @@ export class UsersService {
         .deleteUser(keycloakId)
         .catch((e) => this.logger.error(`Falha ao desfazer usuário ${keycloakId}: ${(e as Error).message}`));
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException('Já existe um usuário com este e-mail ou nome de usuário.');
+        throw new ConflictException('Já existe um usuário com este e-mail.');
       }
       throw err;
     }

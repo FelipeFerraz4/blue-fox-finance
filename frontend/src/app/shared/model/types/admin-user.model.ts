@@ -21,7 +21,7 @@ export interface AdminUsersResponse {
 export interface CreateAdminUserDto {
   nome: string;
   sobrenome?: string;
+  /** Também é o login */
   email: string;
-  username?: string;
   senhaTemporaria: string;
 }

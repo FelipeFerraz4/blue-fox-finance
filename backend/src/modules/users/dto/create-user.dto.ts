@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 const lower = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toLowerCase() : value);
@@ -17,16 +17,11 @@ export class CreateUserDto {
   @MaxLength(80)
   sobrenome?: string;
 
+  // O e-mail também é o login (username) no Keycloak
   @Transform(lower)
   @IsEmail()
   @MaxLength(254)
   email: string;
-
-  // Padrão: o próprio e-mail (o Keycloak guarda o username em minúsculas)
-  @Transform(lower)
-  @IsOptional()
-  @Matches(/^[a-z0-9._-]{3,50}$/, { message: 'username must have 3-50 chars: a-z, 0-9, ".", "_" or "-"' })
-  username?: string;
 
   @IsString()
   @MinLength(8)

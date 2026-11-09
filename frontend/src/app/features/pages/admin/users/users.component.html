@@ -29,7 +29,7 @@
         <div class="created" role="status">
           <p class="created-title">✅ {{ c.nome }} foi criado. Repasse os dados de acesso:</p>
           <dl class="credentials">
-            <dt>Usuário</dt>
+            <dt>Login (e-mail)</dt>
             <dd><code>{{ c.username }}</code></dd>
             <dt>Senha temporária</dt>
             <dd><code>{{ c.senha }}</code></dd>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="email">E-mail *</label>
+          <label class="form-label" for="email">E-mail (login) *</label>
           <input
             id="email"
             name="email"
@@ -93,23 +93,6 @@
           }
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="username">Usuário (login)</label>
-          <input
-            id="username"
-            name="username"
-            class="form-control"
-            [(ngModel)]="form.username"
-            pattern="^[a-zA-Z0-9._-]{3,50}$"
-            placeholder="Se vazio, o login é o e-mail"
-            autocomplete="off"
-            #username="ngModel"
-            [class.is-invalid]="submitted && username.invalid"
-          />
-          @if (submitted && username.invalid) {
-            <span class="field-error">3 a 50 caracteres: letras, números, ponto, _ ou -</span>
-          }
-        </div>
 
         <div class="form-group">
           <label class="form-label" for="senha">Senha temporária *</label>
@@ -160,9 +143,6 @@
               <div class="user-info">
                 <strong>{{ fullName(u) }}</strong>
                 <span class="muted">{{ u.email }}</span>
-                @if (u.username !== u.email) {
-                  <span class="muted">login: {{ u.username }}</span>
-                }
               </div>
               <span class="muted date">{{ u.createdAt | date: 'dd/MM/yyyy' }}</span>
             </li>
