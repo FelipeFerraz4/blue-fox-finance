@@ -13,11 +13,12 @@ import { Store } from '../../../../shared/model/types/store.model';
 import { PaymentMethod } from '../../../../shared/model/types/payment-method.model';
 import { CategoriaItem } from '../../../../shared/model/types/category.model';
 import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
+import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-card.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent],
+  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent, TelegramLinkCardComponent],
   template: `
     <div class="profile-page">
       <!-- Breadcrumb & Cabeçalho -->
@@ -358,6 +359,9 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               </div>
             </div>
           </div>
+
+          <!-- Vínculo com o bot do Telegram -->
+          <app-telegram-link-card />
         </div>
       </div>
     </div>

@@ -23,5 +23,4 @@ if [ "$STATE" = "baseline" ]; then
 fi
 
 npx prisma migrate deploy
-npx prisma db seed
 exec node dist/src/main

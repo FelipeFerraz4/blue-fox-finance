@@ -1,0 +1,42 @@
+// Integração com bots de mensagem (Telegram agora; WhatsApp no futuro).
+// externalUserId é o id do usuário no canal, guardado como texto para servir a qualquer canal.
+
+enum CanalBot {
+  TELEGRAM
+}
+
+model BotVinculo {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  canal          CanalBot
+  externalUserId String
+  chatId         String
+  username       String?
+  createdAt      DateTime @default(now())
+
+  @@unique([canal, externalUserId])
+  @@map("bot_vinculos")
+}
+
+// Código de uso único gerado no site para vincular a conta (guardado como hash SHA-256)
+model BotCodigoVinculo {
+  codeHash  String    @id
+  userId    String
+  expiraEm  DateTime
+  usadoEm   DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("bot_codigos_vinculo")
+}
+
+// Estado da conversa em andamento (assistente de lançamento etc.)
+model BotConversa {
+  canal          CanalBot
+  externalUserId String
+  estado         Json
+  atualizadoEm   DateTime @updatedAt
+
+  @@id([canal, externalUserId])
+  @@map("bot_conversas")
+}

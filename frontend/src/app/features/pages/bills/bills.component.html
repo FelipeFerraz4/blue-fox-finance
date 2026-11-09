@@ -1,0 +1,446 @@
+<div class="bills-page">
+  <!-- Cabeçalho -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <div class="title-with-pill">
+        <div class="header-icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <polyline points="9 15 11 17 15 13" />
+          </svg>
+        </div>
+        <h1 class="page-title">Contas a Pagar</h1>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-pill" (click)="showManage.set(!showManage())">
+        {{ showManage() ? 'Vencimentos' : 'Cadastro' }}
+      </button>
+      <button class="btn btn-primary btn-pill" (click)="openNewBill()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span>Nova</span>
+      </button>
+    </div>
+  </div>
+
+  @if (!showManage()) {
+    <!-- Navegação entre meses -->
+    <div class="month-nav card">
+      <button class="btn btn-secondary btn-sm" (click)="changeMonth(-1)" aria-label="Mês anterior">‹</button>
+      <div class="month-nav-label">
+        <strong>{{ monthLabel() }}</strong>
+        @if (!isCurrentMonth()) {
+          <button class="link-btn" (click)="goToCurrentMonth()">Hoje</button>
+        }
+      </div>
+      <button class="btn btn-secondary btn-sm" (click)="changeMonth(1)" aria-label="Próximo mês">›</button>
+    </div>
+
+    @if (loading()) {
+      <div class="card loading-state">
+        <div class="mini-spinner"></div>
+        <p>Carregando...</p>
+      </div>
+    } @else {
+      @if (overview(); as data) {
+        <!-- Totais do mês -->
+        <div class="summary-grid">
+          <div class="card summary-card">
+            <span class="summary-label">Total</span>
+            <strong class="summary-value">{{ data.totais.previsto | currency: 'BRL' }}</strong>
+          </div>
+          <div class="card summary-card summary-paid">
+            <span class="summary-label">Pago</span>
+            <strong class="summary-value">{{ data.totais.pago | currency: 'BRL' }}</strong>
+          </div>
+          <div class="card summary-card summary-pending">
+            <span class="summary-label">Pendente</span>
+            <strong class="summary-value">{{ data.totais.pendente | currency: 'BRL' }}</strong>
+          </div>
+        </div>
+
+        <!-- Atrasadas de meses anteriores -->
+        @if (data.atrasadasAnteriores.length > 0) {
+          <div class="card overdue-card">
+            <div class="card-title">
+              <span>Atrasadas</span>
+              <span class="badge badge-danger">{{ data.atrasadasAnteriores.length }}</span>
+            </div>
+            <ng-container
+              *ngTemplateOutlet="occurrenceList; context: { $implicit: data.atrasadasAnteriores, showMonth: true }"
+            ></ng-container>
+          </div>
+        }
+
+        <!-- Contas do mês -->
+        <div class="card">
+          <div class="card-title">
+            <span>{{ monthLabel() }}</span>
+            <span class="badge badge-primary">{{ data.ocorrencias.length }}</span>
+          </div>
+
+          @if (data.ocorrencias.length === 0) {
+            <div class="empty-state">
+              <p>Nada neste mês</p>
+              @if (bills().length === 0) {
+                <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
+              }
+            </div>
+          } @else {
+            <ng-container
+              *ngTemplateOutlet="occurrenceList; context: { $implicit: data.ocorrencias, showMonth: false }"
+            ></ng-container>
+          }
+        </div>
+      }
+    }
+  } @else {
+    <!-- Cadastro de contas -->
+    <div class="card">
+      <div class="card-title">
+        <span>Contas</span>
+        <span class="badge badge-primary">{{ bills().length }}</span>
+      </div>
+
+      @if (bills().length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma conta</p>
+          <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
+        </div>
+      } @else {
+        <ul class="bill-list">
+          @for (bill of bills(); track bill.id) {
+            <li class="bill-row" [class.inactive]="!bill.ativo">
+              <div class="bill-info">
+                <strong>{{ bill.nome }}</strong>
+                <div class="bill-meta">
+                  <span>{{ recurrenceLabel(bill) }}</span>
+                  @if (bill.meioPagamento) {
+                    <span class="badge badge-brand">Fatura {{ bill.meioPagamento.nome }}</span>
+                  } @else if (bill.valorPrevisto !== null) {
+                    <span>{{ +bill.valorPrevisto | currency: 'BRL' }}</span>
+                  } @else {
+                    <span class="text-muted">Variável</span>
+                  }
+                  @if (bill.categoria) {
+                    <span class="badge badge-gray">{{ bill.categoria }}</span>
+                  }
+                  @if (!bill.ativo) {
+                    <span class="badge badge-danger">Inativa</span>
+                  }
+                </div>
+              </div>
+              <div class="row-actions">
+                <button class="btn btn-secondary btn-sm" (click)="openEditBill(bill)">Editar</button>
+                <button class="btn btn-secondary btn-sm" (click)="toggleActive(bill)">
+                  {{ bill.ativo ? 'Desativar' : 'Ativar' }}
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="billToDelete = bill">Excluir</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  <!-- Lista de ocorrências (reutilizada para o mês e para as atrasadas) -->
+  <ng-template #occurrenceList let-items let-showMonth="showMonth">
+    <ul class="occurrence-list">
+      @for (o of items; track o.id) {
+        <li class="occurrence-row" [class]="'status-' + o.status">
+          <div class="occurrence-date">
+            <span class="day">{{ formatDate(o.dataVencimento).slice(0, 2) }}</span>
+            <span class="month">{{ formatMonth(o.mesReferencia) }}</span>
+          </div>
+
+          <div class="occurrence-info">
+            <strong>{{ o.nome }}</strong>
+            <div class="occurrence-meta">
+              <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o) }}</span>
+              @if (o.pagoEm) {
+                <span class="text-muted text-xs">{{ formatDate(o.pagoEm) }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="occurrence-value">
+            @if (o.valor !== null) {
+              {{ o.valor | currency: 'BRL' }}
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </div>
+
+          <div class="row-actions">
+            @if (o.status === 'PAGA') {
+              <button class="btn btn-secondary btn-sm" (click)="occurrenceToUnpay = o">Desfazer</button>
+            } @else {
+              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Confirmar pagamento</button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  </ng-template>
+
+  <!-- Modal de pagamento -->
+  @if (payingOccurrence; as o) {
+    <div class="modal-backdrop" (click)="closePayModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-with-icon">
+            <div class="icon-circle icon-circle-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div>
+              <h3>Confirmar pagamento</h3>
+              <p class="modal-subtitle">{{ o.nome }}</p>
+            </div>
+          </div>
+          <button class="btn-close" (click)="closePayModal()">✕</button>
+        </div>
+
+        <form (ngSubmit)="confirmPay()" #payForm="ngForm">
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Valor pago *</label>
+                <input
+                  type="number"
+                  name="valorPago"
+                  min="0"
+                  step="0.01"
+                  [(ngModel)]="payValue"
+                  required
+                  class="form-control"
+                  placeholder="ex: 187,35"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Data do pagamento *</label>
+                <input type="date" name="pagoEm" [(ngModel)]="payDate" required class="form-control" />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closePayModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-pill" [disabled]="!payForm.valid || savingPay">
+              @if (savingPay) {
+                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
+              } @else {
+                Confirmar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de cadastro / edição de conta -->
+  @if (showBillModal) {
+    <div class="modal-backdrop" (click)="closeBillModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-with-icon">
+            <div class="icon-circle icon-circle-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <div>
+              <h3>{{ editingBillId ? 'Editar conta' : 'Nova conta' }}</h3>
+                          </div>
+          </div>
+          <button class="btn-close" (click)="closeBillModal()">✕</button>
+        </div>
+
+        <form (ngSubmit)="saveBill()" #billForm="ngForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Cartão</label>
+              <app-searchable-dropdown
+                [options]="cardOptions()"
+                [ngModel]="form.meioPagamentoId"
+                (ngModelChange)="onCardChange($event)"
+                name="meioPagamentoId"
+                placeholder="Nenhum"
+                emptyMessage="Nenhum cartão"
+              ></app-searchable-dropdown>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nome *</label>
+                <input
+                  type="text"
+                  name="nome"
+                  [(ngModel)]="form.nome"
+                  required
+                  class="form-control"
+                  placeholder="ex: Energia, Internet, Aluguel"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <input
+                  type="text"
+                  name="categoria"
+                  [(ngModel)]="form.categoria"
+                  class="form-control"
+                  placeholder="ex: Moradia, Serviços"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Repetição *</label>
+              <app-searchable-dropdown
+                [options]="recorrenciaOptions"
+                [(ngModel)]="form.recorrencia"
+                name="recorrencia"
+                [showSearch]="false"
+                [clearable]="false"
+              ></app-searchable-dropdown>
+            </div>
+
+            <div class="form-row">
+              @if (form.recorrencia === 'UNICA') {
+                <div class="form-group">
+                  <label class="form-label">Vencimento *</label>
+                  <input type="date" name="dataUnica" [(ngModel)]="form.dataUnica" required class="form-control" />
+                </div>
+              } @else {
+                <div class="form-group">
+                  <label class="form-label">Dia *</label>
+                  <input
+                    type="number"
+                    name="diaVencimento"
+                    min="1"
+                    max="31"
+                    [(ngModel)]="form.diaVencimento"
+                    required
+                    class="form-control"
+                    placeholder="ex: 10"
+                  />
+                </div>
+                @if (form.recorrencia === 'ANUAL') {
+                  <div class="form-group">
+                    <label class="form-label">Mês *</label>
+                    <app-searchable-dropdown
+                      [options]="monthOptions"
+                      [(ngModel)]="form.mesVencimento"
+                      name="mesVencimento"
+                      [showSearch]="false"
+                      [clearable]="false"
+                      placeholder="Selecione o mês..."
+                    ></app-searchable-dropdown>
+                  </div>
+                }
+              }
+            </div>
+
+            <div class="form-row">
+              @if (!form.meioPagamentoId) {
+                <div class="form-group">
+                  <label class="form-label">Valor</label>
+                  <input
+                    type="number"
+                    name="valorPrevisto"
+                    min="0"
+                    step="0.01"
+                    [(ngModel)]="form.valorPrevisto"
+                    class="form-control"
+                    placeholder="Variável"
+                  />
+                </div>
+              }
+              <div class="form-group">
+                <label class="form-label">Aviso (dias)</label>
+                <input
+                  type="number"
+                  name="lembrarDiasAntes"
+                  min="0"
+                  max="30"
+                  [(ngModel)]="form.lembrarDiasAntes"
+                  class="form-control"
+                />
+              </div>
+            </div>
+
+            @if (form.recorrencia !== 'UNICA') {
+              <div class="form-group">
+                <label class="form-label">Início</label>
+                <input type="month" name="dataInicio" [(ngModel)]="form.dataInicio" required class="form-control" />
+              </div>
+            }
+
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <input type="text" name="observacoes" [(ngModel)]="form.observacoes" class="form-control" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeBillModal()">Cancelar</button>
+            <button
+              type="submit"
+              class="btn btn-primary btn-pill"
+              [disabled]="!billForm.valid || savingBill || (form.recorrencia === 'ANUAL' && !form.mesVencimento)"
+            >
+              @if (savingBill) {
+                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
+              } @else {
+                Salvar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <app-confirm-modal
+    [isOpen]="!!billToDelete"
+    title="Excluir conta"
+    message="O histórico também será excluído."
+    [itemName]="billToDelete?.nome"
+    confirmText="Excluir"
+    [loading]="confirmLoading"
+    (confirm)="confirmDeleteBill()"
+    (cancel)="billToDelete = null"
+  ></app-confirm-modal>
+
+  <app-confirm-modal
+    [isOpen]="!!occurrenceToUnpay"
+    title="Desfazer pagamento"
+    message="A conta volta a ficar pendente."
+    [itemName]="occurrenceToUnpay?.nome"
+    confirmText="Desfazer"
+    variant="warning"
+    [loading]="confirmLoading"
+    (confirm)="confirmUnpay()"
+    (cancel)="occurrenceToUnpay = null"
+  ></app-confirm-modal>
+
+  <app-notice-modal
+    [isOpen]="noticeOpen"
+    title="Erro"
+    [message]="noticeMessage"
+    type="warning"
+    (close)="noticeOpen = false"
+    (confirm)="noticeOpen = false"
+  ></app-notice-modal>
+</div>

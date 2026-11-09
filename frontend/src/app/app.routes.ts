@@ -52,6 +52,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'bills',
+    canActivate: [authGuard],
+    data: { roles: FINANCE_ACCESS_ROLES },
+    loadComponent: () =>
+      import('./features/pages/bills/bills.component').then((m) => m.BillsComponent),
+  },
+  {
     path: 'payment-methods',
     canActivate: [authGuard],
     data: { roles: FINANCE_ACCESS_ROLES },
@@ -112,6 +119,9 @@ export const routes: Routes = [
   // 3. Redirecionamentos de Compatibilidade (Rotas legadas em Português)
   { path: 'lancamentos', redirectTo: 'expenses', pathMatch: 'full' },
   { path: 'lancamentos/novo', redirectTo: 'expenses/new', pathMatch: 'full' },
+  { path: 'analytics', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'analises', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'contas', redirectTo: 'bills', pathMatch: 'full' },
   { path: 'meios-pagamento', redirectTo: 'payment-methods', pathMatch: 'full' },
   { path: 'lojas', redirectTo: 'stores', pathMatch: 'full' },
   { path: 'compradores', redirectTo: 'buyers', pathMatch: 'full' },

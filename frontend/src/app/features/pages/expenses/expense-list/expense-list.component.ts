@@ -236,7 +236,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <tr *ngFor="let item of expenses">
                     <td>
                       <span class="date-badge">
-                        {{ item.data | date:'dd/MM/yyyy' }}
+                        {{ item.data | date:'dd/MM/yyyy':'UTC' }}
                       </span>
                     </td>
                     <td>
@@ -336,7 +336,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <div class="expense-card-meta">
                 <div class="meta-item">
                   <span class="meta-label">Data:</span>
-                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
                 </div>
                 <div class="meta-item">
                   <span class="meta-label">Comprador:</span>
@@ -566,7 +566,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <div class="expense-card-meta">
                     <div class="meta-item">
                       <span class="meta-label">Data:</span>
-                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Comprador:</span>

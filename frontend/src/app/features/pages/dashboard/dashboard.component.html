@@ -1,0 +1,275 @@
+<div class="dashboard-page">
+  <!-- Cabeçalho -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <div class="title-with-pill">
+        <div class="header-icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+        </div>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de filtros (fixa no topo) -->
+  <div class="filter-bar" role="toolbar" aria-label="Filtros do dashboard">
+    <div class="year-picker" role="group" aria-label="Ano">
+      <button class="icon-btn" (click)="changeYear(-1)" aria-label="Ano anterior">‹</button>
+      <strong>{{ year() }}</strong>
+      <button class="icon-btn" (click)="changeYear(1)" aria-label="Próximo ano">›</button>
+    </div>
+
+    <div class="filter-chips">
+      @for (f of store.activeFilters(); track f.dim) {
+        <button class="chip" (click)="clearFilter(f.dim)" [attr.aria-label]="'Remover filtro ' + f.label + ': ' + f.value">
+          <span class="chip-label">{{ f.label }}:</span> {{ f.value }} <span aria-hidden="true">✕</span>
+        </button>
+      }
+      @if (store.activeFilters().length > 1) {
+        <button class="link-btn" (click)="clearAll()">Limpar</button>
+      }
+    </div>
+
+    @if (refreshing()) {
+      <span class="mini-spinner" aria-label="Atualizando"></span>
+    }
+  </div>
+
+  <!-- Contas a pagar atrasadas / vencendo (some quando não há nada) -->
+  <app-bill-alerts-card></app-bill-alerts-card>
+
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      {{ error() }}
+      <button class="btn btn-secondary btn-sm" (click)="load()">Recarregar</button>
+    </div>
+  }
+
+  @if (firstLoad()) {
+    <div class="loading-state">
+      <span class="mini-spinner"></span>
+      <p>Carregando...</p>
+    </div>
+  } @else if (store.overview()) {
+    <!-- KPIs -->
+    <div class="kpi-grid" [class.refreshing]="refreshing()">
+      @let k = store.kpis();
+      <div class="kpi">
+        <span class="kpi-label">Total</span>
+        <strong class="kpi-value">{{ k.total | currency: 'BRL' }}</strong>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">vs {{ year() - 1 }}</span>
+        @if (k.variacao !== null) {
+          <strong
+            class="kpi-value"
+            [class.up]="k.variacao > 0"
+            [class.down]="k.variacao < 0"
+            [attr.title]="(k.totalAnterior | currency: 'BRL') + ' em ' + (year() - 1)"
+          >
+            {{ k.variacao > 0 ? '▲' : k.variacao < 0 ? '▼' : '' }} {{ k.variacao | percent: '1.0-1' }}
+          </strong>
+        } @else {
+          <strong class="kpi-value muted">—</strong>
+        }
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Média mensal</span>
+        <strong class="kpi-value">{{ k.mediaMensal | currency: 'BRL' }}</strong>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Pagamentos</span>
+        <strong class="kpi-value">{{ k.pagamentos }}</strong>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Parcelado</span>
+        <strong class="kpi-value">{{ k.percentualParcelado | percent: '1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <!-- Painéis (todos clicáveis) -->
+    <div class="panel-grid">
+      <!-- Gastos por mês: horizontal, comparação com o ano anterior no tooltip -->
+      <app-chart-card
+        title="Por mês"
+        [refreshing]="refreshing()"
+      >
+        <div
+          echarts
+          class="chart"
+          [style.height]="monthlyHeight"
+          [options]="monthlyOptions()"
+          (chartInit)="bindCategoryClick($event, 'y', monthIndexClick)"
+          role="img"
+          [attr.aria-label]="'Gastos por mês em ' + year() + '. Clique num mês para filtrar. Os valores estão na lista de gastos abaixo.'"
+        ></div>
+      </app-chart-card>
+
+      @for (panel of rankedPanels(); track panel.dim) {
+        <app-chart-card
+          [title]="panel.title"
+          [empty]="panel.slices.length === 0"
+          [refreshing]="refreshing()"
+        >
+          <div
+            echarts
+            class="chart"
+            [style.height]="rankedHeight(panel)"
+            [options]="rankedOptions()[panel.dim]"
+            (chartInit)="bindCategoryClick($event, 'y', rankedIndexClick(panel.dim))"
+            role="img"
+            [attr.aria-label]="panel.title + '. Clique numa barra para filtrar.'"
+          ></div>
+        </app-chart-card>
+      }
+
+      <!-- À vista × parcelado (barra segmentada em HTML) -->
+      <app-chart-card
+        title="Parcelamento"
+        [empty]="tipoSplit().length === 0"
+        [refreshing]="refreshing()"
+      >
+        <div class="split-bar" role="group" aria-label="À vista e parcelado">
+          @for (s of tipoSplit(); track s.key) {
+            <button
+              class="split-segment"
+              [class.parcelado]="s.key === 'PARCELADO'"
+              [class.dimmed]="store.filters().tipo && !store.isSelected('tipo', s.key)"
+              [style.flex-grow]="s.share"
+              (click)="toggleTipo(s.key)"
+              [attr.aria-pressed]="store.isSelected('tipo', s.key)"
+              [attr.aria-label]="s.label + ': ' + (s.total | currency: 'BRL') + ', ' + (s.share | percent: '1.0-0')"
+            ></button>
+          }
+        </div>
+        <ul class="split-legend">
+          @for (s of tipoSplit(); track s.key) {
+            <li>
+              <span class="swatch" [class.parcelado]="s.key === 'PARCELADO'"></span>
+              <span class="split-name">{{ s.label }}</span>
+              <strong>{{ s.total | currency: 'BRL' }}</strong>
+              <span class="muted">{{ s.share | percent: '1.0-0' }}</span>
+            </li>
+          }
+        </ul>
+      </app-chart-card>
+
+      <!-- Compromissos futuros + contas a pagar -->
+      <app-chart-card
+        title="Parcelas futuras"
+        [empty]="!commitments() || commitments()!.totalFuturo === 0"
+        emptyMessage="Sem parcelas"
+        [refreshing]="refreshing()"
+      >
+        @if (commitmentsChart(); as opts) {
+          <div echarts class="chart chart-medium" [options]="opts" role="img" aria-label="Parcelas a vencer por mês e meio de pagamento. Detalhes na lista ao lado."></div>
+        }
+        @if (commitments()!.parcelamentosAbertos.length) {
+          <h3 class="sub-title">Em aberto</h3>
+          <ul class="open-list">
+            @for (p of commitments()!.parcelamentosAbertos.slice(0, 6); track p.lancamentoId) {
+              <li>
+                <div class="open-main">
+                  <strong>{{ p.nome }}</strong>
+                  <span class="muted">{{ p.loja }} · {{ p.meioPagamento }}</span>
+                </div>
+                <div class="open-side">
+                  <strong>{{ p.totalRestante | currency: 'BRL' }}</strong>
+                  <span class="muted">{{ p.restantes }}x · até {{ formatMonthRef(p.ultimoMes) }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </app-chart-card>
+
+      <app-chart-card
+        title="Contas"
+        [empty]="!hasBills()"
+        emptyMessage="Sem contas"
+        [refreshing]="refreshing()"
+      >
+        <a card-actions routerLink="/bills" class="card-link">Abrir</a>
+        <div class="bills-summary">
+          <div>
+            <span class="muted">Pago</span>
+            <strong class="good">{{ billsPeriod().pago | currency: 'BRL' }}</strong>
+          </div>
+          <div>
+            <span class="muted">Pendente</span>
+            <strong class="warn">{{ billsPeriod().pendente | currency: 'BRL' }}</strong>
+          </div>
+          @if (billsPeriod().atrasadas > 0) {
+            <div>
+              <span class="muted">Atrasadas</span>
+              <strong class="bad">{{ billsPeriod().atrasadas }}</strong>
+            </div>
+          }
+        </div>
+        <div
+          echarts
+          class="chart chart-medium"
+          [options]="billsChart()"
+          (chartInit)="bindCategoryClick($event, 'x', monthIndexClick)"
+          role="img"
+          aria-label="Contas pagas e pendentes por mês. Clique num mês para filtrar."
+        ></div>
+      </app-chart-card>
+    </div>
+
+    <!-- Lista de gastos (também é a tabela acessível dos gráficos) -->
+    <app-chart-card
+     
+      title="Gastos"
+      [empty]="sortedRows().length === 0"
+      [refreshing]="refreshing()"
+    >
+      <a card-actions routerLink="/expenses" class="card-link">Abrir</a>
+      <div class="table-wrap">
+        <table class="facts-table">
+          <thead>
+            <tr>
+              <th [attr.aria-sort]="ariaSort('data')"><button (click)="sortBy('data')">Compra {{ sortIndicator('data') }}</button></th>
+              <th [attr.aria-sort]="ariaSort('nome')"><button (click)="sortBy('nome')">Item {{ sortIndicator('nome') }}</button></th>
+              <th [attr.aria-sort]="ariaSort('loja')"><button (click)="sortBy('loja')">Loja {{ sortIndicator('loja') }}</button></th>
+              <th [attr.aria-sort]="ariaSort('categoria')"><button (click)="sortBy('categoria')">Categoria {{ sortIndicator('categoria') }}</button></th>
+              <th [attr.aria-sort]="ariaSort('meioPagamento')"><button (click)="sortBy('meioPagamento')">Meio {{ sortIndicator('meioPagamento') }}</button></th>
+              <th class="num" [attr.aria-sort]="ariaSort('valor')"><button (click)="sortBy('valor')">Valor {{ sortIndicator('valor') }}</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of pageRows(); track f.id) {
+              <tr>
+                <td>
+                  {{ formatDate(f.data) }}
+                  <span class="muted block">{{ monthLabels[f.mes - 1] }}</span>
+                </td>
+                <td>
+                  <strong>{{ f.nome }}</strong>
+                  @if (f.parcela) {
+                    <span class="tag">{{ f.parcela }}</span>
+                  }
+                </td>
+                <td>{{ f.loja }}</td>
+                <td>{{ f.categoria }}</td>
+                <td>{{ f.meioPagamento }}</td>
+                <td class="num"><strong>{{ f.valor | currency: 'BRL' }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (totalPages() > 1) {
+        <div class="pager">
+          <button class="btn btn-secondary btn-sm" (click)="goToPage(-1)" [disabled]="page() <= 1">Anterior</button>
+          <span class="muted">Página {{ page() }} de {{ totalPages() }}</span>
+          <button class="btn btn-secondary btn-sm" (click)="goToPage(1)" [disabled]="page() >= totalPages()">Próxima</button>
+        </div>
+      }
+    </app-chart-card>
+  }
+</div>

@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
 
 # Instalar dependências
-COPY package*.json ./
+COPY package*.json prisma.config.ts ./
 COPY prisma ./prisma/
 RUN npm install
 
@@ -24,10 +24,9 @@ RUN apk add --no-cache openssl libc6-compat
 
 ENV NODE_ENV=production
 
-COPY package*.json tsconfig*.json ./
-RUN npm install --omit=dev && npm install -g ts-node typescript@^5.6.2 prisma
-
-ENV NODE_PATH=/usr/local/lib/node_modules
+COPY package*.json prisma.config.ts ./
+# A CLI do Prisma é dependência de produção (migrate deploy na inicialização), na versão do lockfile
+RUN npm install --omit=dev
 
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma

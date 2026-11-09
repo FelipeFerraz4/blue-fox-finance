@@ -1,0 +1,17 @@
+<section class="chart-card-inner" [class.refreshing]="refreshing()" [attr.aria-busy]="refreshing()">
+  <header class="chart-card-header">
+    <div>
+      <h2 class="chart-card-title">{{ title() }}</h2>
+      @if (subtitle()) {
+        <p class="chart-card-subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+    <ng-content select="[card-actions]"></ng-content>
+  </header>
+
+  @if (empty()) {
+    <div class="chart-card-empty">{{ emptyMessage() }}</div>
+  } @else {
+    <ng-content></ng-content>
+  }
+</section>

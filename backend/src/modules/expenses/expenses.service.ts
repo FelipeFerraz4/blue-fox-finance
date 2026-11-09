@@ -3,12 +3,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateExpenseDto, PreviewInstallmentsDto, UpdateExpenseDto } from './dto/expense.dto';
 import { InvoiceCalculatorHelper } from '../../common/helpers/invoice-calculator.helper';
 import { randomUUID } from 'crypto';
+import { OrigemLancamento } from '@prisma/client';
 
 @Injectable()
 export class ExpensesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userId: string, dto: CreateExpenseDto) {
+  /** `origem` indica por onde o lançamento entrou (site ou bot); não é aceito do cliente. */
+  async create(userId: string, dto: CreateExpenseDto, origem: OrigemLancamento = OrigemLancamento.WEB) {
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
       where: { id: dto.meioPagamentoId, userId },
     });
@@ -71,6 +73,7 @@ export class ExpensesService {
         tipo: dto.tipo,
         numeroParcelas,
         observacoes: dto.observacoes,
+        origem,
         parcelas: {
           create: calculatedInstallments.map((p) => ({
             numero: p.numero,

@@ -1364,7 +1364,8 @@ export class ExpenseFormComponent implements OnInit {
     compradorId: undefined as string | undefined,
     loja: '',
     lojaId: undefined as string | undefined,
-    data: new Date().toISOString().split('T')[0],
+    // Data local (toISOString daria o dia seguinte depois das 21h no Brasil)
+    data: new Date().toLocaleDateString('en-CA'),
     meioPagamentoId: '',
     tipo: 'A_VISTA' as TipoLancamento,
     numeroParcelas: 1,

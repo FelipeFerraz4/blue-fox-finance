@@ -1,0 +1,119 @@
+/* Mesmo visual dos cards do perfil */
+.tg-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 74, 173, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
+  padding: 1.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.tg-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.tg-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.tg-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tg-header-text h3 {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0b132b;
+  margin: 0;
+}
+
+.tg-header-text p {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  margin: 0.15rem 0 0;
+}
+
+.tg-badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--success-light);
+  color: #047857;
+  flex-shrink: 0;
+}
+
+.tg-line,
+.tg-muted {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.tg-muted {
+  color: var(--gray-500);
+}
+
+.tg-success,
+.tg-error {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.tg-success {
+  background: var(--success-light);
+  color: #047857;
+}
+
+.tg-error {
+  background: var(--danger-light);
+  color: #b42318;
+}
+
+.tg-tips,
+.tg-steps {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  line-height: 1.7;
+}
+
+.tg-tips code {
+  background: var(--gray-100);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.tg-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tg-wait {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  font-variant-numeric: tabular-nums;
+}

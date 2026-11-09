@@ -222,3 +222,38 @@
     display: none;
   }
 }
+
+/* Selo de contas a pagar (atrasadas / vencendo) */
+.link-icon {
+  position: relative;
+}
+
+.alert-count {
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 50px;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-dot {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 2px solid #ffffff;
+}
+
+.alert-count.alert-danger,
+.alert-dot.alert-danger {
+  background: #ef4444;
+}

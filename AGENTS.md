@@ -34,8 +34,12 @@ frontend/src/app/
 │       │   └── buyers.service.ts                     # CRUD de compradores (/api/buyers)
 │       ├── categories/
 │       │   └── categories.service.ts                 # CRUD de categorias de itens e lojas (/api/categories)
-│       ├── dashboard/
-│       │   └── dashboard.service.ts                  # Métricas e indicadores consolidados (/api/dashboard)
+│       ├── analytics/
+│       │   └── analytics.service.ts                  # Dados do Dashboard com filtro cruzado (/api/analytics)
+│       ├── bills/
+│       │   └── bills.service.ts                      # Contas a pagar e avisos (/api/bills)
+│       ├── bot/
+│       │   └── bot-engine.service.ts                 # Bot do Telegram: núcleo canal-agnóstico (/api/bot)
 │       ├── expenses/
 │       │   └── expenses.service.ts                   # Gestão de despesas, parcelas e preview (/api/expenses)
 │       ├── payment-methods/
@@ -56,8 +60,13 @@ frontend/src/app/
 │       │   │   └── about.component.ts                # Página "Sobre a Blue Fox Finance"
 │       │   └── updates/
 │       │       └── updates.component.ts              # Changelog e notas de versão
-│       ├── dashboard/
-│       │   └── dashboard.component.ts                # Dashboard financeiro com resumos e cartões
+│       ├── dashboard/                                # Dashboard único estilo Power BI (filtro cruzado)
+│       │   ├── dashboard.component.{ts,html,css}
+│       │   ├── analytics.store.ts                    # Estado e filtros (Signals)
+│       │   ├── analytics-charts.ts                   # Opções dos gráficos ECharts
+│       │   ├── echarts.setup.ts                      # Registro modular do ECharts
+│       │   └── chart-card/                           # Moldura dos painéis
+│       ├── bills/                                    # Contas a pagar + bill-alerts-card
 │       ├── expenses/                                 # Módulo de gestão de despesas
 │       │   ├── expense-list/
 │       │   │   └── expense-list.component.ts         # Listagem paginada, filtros, faturas e ações
@@ -100,7 +109,8 @@ frontend/src/app/
 │       └── types/                                    # Modelos e interfaces TypeScript do domínio
 │           ├── buyer.model.ts                        # Interface Buyer e DTOs
 │           ├── category.model.ts                     # Interfaces CategoriaItem e CategoriaLoja
-│           ├── dashboard.model.ts                    # Interfaces de estatísticas e visão geral
+│           ├── analytics.model.ts                    # Linhas e filtros do Dashboard
+│           ├── bill.model.ts                         # Contas a pagar e ocorrências
 │           ├── lancamento.model.ts                   # Interfaces de Lançamento, parcelas e filtros
 │           ├── payment-method.model.ts               # Interface PaymentMethod e modalidades
 │           ├── store.model.ts                        # Interface Store e DTOs
@@ -219,7 +229,7 @@ O `SearchableDropdownComponent` é o componente padrão do ecossistema Blue Fox 
 
 ---
 
-## 🏗️ 2. Arquitetura do Backend (NestJS 10 + Prisma 5)
+## 🏗️ 2. Arquitetura do Backend (NestJS 10 + Prisma 6)
 
 O backend é uma API REST modular construída com NestJS, tipada com TypeScript, com documentação Prisma e integração nativa com o Keycloak.
 
@@ -233,7 +243,8 @@ backend/src/
 │
 ├── common/                                           # Utilitários, helpers e constantes compartilhadas
 │   └── helpers/
-│       └── invoice-calculator.helper.ts              # Cálculo de faturas de cartão e virada de ciclo
+│       ├── invoice-calculator.helper.ts              # Cálculo de faturas de cartão e virada de ciclo
+│       └── bill-schedule.helper.ts                   # Vencimentos de contas a pagar, "hoje" no fuso de SP e status
 │
 ├── prisma/                                           # Provedor do cliente Prisma
 │   ├── prisma.service.ts                             # Extensão do PrismaClient com lifecycle hooks
@@ -249,6 +260,27 @@ backend/src/
     │   ├── public.decorator.ts                       # Decorator @Public() para rotas abertas
     │   └── current-user.decorator.ts                 # Decorator @CurrentUser() para injeção do usuário
     │
+    ├── analytics/                                    # API do Dashboard (Power BI): linhas do ano para filtro cruzado no cliente
+    │   ├── analytics.controller.ts                   # GET /api/analytics?year=&basis=compra|fatura
+    │   ├── analytics.service.ts                      # facts, ano anterior, compromissos futuros, resumo de contas
+    │   ├── analytics.module.ts
+    │   └── dto/
+    │       └── analytics-query.dto.ts
+    │
+    ├── bills/                                        # Contas a pagar recorrentes (energia, internet, fatura do cartão)
+    │   ├── bills.controller.ts                       # /api/bills (CRUD), /occurrences?month, /alerts, /occurrences/:id/pay|unpay
+    │   ├── bills.service.ts                          # Geração lazy de ocorrências, valor da fatura do cartão, pagamento
+    │   ├── bills.module.ts
+    │   └── dto/
+    │       └── bill.dto.ts
+    │
+    ├── bot/                                          # Bot de mensagens (Telegram; WhatsApp no futuro)
+    │   ├── bot-engine.service.ts                     # Roteia comandos/callbacks, rate limit, erros → mensagens
+    │   ├── bot-link.service.ts                       # Código de vínculo (hash, 10 min, uso único), vínculo 1↔1, estado da conversa
+    │   ├── bot-link.controller.ts                    # GET/DELETE /api/bot/link, POST /api/bot/link/code (JWT + roles)
+    │   ├── flows/                                    # expense.flow (assistente /lancamento, /ultimos), bills.flow (/contas), summary.flow (/resumo)
+    │   └── telegram/                                 # telegram.adapter (grammY, webhook/polling) e telegram.controller (POST /api/bot/telegram, @Public + secret)
+    │
     ├── buyers/                                       # Gestão de compradores/pagadores
     │   ├── buyers.controller.ts                      # Endpoints: GET, POST, PUT, DELETE /api/buyers
     │   ├── buyers.service.ts                         # Regras de negócio e persistência via Prisma
@@ -262,11 +294,6 @@ backend/src/
     │   ├── categories.module.ts
     │   └── dto/
     │       └── category.dto.ts
-    │
-    ├── dashboard/                                    # Painel de métricas e indicadores
-    │   ├── dashboard.controller.ts                   # Endpoint: GET /api/dashboard
-    │   ├── dashboard.service.ts                      # Agregação de totais mensais, por categoria e faturas
-    │   └── dashboard.module.ts
     │
     ├── expenses/                                     # Gestão financeira de lançamentos
     │   ├── expenses.controller.ts                    # Endpoints: /api/expenses (CRUD, preview parcelas, status)
@@ -292,7 +319,7 @@ backend/src/
 
 ### 📂 Modelagem de Dados (`backend/prisma`)
 
-O Prisma utiliza o recurso de múltiplos esquemas (`prismaSchemaFolder`):
+O Prisma utiliza schema dividido em vários arquivos, configurado em `backend/prisma.config.ts` (`schema: prisma/schema`, `migrations: prisma/migrations`):
 ```text
 backend/prisma/
 ├── schema/
@@ -301,15 +328,13 @@ backend/prisma/
 │   ├── categoria.prisma                              # Modelos CategoriaItem e CategoriaLoja
 │   ├── loja.prisma                                   # Modelo Loja vinculado à CategoriaLoja
 │   ├── pagamento.prisma                              # Modelo MeioPagamento e ModalidadePagamento
-│   └── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
-├── seeds/                                            # Scripts de carga inicial de banco
-│   ├── index.ts
-│   ├── usuarios.seed.ts
-│   ├── categorias-itens.seed.ts
-│   ├── categorias-lojas.seed.ts
-│   ├── lojas.seed.ts
-│   └── pagamentos.seed.ts
-└── seed.ts                                           # Orquestrador do comando npx prisma db seed
+│   ├── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
+│   ├── conta.prisma                                  # Contas a pagar (ContaPagar) e ocorrências (PagamentoConta)
+│   ├── bot.prisma                                    # BotVinculo, BotCodigoVinculo, BotConversa (bot do Telegram)
+│   └── preferencia.prisma                            # Preferências de lançamento por usuário
+├── seeds/
+│   └── demo.seed.ts                                  # Seed de demonstração manual (SEED_USER_ID=<sub> npm run seed:demo)
+└── migrations/                                       # Migrations versionadas (prisma migrate deploy)
 ```
 
 ---
@@ -344,7 +369,6 @@ npm run build     # Compila a aplicação para produção (dist/)
 npm run start:dev        # Executa a API em modo watch (porta 3000)
 npm run prisma:migrate:dev -- --name <nome>  # Cria migration a partir do schema (dev)
 npx prisma migrate deploy                    # Aplica migrations pendentes
-npx prisma db seed       # Executa sementes iniciais
 ```
 
 ---

@@ -65,17 +65,13 @@ Os dados do banco de dados ficam salvos de forma persistente no diretório local
 
 ---
 
-## 📦 Inicialização e Seeds Automáticos
+## 📦 Inicialização do Banco
 
 A cada inicialização, o container do backend executa automaticamente (`backend/docker-entrypoint.sh`):
 1. `prisma migrate deploy` para aplicar as migrations versionadas em `backend/prisma/migrations` (nunca `db push --accept-data-loss`). Bancos antigos criados com `db push` recebem um baseline automático na primeira subida, que falha em vez de apagar dados se houver divergência destrutiva.
-2. `prisma db seed` (idempotente) para pré-carregar os meios de pagamento padrão:
-   - **Dinheiro**
-   - **Pix**
-   - **Boleto Bancário**
-   - **TED / Transferência**
+2. `node dist/src/main` para subir a API.
 
-O usuário pode então acessar a tela de **Meios de Pagamento** para cadastrar seus cartões de crédito e débito personalizados!
+Não há dados de exemplo: os dados são isolados por usuário (`userId` = `sub` do token do Keycloak) e cada usuário começa vazio, cadastrando os próprios meios de pagamento, categorias, lojas e compradores.
 
 ---
 
@@ -160,7 +156,6 @@ cd backend
 npm install
 npx prisma generate
 npx prisma migrate deploy
-npx prisma db seed
 npm run start:dev
 ```
 

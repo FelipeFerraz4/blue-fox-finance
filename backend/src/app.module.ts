@@ -7,11 +7,13 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/roles.guard';
 import { PaymentMethodsModule } from './modules/payment-methods/payment-methods.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { BuyersModule } from './modules/buyers/buyers.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
+import { BillsModule } from './modules/bills/bills.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { BotModule } from './modules/bot/bot.module';
 
 @Module({
   imports: [
@@ -20,11 +22,13 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
     AuthModule,
     PaymentMethodsModule,
     ExpensesModule,
-    DashboardModule,
     StoresModule,
     BuyersModule,
     CategoriesModule,
     PreferencesModule,
+    BillsModule,
+    AnalyticsModule,
+    BotModule,
   ],
   providers: [
     {

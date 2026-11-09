@@ -19,6 +19,7 @@ model PaymentMethod {
 
   lancamentos            Lancamento[]
   preferenciasLancamento PreferenciaLancamento[]
+  contasPagar            ContaPagar[]
 
   @@index([userId])
   @@map("payment_methods")

@@ -1,0 +1,256 @@
+.bills-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.text-muted {
+  color: var(--gray-500);
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+/* Navegação entre meses */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.month-nav .btn {
+  font-size: 1.25rem;
+  line-height: 1;
+  min-width: 2.5rem;
+}
+
+.month-nav-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  color: var(--gray-900);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Totais */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-top: 4px solid var(--primary);
+}
+
+.summary-paid {
+  border-top-color: var(--success);
+}
+
+.summary-pending {
+  border-top-color: var(--warning);
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+}
+
+.summary-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  color: var(--gray-900);
+}
+
+.summary-hint {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+
+.overdue-card {
+  border-left: 4px solid var(--danger);
+}
+
+/* Estados */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+/* Listas */
+.occurrence-list,
+.bill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.occurrence-row,
+.bill-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0.25rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.occurrence-row:last-child,
+.bill-row:last-child {
+  border-bottom: none;
+}
+
+.occurrence-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.5rem;
+  padding: 0.4rem;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.occurrence-date .day {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.occurrence-date .month {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.status-ATRASADA .occurrence-date {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.status-VENCE_HOJE .occurrence-date,
+.status-PROXIMA .occurrence-date {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.status-PAGA .occurrence-date {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.status-PAGA .occurrence-info strong,
+.status-PAGA .occurrence-value {
+  color: var(--gray-500);
+}
+
+.occurrence-info,
+.bill-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.occurrence-info strong,
+.bill-info strong {
+  color: var(--gray-900);
+  overflow-wrap: anywhere;
+}
+
+.occurrence-meta,
+.bill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+
+.occurrence-value {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--gray-900);
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bill-row.inactive {
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .occurrence-row,
+  .bill-row {
+    flex-wrap: wrap;
+  }
+
+  .occurrence-value {
+    margin-left: auto;
+  }
+
+  .row-actions {
+    width: 100%;
+  }
+
+  .row-actions .btn {
+    flex: 1;
+  }
+}
