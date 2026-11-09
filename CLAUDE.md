@@ -4,7 +4,7 @@ Este documento serve como guia de contexto para assistentes de IA no repositóri
 
 ## 🌌 Visão Geral do Domínio
 A **Blue Fox Finance** é o sistema central de controle financeiro do ecossistema Blue Fox.
-- **Entidades principais:** Lançamentos/Despesas (`Lancamento`), Compradores (`Buyer`), Lojas (`Store`), Categorias (`CategoriaItem`, `CategoriaLoja`), Meios de Pagamento (`PaymentMethod`), Contas a Pagar (`ContaPagar` + ocorrências `PagamentoConta`), Usuários (`Usuario`).
+- **Entidades principais:** Lançamentos/Despesas (`Lancamento`), Compradores (`Buyer`), Lojas (`Store`), Categorias (`CategoriaItem`, `CategoriaLoja`), Meios de Pagamento (`PaymentMethod`), Contas a Pagar (`ContaPagar` + ocorrências `PagamentoConta`), Usuários criados pelo admin (`Usuario`, registro de auditoria; a conta vive no Keycloak).
 - **Autenticação & IAM:** SSO federado via Keycloak (Blue Fox IAM).
 
 ## 🏗️ Arquitetura do Frontend (Angular 19)
@@ -40,6 +40,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - **Assistente `/lancamento`** (o Telegram só aceita `a-z0-9_` em comandos; `/lançamento` digitado também funciona, e `/gasto` ficou como apelido): pergunta campo a campo na mesma ordem e com os mesmos rótulos da tela "Novo Lançamento" (Comprador, Loja, Data da Compra, Meio de Pagamento, Tipo de Pagamento/Número de Parcelas, Nome, Categoria, Quantidade, Valor Unitário) e envia o mesmo payload. Padrões do perfil (e a categoria da loja) aparecem como primeira opção ⭐, nunca preenchidos sem perguntar; o atalho `45,90 pão @ padaria` só pré-preenche valor/nome/loja.
   - **Config:** sem `TELEGRAM_BOT_TOKEN` o bot fica desligado. Produção: `TELEGRAM_MODE=webhook` + `PUBLIC_API_URL` (https) + `TELEGRAM_WEBHOOK_SECRET` (o webhook `POST /api/bot/telegram` é `@Public` e valida o header `X-Telegram-Bot-Api-Secret-Token`). Dev: `TELEGRAM_MODE=polling` (sem URL pública). Crie o bot no @BotFather (`/newbot`). Use um bot de teste no dev: polling e webhook no mesmo token se anulam.
   - **Próximas fases:** cadastros pelo chat (lojas, compradores, contas), texto livre com IA (Claude) e foto de cupom, WhatsApp (Cloud API oficial).
+- `users`: criação de usuários pela tela **Admin → Usuários** (`/admin/users`, só `ROLE_FINANCE_ADMIN` no front e na API). `KeycloakAdminService` usa a Admin REST API com a service account do client confidencial (`KEYCLOAK_ADMIN_CLIENT_ID`/`KEYCLOAK_ADMIN_CLIENT_SECRET`, URLs derivadas do `KEYCLOAK_ISSUER_URI`), que precisa dos papéis `realm-management` **manage-users** e **view-users**. Cria a conta com senha temporária (`UPDATE_PASSWORD` obrigatório no 1º login) e os papéis fixos `NEW_USER_ROLES` (`ROLE_FINANCE_USER` + `ROLE_USER`, nunca vindos do cliente); registra em `Usuario` (`keycloakId`, quem criou). Se atribuir papéis ou gravar no banco falhar, apaga a conta do Keycloak. Sem as variáveis, a tela avisa que não está configurada. A senha não é salva no Finance.
 - `stores`: Gestão de lojas e fornecedores (`stores.controller.ts`, `stores.service.ts`).
 - `prisma`: Módulo global com `PrismaService` conectado ao PostgreSQL.
 

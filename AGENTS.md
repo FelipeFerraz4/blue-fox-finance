@@ -274,6 +274,11 @@ backend/src/
     │   └── dto/
     │       └── bill.dto.ts
     │
+    ├── users/                                        # Admin → Usuários (só ROLE_FINANCE_ADMIN)
+    │   ├── users.controller.ts                       # GET/POST /api/admin/users
+    │   ├── users.service.ts                          # Keycloak + registro em Usuario (com rollback)
+    │   └── keycloak-admin.service.ts                 # Admin REST API via service account (manage-users, view-users)
+    │
     ├── bot/                                          # Bot de mensagens (Telegram; WhatsApp no futuro)
     │   ├── bot-engine.service.ts                     # Roteia comandos/callbacks, rate limit, erros → mensagens
     │   ├── bot-link.service.ts                       # Código de vínculo (hash, 10 min, uso único), vínculo 1↔1, estado da conversa

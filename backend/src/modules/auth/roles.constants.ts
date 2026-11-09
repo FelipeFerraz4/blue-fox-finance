@@ -17,3 +17,6 @@ export const FINANCE_ACCESS_ROLES = [
   KeycloakRole.FINANCE_ADMIN,
   KeycloakRole.FINANCE_USER,
 ];
+
+/** Papéis dados a quem é criado pela tela Admin → Usuários (fixos: nunca vêm do cliente). */
+export const NEW_USER_ROLES = [KeycloakRole.FINANCE_USER, KeycloakRole.USER] as const;

@@ -28,6 +28,9 @@ services:
       PORT: ${PORT:-3000}
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-bluefox_finance}?schema=public
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/auth/realms/blue-fox-global-group}
+      # Criação de usuários pela tela Admin → Usuários (service account com manage-users/view-users)
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID:-}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-}
       # Bot do Telegram (opcional): sem token fica desligado
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_MODE: ${TELEGRAM_MODE:-webhook}

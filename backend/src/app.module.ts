@@ -14,6 +14,7 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
 import { BillsModule } from './modules/bills/bills.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BotModule } from './modules/bot/bot.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BotModule } from './modules/bot/bot.module';
     BillsModule,
     AnalyticsModule,
     BotModule,
+    UsersModule,
   ],
   providers: [
     {
