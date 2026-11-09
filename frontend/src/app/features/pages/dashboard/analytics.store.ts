@@ -88,9 +88,15 @@ export class AnalyticsStore {
   readonly kpis = computed(() => {
     const rows = this.filtered();
     const total = rows.reduce((acc, f) => acc + f.valor, 0);
-    const lancamentos = new Set(rows.map((f) => f.lancamentoId)).size;
+    const pagamentos = rows.length;
     const parcelado = rows.filter((f) => f.tipo === 'PARCELADO').reduce((acc, f) => acc + f.valor, 0);
     const months = this.periodMonths();
+    // Parcelas de meses que ainda não chegaram (já agendadas nos cartões)
+    const lastMonth = Math.max(...months);
+    const agendado = rows
+      .filter((f) => f.mes > lastMonth)
+      .reduce((acc, f) => acc + f.valor, 0);
+    const totalNoPeriodo = total - agendado;
 
     // Comparativo ano contra ano no mesmo período (só sem filtros de outras dimensões)
     let variacao: number | null = null;
@@ -106,9 +112,10 @@ export class AnalyticsStore {
 
     return {
       total: Number(total.toFixed(2)),
-      mediaMensal: months.length ? Number((total / months.length).toFixed(2)) : 0,
-      lancamentos,
-      ticketMedio: lancamentos ? Number((total / lancamentos).toFixed(2)) : 0,
+      agendado: Number(agendado.toFixed(2)),
+      mediaMensal: months.length ? Number((totalNoPeriodo / months.length).toFixed(2)) : 0,
+      pagamentos,
+      valorMedio: pagamentos ? Number((total / pagamentos).toFixed(2)) : 0,
       percentualParcelado: total > 0 ? parcelado / total : 0,
       variacao,
       totalAnterior,

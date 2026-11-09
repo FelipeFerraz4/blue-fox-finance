@@ -47,7 +47,6 @@ export class DashboardComponent implements OnInit {
   readonly store = inject(AnalyticsStore);
 
   readonly year = signal(new Date().getFullYear());
-  readonly basis = signal<AnalyticsBasis>('compra');
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
@@ -61,9 +60,8 @@ export class DashboardComponent implements OnInit {
     const mes = this.selectedMonth();
     return mes ? `${MONTH_NAMES[mes - 1]} de ${this.year()}` : `${this.year()}`;
   });
-  readonly basisLabel = computed(() =>
-    this.basis() === 'compra' ? 'pela data da compra' : 'pelo mês de vencimento das parcelas',
-  );
+  /** O Dashboard distribui os gastos pelo mês em que são pagos (parcelas no mês da fatura). */
+  private readonly basis: AnalyticsBasis = 'fatura';
 
   // ----- Gráficos -----------------------------------------------------------
 
@@ -152,7 +150,7 @@ export class DashboardComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api.getOverview(this.year(), this.basis()).subscribe({
+    this.api.getOverview(this.year(), this.basis).subscribe({
       next: (data) => {
         this.store.setOverview(data);
         this.page.set(1);
@@ -170,12 +168,6 @@ export class DashboardComponent implements OnInit {
     this.year.update((y) => y + delta);
     // Mês selecionado não faz sentido em outro ano; os demais filtros continuam
     this.store.clear('mes');
-    this.load();
-  }
-
-  setBasis(basis: AnalyticsBasis): void {
-    if (basis === this.basis()) return;
-    this.basis.set(basis);
     this.load();
   }
 
@@ -258,6 +250,8 @@ export class DashboardComponent implements OnInit {
   goToPage(delta: number): void {
     this.page.update((p) => Math.min(this.totalPages(), Math.max(1, p + delta)));
   }
+
+  readonly monthlyHeight = `${rankedBarHeight(12)}px`;
 
   rankedHeight(panel: RankedPanel): string {
     return `${rankedBarHeight(panel.slices.length)}px`;

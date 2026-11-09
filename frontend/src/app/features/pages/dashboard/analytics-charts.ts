@@ -9,7 +9,7 @@ import { MONTH_LABELS, MONTH_NAMES } from './analytics.store';
 // Paleta: uma série = azul da marca; selecionado cheio, demais esmaecidos.
 export const BRAND = '#004aad';
 export const BRAND_MUTED = '#b9cbe8';
-const GHOST = '#d9dee6';
+const GHOST = '#d9dee6'; // "Outros" e séries agregadas
 const INK = '#0b132b';
 const INK_SECONDARY = '#475569';
 const MUTED = '#898781';
@@ -63,7 +63,10 @@ const valueAxis = {
   axisTick: { show: false },
 };
 
-/** Gastos por mês do ano (barras clicáveis) com o ano anterior em cinza no mesmo eixo. */
+/**
+ * Gastos por mês (barras horizontais, janeiro no topo). A comparação com o ano anterior
+ * fica no tooltip, sem uma segunda barra.
+ */
 export function monthlyChartOptions(
   current: number[],
   previous: number[],
@@ -73,55 +76,38 @@ export function monthlyChartOptions(
   const maxIndex = current.indexOf(Math.max(...current));
   return {
     ...BASE,
-    grid: { left: 8, right: 8, top: 36, bottom: 4, containLabel: true },
-    legend: {
-      top: 0,
-      right: 0,
-      itemWidth: 12,
-      itemHeight: 12,
-      icon: 'roundRect',
-      textStyle: { color: INK_SECONDARY, fontSize: 12 },
-      data: [String(year - 1), String(year)],
-    },
+    grid: { left: 4, right: 72, top: 4, bottom: 4, containLabel: true },
     tooltip: {
       ...(BASE['tooltip'] as object),
-      trigger: 'axis',
-      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,74,173,0.05)' } },
-      formatter: (params: any[]) => {
-        const i = params[0].dataIndex;
+      trigger: 'item',
+      formatter: (p: any) => {
+        const i = p.dataIndex;
         const prev = previous[i] ?? 0;
-        const diff = prev > 0 ? ` <span style="color:${MUTED}">(${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1})</span>` : '';
+        const comparison =
+          prev > 0
+            ? `${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1} (${formatBRL(prev)})`
+            : `Sem gastos em ${MONTH_NAMES[i].toLowerCase()} de ${year - 1}`;
         return (
-          `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[i]}${diff}</div>` +
-          tooltipRow(BRAND, String(year), current[i]) +
-          tooltipRow(GHOST, String(year - 1), prev) +
+          `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[i]} de ${year}</div>` +
+          `<div style="margin-top:4px"><strong>${formatBRL(current[i])}</strong></div>` +
+          `<div style="color:${INK_SECONDARY};margin-top:2px">${comparison}</div>` +
           `<div style="color:${MUTED};margin-top:6px;font-size:11px">Clique para filtrar este mês</div>`
         );
       },
     },
-    xAxis: {
+    xAxis: { type: 'value', show: false },
+    yAxis: {
       type: 'category',
+      inverse: true,
       data: MONTH_LABELS,
-      axisLine: { lineStyle: { color: AXIS } },
+      axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: INK_SECONDARY, fontSize: 12 },
     },
-    yAxis: valueAxis,
     series: [
       {
-        name: String(year - 1),
         type: 'bar',
-        data: previous,
-        barGap: '8%',
-        barMaxWidth: 22,
-        itemStyle: { color: GHOST, borderRadius: [4, 4, 0, 0] },
-        emphasis: { disabled: true },
-        cursor: 'pointer',
-      },
-      {
-        name: String(year),
-        type: 'bar',
-        barMaxWidth: 22,
+        barMaxWidth: 16,
         cursor: 'pointer',
         data: current.map((value, i) => {
           const isSelected = selected === i + 1;
@@ -130,10 +116,10 @@ export function monthlyChartOptions(
           const showLabel = value > 0 && (isSelected || (selected === undefined && i === maxIndex));
           return {
             value,
-            itemStyle: { color: dimmed ? BRAND_MUTED : BRAND, borderRadius: [4, 4, 0, 0] },
+            itemStyle: { color: dimmed ? BRAND_MUTED : BRAND, borderRadius: [0, 4, 4, 0] },
             label: {
               show: showLabel,
-              position: 'top',
+              position: 'right',
               color: INK,
               fontWeight: 600,
               fontSize: 11,

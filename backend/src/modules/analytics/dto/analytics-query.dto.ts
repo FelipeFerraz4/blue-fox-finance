@@ -10,7 +10,7 @@ export class AnalyticsQueryDto {
   @Max(2100)
   year?: number;
 
-  // compra = mês da data da compra; fatura = mês de vencimento de cada parcela
+  // fatura (padrão, usado pelo Dashboard) = mês de vencimento de cada parcela; compra = mês da data da compra
   @IsOptional()
   @IsIn(ANALYTICS_BASES, { message: "A visão deve ser 'compra' ou 'fatura'." })
   basis?: AnalyticsBasis;

@@ -17,6 +17,6 @@ export class AnalyticsController {
     @Query() query: AnalyticsQueryDto,
   ) {
     const year = query.year ?? Number(BillScheduleHelper.currentMonth().slice(0, 4));
-    return this.analyticsService.getOverview(userId, year, query.basis ?? 'compra');
+    return this.analyticsService.getOverview(userId, year, query.basis ?? 'fatura');
   }
 }

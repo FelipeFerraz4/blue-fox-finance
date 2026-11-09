@@ -27,27 +27,6 @@
       <button class="icon-btn" (click)="changeYear(1)" aria-label="Próximo ano">›</button>
     </div>
 
-    <div class="segmented" role="radiogroup" aria-label="Visão">
-      <button
-        role="radio"
-        [attr.aria-checked]="basis() === 'compra'"
-        [class.active]="basis() === 'compra'"
-        (click)="setBasis('compra')"
-        title="Cada compra conta inteira no mês em que foi feita"
-      >
-        Compras
-      </button>
-      <button
-        role="radio"
-        [attr.aria-checked]="basis() === 'fatura'"
-        [class.active]="basis() === 'fatura'"
-        (click)="setBasis('fatura')"
-        title="Cada parcela conta no mês em que vence"
-      >
-        Faturas
-      </button>
-    </div>
-
     <div class="filter-chips">
       @for (f of store.activeFilters(); track f.dim) {
         <button class="chip" (click)="clearFilter(f.dim)" [attr.aria-label]="'Remover filtro ' + f.label + ': ' + f.value">
@@ -86,7 +65,12 @@
       <div class="kpi">
         <span class="kpi-label">Total gasto</span>
         <strong class="kpi-value">{{ k.total | currency: 'BRL' }}</strong>
-        <span class="kpi-hint">{{ periodLabel() }} · {{ basisLabel() }}</span>
+        <span class="kpi-hint">
+          {{ periodLabel() }} · pelo mês do pagamento
+          @if (k.agendado > 0) {
+            <span class="block">inclui {{ k.agendado | currency: 'BRL' }} de parcelas futuras</span>
+          }
+        </span>
       </div>
       <div class="kpi">
         <span class="kpi-label">vs. ano anterior</span>
@@ -107,12 +91,12 @@
       <div class="kpi">
         <span class="kpi-label">Média mensal</span>
         <strong class="kpi-value">{{ k.mediaMensal | currency: 'BRL' }}</strong>
-        <span class="kpi-hint">{{ store.periodMonths().length }} mês(es) no período</span>
+        <span class="kpi-hint">{{ store.periodMonths().length }} mês(es) já pagos ou em curso</span>
       </div>
       <div class="kpi">
-        <span class="kpi-label">Lançamentos</span>
-        <strong class="kpi-value">{{ k.lancamentos }}</strong>
-        <span class="kpi-hint">Ticket médio {{ k.ticketMedio | currency: 'BRL' }}</span>
+        <span class="kpi-label">Pagamentos</span>
+        <strong class="kpi-value">{{ k.pagamentos }}</strong>
+        <span class="kpi-hint">Valor médio {{ k.valorMedio | currency: 'BRL' }}</span>
       </div>
       <div class="kpi">
         <span class="kpi-label">Parcelado</span>
@@ -121,27 +105,25 @@
       </div>
     </div>
 
-    <!-- Painel principal: meses -->
-    <app-chart-card
-     
-      [title]="'Gastos por mês em ' + year()"
-      [subtitle]="'Comparado com ' + (year() - 1) + ' · ' + basisLabel()"
-      [refreshing]="refreshing()"
-    >
-      <div class="chart-scroll">
+    <!-- Painéis (todos clicáveis) -->
+    <div class="panel-grid">
+      <!-- Gastos por mês: horizontal, comparação com o ano anterior no tooltip -->
+      <app-chart-card
+        [title]="'Gastos por mês em ' + year()"
+        [subtitle]="'Pelo mês do pagamento · passe o mouse para comparar com ' + (year() - 1)"
+        [refreshing]="refreshing()"
+      >
         <div
           echarts
-          class="chart chart-monthly"
+          class="chart"
+          [style.height]="monthlyHeight"
           [options]="monthlyOptions()"
-          (chartInit)="bindCategoryClick($event, 'x', monthIndexClick)"
+          (chartInit)="bindCategoryClick($event, 'y', monthIndexClick)"
           role="img"
-          [attr.aria-label]="'Gráfico de gastos por mês em ' + year() + '. Os valores estão na lista de gastos abaixo.'"
+          [attr.aria-label]="'Gastos por mês em ' + year() + '. Clique num mês para filtrar. Os valores estão na lista de gastos abaixo.'"
         ></div>
-      </div>
-    </app-chart-card>
+      </app-chart-card>
 
-    <!-- Painéis por dimensão -->
-    <div class="panel-grid">
       @for (panel of rankedPanels(); track panel.dim) {
         <app-chart-card
           [title]="panel.title"
@@ -192,10 +174,8 @@
           }
         </ul>
       </app-chart-card>
-    </div>
 
-    <!-- Compromissos futuros + contas a pagar -->
-    <div class="panel-grid two">
+      <!-- Compromissos futuros + contas a pagar -->
       <app-chart-card
         title="Compromissos futuros"
         [subtitle]="'Parcelas a vencer nos próximos 12 meses · não depende dos filtros' + (commitments() ? ' · total ' + (commitments()!.totalFuturo | currency: 'BRL') : '')"
@@ -273,7 +253,7 @@
         <table class="facts-table">
           <thead>
             <tr>
-              <th [attr.aria-sort]="ariaSort('data')"><button (click)="sortBy('data')">Data {{ sortIndicator('data') }}</button></th>
+              <th [attr.aria-sort]="ariaSort('data')"><button (click)="sortBy('data')">Compra {{ sortIndicator('data') }}</button></th>
               <th [attr.aria-sort]="ariaSort('nome')"><button (click)="sortBy('nome')">Item {{ sortIndicator('nome') }}</button></th>
               <th [attr.aria-sort]="ariaSort('loja')"><button (click)="sortBy('loja')">Loja {{ sortIndicator('loja') }}</button></th>
               <th [attr.aria-sort]="ariaSort('categoria')"><button (click)="sortBy('categoria')">Categoria {{ sortIndicator('categoria') }}</button></th>
@@ -286,9 +266,7 @@
               <tr>
                 <td>
                   {{ formatDate(f.data) }}
-                  @if (basis() === 'fatura') {
-                    <span class="muted block">fatura {{ monthLabels[f.mes - 1] }}</span>
-                  }
+                  <span class="muted block">pago em {{ monthLabels[f.mes - 1] }}</span>
                 </td>
                 <td>
                   <strong>{{ f.nome }}</strong>
