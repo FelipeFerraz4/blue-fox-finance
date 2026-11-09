@@ -22,6 +22,8 @@ export interface BotButton {
 export interface BotReply {
   text: string;
   buttons?: BotButton[][];
+  /** Encerra uma operação: o engine manda o menu inicial logo depois. */
+  final?: boolean;
 }
 
 /**

@@ -51,7 +51,7 @@ export class ExpenseFlow {
   // ---------------------------------------------------------------------------
 
   /**
-   * `/gasto`, ou atalho `/gasto 45,90 pão @ padaria` (também como texto solto
+   * `/lancamento`, ou atalho `/lancamento 45,90 pão @ padaria` (também como texto solto
    * começando pelo valor): o que foi digitado já entra no rascunho
    * (valor unitário com quantidade 1, nome e loja) e o resto é perguntado.
    */
@@ -149,14 +149,14 @@ export class ExpenseFlow {
 
   async onCallback(u: BotUser, state: ConversationState | null, nonce: string, action: string, arg?: string) {
     if (!state || state.flow !== 'gasto' || state.nonce !== nonce) {
-      return [{ text: 'Esse botão expirou. Use /gasto para um novo lançamento.' }];
+      return [{ text: 'Esse botão expirou. Use /lancamento para um novo lançamento.' }];
     }
     const { draft } = state;
 
     switch (action) {
       case 'cancel':
         await this.link.clearState(u.canal, u.externalUserId);
-        return [{ text: 'Lançamento cancelado.' }];
+        return [{ text: 'Lançamento cancelado.', final: true }];
 
       case 'save':
         return this.save(u, state);
@@ -200,7 +200,7 @@ export class ExpenseFlow {
         const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
         if (!expense) return [{ text: 'Esse lançamento já não existe.' }];
         await this.expenses.remove(u.userId, expense.id);
-        return [{ text: `🗑 Excluído: <b>${F.esc(expense.nome)}</b> · ${F.brl(expense.valorTotal)}` }];
+        return [{ text: `🗑 Excluído: <b>${F.esc(expense.nome)}</b> · ${F.brl(expense.valorTotal)}`, final: true }];
       }
       case 'del': {
         const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
@@ -216,7 +216,7 @@ export class ExpenseFlow {
         ];
       }
       case 'keep':
-        return [{ text: 'Ok, mantido.' }];
+        return [{ text: 'Ok, mantido.', final: true }];
     }
     return [{ text: 'Opção inválida.' }];
   }
@@ -229,7 +229,7 @@ export class ExpenseFlow {
       orderBy: { createdAt: 'desc' },
       take: 5,
     });
-    if (!items.length) return [{ text: 'Você ainda não tem lançamentos. Use /gasto para criar o primeiro.' }];
+    if (!items.length) return [{ text: 'Você ainda não tem lançamentos.', final: true }];
 
     const lines = items.map(
       (e, i) =>
@@ -583,6 +583,7 @@ export class ExpenseFlow {
       '/expenses',
     );
     reply.buttons = [[{ label: '↩️ Desfazer', data: `x::undo:${created.id}` }, ...(reply.buttons?.[0] ?? [])]];
+    reply.final = true;
     return [reply];
   }
 

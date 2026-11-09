@@ -59,6 +59,6 @@ export class SummaryFlow {
       lines.push('', `🔔 ${alerts.total} conta(s) precisando de atenção${overdue}. Veja em /contas`);
     }
 
-    return [{ text: lines.join('\n') }];
+    return [{ text: lines.join('\n'), final: true }];
   }
 }

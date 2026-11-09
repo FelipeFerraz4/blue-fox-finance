@@ -11,7 +11,8 @@ const RATE_LIMIT = 60; // mensagens por minuto por usuário (o assistente usa ~1
 const RATE_WINDOW_MS = 60_000;
 
 export const BOT_COMMANDS = [
-  { command: 'gasto', description: 'Lançar um gasto' },
+  // O Telegram só aceita a-z, 0-9 e _ em comandos: "/lançamento" digitado também é aceito
+  { command: 'lancamento', description: 'Novo lançamento' },
   { command: 'resumo', description: 'Gastos do mês' },
   { command: 'contas', description: 'Contas a pagar' },
   { command: 'ultimos', description: 'Últimos lançamentos' },
@@ -47,7 +48,9 @@ export class BotEngineService {
     }
 
     try {
-      return await this.route(msg);
+      const replies = await this.route(msg);
+      // Fim de uma operação (salvou, cancelou, confirmou pagamento…): mostra o menu de novo
+      return replies.some((r) => r.final) ? [...replies, this.menu()] : replies;
     } catch (err) {
       if (err instanceof HttpException) {
         // Erros de negócio dos services (ex.: "Meio de pagamento não existe")
@@ -63,7 +66,7 @@ export class BotEngineService {
   private async route(msg: BotIncoming): Promise<BotReply[]> {
     const text = msg.text?.trim() ?? '';
     const [rawCommand, ...rest] = text.split(/\s+/);
-    // "/gasto@MeuBot" → "gasto"
+    // "/lancamento@MeuBot" → "lancamento"
     const command = rawCommand?.startsWith('/') ? rawCommand.slice(1).split('@')[0].toLowerCase() : null;
     const args = rest.join(' ');
 
@@ -79,9 +82,10 @@ export class BotEngineService {
 
     if (command) {
       switch (command) {
-        case 'gasto':
-        case 'g':
+        case 'lancamento':
+        case 'lançamento':
         case 'novo':
+        case 'gasto': // nome antigo, mantido para quem já se acostumou
           return this.expense.start(u, args);
         case 'resumo':
           return this.summaryFlow.summary(u);
@@ -92,25 +96,27 @@ export class BotEngineService {
           return this.expense.recent(u);
         case 'cancelar':
           await this.link.clearState(u.canal, u.externalUserId);
-          return [{ text: 'Ok, cancelado.' }];
+          return [{ text: 'Ok, cancelado.', final: true }];
         case 'desconectar':
           await this.link.unlinkUser(userId);
           return [{ text: 'Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.' }];
         case 'start':
         case 'ajuda':
         case 'help':
-          return [this.help()];
+        case 'menu':
+          return [this.menu()];
         default:
-          return [{ text: 'Comando desconhecido. Veja /ajuda.' }];
+          return [{ text: 'Não conheço esse comando.' }, this.menu()];
       }
     }
 
-    // Texto livre: continua a conversa em andamento ou inicia um gasto se começar por um valor
+    // Texto livre: continua a conversa em andamento, inicia um lançamento se começar
+    // por um valor, ou mostra o menu (ex.: "oi" no início da conversa)
     const state = await this.link.getState(u.canal, u.externalUserId);
     if (state?.flow === 'gasto') return this.expense.onText(u, state, text);
     if (state?.flow === 'conta-valor') return this.billsFlow.onText(u, state, text);
     if (F.parseAmount(text.split(/\s+/)[0] ?? '')) return this.expense.start(u, text);
-    return [{ text: 'Para lançar, mande o valor e o item, por exemplo: <code>45,90 pão @ padaria</code>\nOu veja /ajuda.' }];
+    return [this.menu()];
   }
 
   private async onCallback(u: BotUser, data: string): Promise<BotReply[]> {
@@ -124,6 +130,18 @@ export class BotEngineService {
         return this.expense.onStatelessCallback(u, action, arg);
       case 'c':
         return this.billsFlow.onCallback(u, action, arg);
+      case 'm':
+        // Botões do menu inicial
+        switch (action) {
+          case 'lancamento':
+            return this.expense.start(u, '');
+          case 'resumo':
+            return this.summaryFlow.summary(u);
+          case 'contas':
+            return this.billsFlow.list(u);
+          case 'ultimos':
+            return this.expense.recent(u);
+        }
     }
     return [{ text: 'Esse botão não é mais válido.' }];
   }
@@ -134,26 +152,36 @@ export class BotEngineService {
       return [{ text: '❌ Código inválido ou expirado. Gere um novo no seu perfil do site (vale por 10 minutos).' }];
     }
     this.logger.log(`Conta vinculada ao ${msg.canal}`);
-    const help = this.help();
-    return [{ text: '✅ <b>Conta conectada!</b> Agora o que você lançar aqui aparece no site.' }, help];
+    return [{ text: '✅ <b>Conta conectada!</b> Agora o que você lançar aqui aparece no site.' }, this.menu()];
   }
 
-  private help(): BotReply {
+  /** Menu inicial: o que cada comando faz, com atalhos em botões. */
+  private menu(): BotReply {
     return {
       text: [
         '<b>Blue Fox Finance</b> 🦊',
         '',
-        '<b>Lançar um gasto</b>',
-        '• /gasto e responda às perguntas (os mesmos campos do site)',
-        '• ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>',
+        '<b>Novo lançamento</b>',
+        '/lancamento · responda às perguntas (os mesmos campos do site)',
+        'ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>',
         '',
         '<b>Consultar</b>',
         '/resumo · gastos do mês',
-        '/contas · contas a pagar (com botão Pagar)',
+        '/contas · contas a pagar e confirmação de pagamento',
         '/ultimos · últimos lançamentos',
         '',
-        '/cancelar · /desconectar',
+        '<b>Outros</b>',
+        '/cancelar · cancela o que estiver em andamento',
+        '/desconectar · desvincula sua conta',
       ].join('\n'),
+      buttons: [
+        [{ label: '➕ Novo lançamento', data: 'm::lancamento' }],
+        [
+          { label: '📊 Resumo', data: 'm::resumo' },
+          { label: '🔔 Contas', data: 'm::contas' },
+          { label: '🧾 Últimos', data: 'm::ultimos' },
+        ],
+      ],
     };
   }
 

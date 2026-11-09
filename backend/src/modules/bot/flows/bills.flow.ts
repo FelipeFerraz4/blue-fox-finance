@@ -6,7 +6,10 @@ import { BotReply, BotUser, ConversationState } from '../bot.types';
 
 type ContaValorState = Extract<ConversationState, { flow: 'conta-valor' }>;
 
-/** `/contas`: avisos de vencimento com botão Pagar. Callbacks `c::<ação>:<id>`. */
+/**
+ * `/contas`: avisos de vencimento com botão "Confirmar pagamento" (o bot não paga
+ * nada: só registra um pagamento que o usuário já fez). Callbacks `c::<ação>:<id>`.
+ */
 @Injectable()
 export class BillsFlow {
   constructor(
@@ -18,12 +21,19 @@ export class BillsFlow {
     const alerts = await this.bills.getAlerts(u.userId);
     const items = [...alerts.atrasadas, ...alerts.venceHoje, ...alerts.proximas];
     if (!items.length) {
-      return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.' }];
+      return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.', final: true }];
     }
 
     const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)}${o.valor !== null ? ` · ${F.brl(o.valor)}` : ''}`);
-    const buttons = items.slice(0, 10).map((o) => [{ label: F.label(`✅ Pagar ${o.nome}`, 32), data: `c::pay:${o.id}` }]);
-    return [{ text: `<b>Contas a pagar</b>\n\n${lines.join('\n')}`, buttons }];
+    const buttons = items
+      .slice(0, 10)
+      .map((o) => [{ label: F.label(`✅ Confirmar pagamento · ${o.nome}`, 40), data: `c::pay:${o.id}` }]);
+    return [
+      {
+        text: `<b>Contas a pagar</b>\n\n${lines.join('\n')}\n\n<i>Já pagou alguma? Toque para confirmar o pagamento.</i>`,
+        buttons,
+      },
+    ];
   }
 
   async onCallback(u: BotUser, action: string, id?: string): Promise<BotReply[]> {
@@ -32,7 +42,7 @@ export class BillsFlow {
 
     if (action === 'unpay') {
       const view = await this.bills.unpay(u.userId, id);
-      return [{ text: `↩️ <b>${F.esc(view.nome)}</b> voltou para pendente.` }];
+      return [{ text: `↩️ Confirmação de pagamento desfeita: <b>${F.esc(view.nome)}</b> voltou para pendente.`, final: true }];
     }
 
     if (action === 'pay') {
@@ -46,7 +56,7 @@ export class BillsFlow {
           occurrenceId: id,
           nome: view.nome,
         });
-        return [{ text: `Quanto foi pago em <b>${F.esc(view.nome)}</b>?\n<i>Exemplo: 120,50</i>` }];
+        return [{ text: `<b>Valor pago</b> em ${F.esc(view.nome)}?\n<i>Exemplo: 120,50</i>` }];
       }
       return this.pay(u, id);
     }
@@ -64,11 +74,9 @@ export class BillsFlow {
     const view = await this.bills.pay(u.userId, occurrenceId, { valorPago });
     return [
       {
-        text: `✅ <b>${F.esc(view.nome)}</b> paga · ${F.brl(view.valorPago ?? 0)}`,
-        buttons: [[
-          { label: '↩️ Desfazer', data: `c::unpay:${occurrenceId}` },
-          { label: '📋 Ver contas', data: 'c::list' },
-        ]],
+        text: `✅ Pagamento confirmado: <b>${F.esc(view.nome)}</b> · ${F.brl(view.valorPago ?? 0)}`,
+        final: true,
+        buttons: [[{ label: '↩️ Desfazer', data: `c::unpay:${occurrenceId}` }]],
       },
     ];
   }
