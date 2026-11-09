@@ -236,14 +236,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <tr *ngFor="let item of expenses">
                     <td>
                       <span class="date-badge">
-                        {{ item.data | date:'dd/MM/yyyy' }}
+                        {{ item.data | date:'dd/MM/yyyy':'UTC' }}
                       </span>
                     </td>
                     <td>
                       <strong class="text-gray-900 font-medium">{{ item.loja }}</strong>
                     </td>
                     <td>
-                      <div class="font-medium text-gray-900">{{ item.nome }} <span class="origin-badge" *ngIf="item.origem === 'TELEGRAM'" title="Lançado pelo Telegram">Telegram</span></div>
+                      <div class="font-medium text-gray-900">{{ item.nome }}</div>
                       <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
                     </td>
                     <td>
@@ -319,7 +319,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <!-- Topo: Nome do Item e Valor Total -->
               <div class="expense-card-top">
                 <div class="expense-card-title-wrap">
-                  <span class="expense-card-name">{{ item.nome }} <span class="origin-badge" *ngIf="item.origem === 'TELEGRAM'" title="Lançado pelo Telegram">Telegram</span></span>
+                  <span class="expense-card-name">{{ item.nome }}</span>
                   <span class="expense-card-store text-muted">{{ item.loja }}</span>
                 </div>
                 <div class="expense-card-price-wrap">
@@ -336,7 +336,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <div class="expense-card-meta">
                 <div class="meta-item">
                   <span class="meta-label">Data:</span>
-                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
                 </div>
                 <div class="meta-item">
                   <span class="meta-label">Comprador:</span>
@@ -475,7 +475,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                     <tbody>
                       <tr *ngFor="let item of group.itens">
                         <td>
-                          <div class="font-medium text-gray-900">{{ item.nome }} <span class="origin-badge" *ngIf="item.origem === 'TELEGRAM'" title="Lançado pelo Telegram">Telegram</span></div>
+                          <div class="font-medium text-gray-900">{{ item.nome }}</div>
                           <small class="text-muted" *ngIf="item.observacoes">{{ item.observacoes }}</small>
                         </td>
                         <td>
@@ -549,7 +549,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <!-- Topo: Nome do Item e Valor Total -->
                   <div class="expense-card-top">
                     <div class="expense-card-title-wrap">
-                      <span class="expense-card-name">{{ item.nome }} <span class="origin-badge" *ngIf="item.origem === 'TELEGRAM'" title="Lançado pelo Telegram">Telegram</span></span>
+                      <span class="expense-card-name">{{ item.nome }}</span>
                       <span class="expense-card-store text-muted">{{ item.loja }}</span>
                     </div>
                     <div class="expense-card-price-wrap">
@@ -566,7 +566,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <div class="expense-card-meta">
                     <div class="meta-item">
                       <span class="meta-label">Data:</span>
-                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy' }}</span>
+                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Comprador:</span>
@@ -1689,18 +1689,6 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
-    }
-    .origin-badge {
-      display: inline-block;
-      margin-left: 0.35rem;
-      padding: 0.05rem 0.45rem;
-      border-radius: 50px;
-      background: #e0f2fe;
-      color: #0369a1;
-      font-family: var(--font-inter, 'Inter', sans-serif);
-      font-size: 0.68rem;
-      font-weight: 600;
-      vertical-align: middle;
     }
     .expense-card-name {
       font-family: var(--font-headers, 'Outfit', sans-serif);

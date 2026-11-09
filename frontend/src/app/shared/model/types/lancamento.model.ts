@@ -35,7 +35,7 @@ export interface Lancamento {
   tipo: TipoLancamento;
   numeroParcelas: number;
   observacoes?: string;
-  /** Por onde o lançamento entrou: site ou bot do Telegram. */
+  /** Por onde o lançamento entrou (auditoria; não é exibido na listagem). */
   origem?: 'WEB' | 'TELEGRAM';
   parcelas?: Parcela[];
   createdAt?: string;
