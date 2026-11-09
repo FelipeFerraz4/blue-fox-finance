@@ -34,13 +34,6 @@ export const routes: Routes = [
       import('./features/pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
-    path: 'analytics',
-    canActivate: [authGuard],
-    data: { roles: FINANCE_ACCESS_ROLES },
-    loadComponent: () =>
-      import('./features/pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),
-  },
-  {
     path: 'expenses',
     canActivate: [authGuard],
     data: { roles: FINANCE_ACCESS_ROLES },
@@ -126,7 +119,8 @@ export const routes: Routes = [
   // 3. Redirecionamentos de Compatibilidade (Rotas legadas em Português)
   { path: 'lancamentos', redirectTo: 'expenses', pathMatch: 'full' },
   { path: 'lancamentos/novo', redirectTo: 'expenses/new', pathMatch: 'full' },
-  { path: 'analises', redirectTo: 'analytics', pathMatch: 'full' },
+  { path: 'analytics', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'analises', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'contas', redirectTo: 'bills', pathMatch: 'full' },
   { path: 'meios-pagamento', redirectTo: 'payment-methods', pathMatch: 'full' },
   { path: 'lojas', redirectTo: 'stores', pathMatch: 'full' },

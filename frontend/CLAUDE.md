@@ -7,7 +7,7 @@ Este documento serve como guia de arquitetura e convenções do frontend do **Bl
 O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e manutenção:
 
 ### 1. `src/app/core` (Singletons e Lógica Global)
-- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`auth/`, `buyers/`, `categories/`, `dashboard/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `sidebar/`, `stores/`, `user/`).
+- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`auth/`, `buyers/`, `categories/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `sidebar/`, `stores/`, `user/`).
 - **Guards (`core/guards/`):** Proteção de rotas com base em autenticação e papéis (`auth.guard.ts`).
 - **Interceptors (`core/interceptors/`):** Interceptação HTTP global como injeção de tokens JWT (`auth.interceptor.ts`).
 - **CoreModule (`core/core-module.ts`):** Módulo central de registro.
@@ -15,8 +15,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 ### 2. `src/app/features` (Páginas e Módulos de Domínio)
 - **Páginas Principais (`features/pages/main/`):** Rotas públicas da aplicação (`home/`, `about/`, `updates/`).
 - **Módulos de Domínio (`features/pages/`):**
-  - `dashboard/`: Visão geral e métricas financeiras.
-  - `analytics/`: Análises estilo Power BI com filtro cruzado (`analytics.store.ts`), opções dos gráficos em `analytics-charts.ts` (paleta categórica validada para daltonismo, uma série = azul da marca) e `chart-card/` como moldura dos painéis. ECharts é registrado em `echarts.setup.ts` e fornecido só no componente (`provideEchartsCore`), mantendo-o fora do bundle inicial.
+  - `dashboard/`: Dashboard único estilo Power BI com filtro cruzado (`analytics.store.ts`), opções dos gráficos em `analytics-charts.ts` (paleta categórica validada para daltonismo, uma série = azul da marca) e `chart-card/` como moldura dos painéis. ECharts é registrado em `echarts.setup.ts` e fornecido só no componente (`provideEchartsCore`), mantendo-o fora do bundle inicial.
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação/edição (`expense-form/`).
   - `admin/`: Painel de administração (`admin.component.ts`), categorias de itens (`item-categories/`), categorias de lojas (`store-categories/`) e perfil de usuário (`user-profile/`).
   - `buyers/`: Gestão de compradores/pagadores.
@@ -26,7 +25,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 
 ### 3. `src/app/shared` (Componentes Reutilizáveis e Tipos)
 - **Componentes Gerais (`shared/components/general/`):** Componentes comuns de layout e UI (`navbar/`, `sidebar/`, `confirm-modal/`, `notice-modal/`).
-- **Modelos e Tipos (`shared/model/types/`):** Interfaces e tipos TypeScript de todas as entidades do domínio financeiro (`buyer.model.ts`, `category.model.ts`, `dashboard.model.ts`, `lancamento.model.ts`, `payment-method.model.ts`, `store.model.ts`).
+- **Modelos e Tipos (`shared/model/types/`):** Interfaces e tipos TypeScript de todas as entidades do domínio financeiro (`analytics.model.ts`, `bill.model.ts`, `buyer.model.ts`, `category.model.ts`, `lancamento.model.ts`, `payment-method.model.ts`, `store.model.ts`).
 - **Mocks (`shared/model/mocks/`):** Mocks e dados estáticos de teste.
 
 ## 🚀 Comandos Úteis

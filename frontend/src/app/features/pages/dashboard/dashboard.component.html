@@ -1,4 +1,4 @@
-<div class="analytics-page">
+<div class="dashboard-page">
   <!-- Cabeçalho -->
   <div class="page-header">
     <div class="page-header-content">
@@ -10,7 +10,7 @@
             <line x1="6" y1="20" x2="6" y2="14" />
           </svg>
         </div>
-        <h1 class="page-title">Análises</h1>
+        <h1 class="page-title">Dashboard</h1>
         <span class="badge badge-brand">Interativo</span>
       </div>
       <p class="page-subtitle">
@@ -20,7 +20,7 @@
   </div>
 
   <!-- Barra de filtros (fixa no topo) -->
-  <div class="filter-bar" role="toolbar" aria-label="Filtros das análises">
+  <div class="filter-bar" role="toolbar" aria-label="Filtros do dashboard">
     <div class="year-picker" role="group" aria-label="Ano">
       <button class="icon-btn" (click)="changeYear(-1)" aria-label="Ano anterior">‹</button>
       <strong>{{ year() }}</strong>
@@ -64,6 +64,9 @@
     }
   </div>
 
+  <!-- Contas a pagar atrasadas / vencendo (some quando não há nada) -->
+  <app-bill-alerts-card></app-bill-alerts-card>
+
   @if (error()) {
     <div class="error-banner" role="alert">
       {{ error() }}
@@ -74,7 +77,7 @@
   @if (firstLoad()) {
     <div class="loading-state">
       <span class="mini-spinner"></span>
-      <p>Carregando análises...</p>
+      <p>Carregando dashboard...</p>
     </div>
   } @else if (store.overview()) {
     <!-- KPIs -->
