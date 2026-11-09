@@ -34,7 +34,7 @@ const STATUS_LABELS: Record<BillStatus, string> = {
   PAGA: 'Paga',
   ATRASADA: 'Atrasada',
   VENCE_HOJE: 'Vence hoje',
-  PROXIMA: 'Vence em breve',
+  PROXIMA: 'Em breve',
   PENDENTE: 'Pendente',
 };
 
@@ -98,9 +98,9 @@ export class BillsComponent implements OnInit {
   noticeMessage = '';
 
   readonly recorrenciaOptions: DropdownOption<RecorrenciaConta>[] = [
-    { value: 'MENSAL', label: 'Mensal', sublabel: 'Vence todo mês no mesmo dia (energia, internet, cartão)' },
-    { value: 'ANUAL', label: 'Anual', sublabel: 'Vence uma vez por ano (seguro, anuidade)' },
-    { value: 'UNICA', label: 'Avulsa', sublabel: 'Vence uma única vez numa data específica (IPVA, consulta)' },
+    { value: 'MENSAL', label: 'Mensal' },
+    { value: 'ANUAL', label: 'Anual' },
+    { value: 'UNICA', label: 'Avulsa' },
   ];
 
   readonly monthOptions: DropdownOption<number>[] = MONTH_NAMES.map((label, i) => ({
@@ -119,7 +119,7 @@ export class BillsComponent implements OnInit {
             .map((m) => ({
               value: m.id,
               label: m.nome,
-              sublabel: `${m.instituicaoBanco}${m.diaVencimento ? ` · vence dia ${m.diaVencimento}` : ''}`,
+              sublabel: m.diaVencimento ? `dia ${m.diaVencimento}` : '',
             })),
         ),
       error: () => this.cardOptions.set([]),
@@ -250,7 +250,7 @@ export class BillsComponent implements OnInit {
   onCardChange(cardId: string | null): void {
     this.form.meioPagamentoId = cardId;
     const card = this.cardOptions().find((c) => c.value === cardId);
-    const match = card?.sublabel?.match(/vence dia (\d+)/);
+    const match = card?.sublabel?.match(/dia (\d+)/);
     if (match && !this.form.diaVencimento) {
       this.form.diaVencimento = Number(match[1]);
     }
@@ -328,11 +328,11 @@ export class BillsComponent implements OnInit {
 
   statusLabel(o: BillOccurrence): string {
     if (o.status === 'PROXIMA') {
-      return o.diasParaVencer === 1 ? 'Vence amanhã' : `Vence em ${o.diasParaVencer} dias`;
+      return o.diasParaVencer === 1 ? 'Amanhã' : `Em ${o.diasParaVencer} dias`;
     }
     if (o.status === 'ATRASADA') {
       const dias = Math.abs(o.diasParaVencer);
-      return `Atrasada há ${dias} dia${dias > 1 ? 's' : ''}`;
+      return `Atrasada ${dias}d`;
     }
     return STATUS_LABELS[o.status];
   }

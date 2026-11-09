@@ -13,23 +13,19 @@
           </svg>
         </div>
         <h1 class="page-title">Contas a Pagar</h1>
-        <span class="badge badge-brand">Vencimentos</span>
       </div>
-      <p class="page-subtitle">
-        Cadastre suas contas recorrentes e marque cada uma como paga para saber o que ainda falta pagar no mês
-      </p>
     </div>
 
     <div class="header-actions">
       <button class="btn btn-secondary btn-pill" (click)="showManage.set(!showManage())">
-        {{ showManage() ? 'Ver vencimentos' : 'Gerenciar contas' }}
+        {{ showManage() ? 'Vencimentos' : 'Cadastro' }}
       </button>
       <button class="btn btn-primary btn-pill" (click)="openNewBill()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        <span>Nova Conta</span>
+        <span>Nova</span>
       </button>
     </div>
   </div>
@@ -41,7 +37,7 @@
       <div class="month-nav-label">
         <strong>{{ monthLabel() }}</strong>
         @if (!isCurrentMonth()) {
-          <button class="link-btn" (click)="goToCurrentMonth()">Voltar para o mês atual</button>
+          <button class="link-btn" (click)="goToCurrentMonth()">Hoje</button>
         }
       </div>
       <button class="btn btn-secondary btn-sm" (click)="changeMonth(1)" aria-label="Próximo mês">›</button>
@@ -50,14 +46,14 @@
     @if (loading()) {
       <div class="card loading-state">
         <div class="mini-spinner"></div>
-        <p>Carregando contas...</p>
+        <p>Carregando...</p>
       </div>
     } @else {
       @if (overview(); as data) {
         <!-- Totais do mês -->
         <div class="summary-grid">
           <div class="card summary-card">
-            <span class="summary-label">Total do mês</span>
+            <span class="summary-label">Total</span>
             <strong class="summary-value">{{ data.totais.previsto | currency: 'BRL' }}</strong>
           </div>
           <div class="card summary-card summary-paid">
@@ -65,9 +61,8 @@
             <strong class="summary-value">{{ data.totais.pago | currency: 'BRL' }}</strong>
           </div>
           <div class="card summary-card summary-pending">
-            <span class="summary-label">Falta pagar</span>
+            <span class="summary-label">Pendente</span>
             <strong class="summary-value">{{ data.totais.pendente | currency: 'BRL' }}</strong>
-            <span class="summary-hint">{{ data.totais.quantidadePendente }} conta(s) pendente(s)</span>
           </div>
         </div>
 
@@ -75,7 +70,7 @@
         @if (data.atrasadasAnteriores.length > 0) {
           <div class="card overdue-card">
             <div class="card-title">
-              <span>Atrasadas de meses anteriores</span>
+              <span>Atrasadas</span>
               <span class="badge badge-danger">{{ data.atrasadasAnteriores.length }}</span>
             </div>
             <ng-container
@@ -87,15 +82,15 @@
         <!-- Contas do mês -->
         <div class="card">
           <div class="card-title">
-            <span>Vencimentos de {{ monthLabel() }}</span>
-            <span class="badge badge-primary">{{ data.ocorrencias.length }} conta(s)</span>
+            <span>{{ monthLabel() }}</span>
+            <span class="badge badge-primary">{{ data.ocorrencias.length }}</span>
           </div>
 
           @if (data.ocorrencias.length === 0) {
             <div class="empty-state">
-              <p>Nenhuma conta vence neste mês.</p>
+              <p>Nada neste mês</p>
               @if (bills().length === 0) {
-                <button class="btn btn-primary btn-pill" (click)="openNewBill()">Cadastrar primeira conta</button>
+                <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
               }
             </div>
           } @else {
@@ -110,14 +105,14 @@
     <!-- Cadastro de contas -->
     <div class="card">
       <div class="card-title">
-        <span>Contas cadastradas</span>
-        <span class="badge badge-primary">{{ bills().length }} conta(s)</span>
+        <span>Contas</span>
+        <span class="badge badge-primary">{{ bills().length }}</span>
       </div>
 
       @if (bills().length === 0) {
         <div class="empty-state">
-          <p>Você ainda não cadastrou nenhuma conta.</p>
-          <button class="btn btn-primary btn-pill" (click)="openNewBill()">Cadastrar primeira conta</button>
+          <p>Nenhuma conta</p>
+          <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
         </div>
       } @else {
         <ul class="bill-list">
@@ -132,7 +127,7 @@
                   } @else if (bill.valorPrevisto !== null) {
                     <span>{{ +bill.valorPrevisto | currency: 'BRL' }}</span>
                   } @else {
-                    <span class="text-muted">Valor variável</span>
+                    <span class="text-muted">Variável</span>
                   }
                   @if (bill.categoria) {
                     <span class="badge badge-gray">{{ bill.categoria }}</span>
@@ -170,14 +165,8 @@
             <strong>{{ o.nome }}</strong>
             <div class="occurrence-meta">
               <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o) }}</span>
-              @if (o.valorDaFatura) {
-                <span class="text-muted text-xs">Valor da fatura calculada</span>
-              }
               @if (o.pagoEm) {
-                <span class="text-muted text-xs">Paga em {{ formatDate(o.pagoEm) }}</span>
-              }
-              @if (showMonth) {
-                <span class="text-muted text-xs">Venceu em {{ formatDate(o.dataVencimento) }}</span>
+                <span class="text-muted text-xs">{{ formatDate(o.pagoEm) }}</span>
               }
             </div>
           </div>
@@ -186,7 +175,7 @@
             @if (o.valor !== null) {
               {{ o.valor | currency: 'BRL' }}
             } @else {
-              <span class="text-muted">A informar</span>
+              <span class="text-muted">—</span>
             }
           </div>
 
@@ -194,7 +183,7 @@
             @if (o.status === 'PAGA') {
               <button class="btn btn-secondary btn-sm" (click)="occurrenceToUnpay = o">Desfazer</button>
             } @else {
-              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Marcar como paga</button>
+              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Pagar</button>
             }
           </div>
         </li>
@@ -214,8 +203,8 @@
               </svg>
             </div>
             <div>
-              <h3>Marcar como paga</h3>
-              <p class="modal-subtitle">{{ o.nome }} · vence {{ formatDate(o.dataVencimento) }}</p>
+              <h3>Pagar</h3>
+              <p class="modal-subtitle">{{ o.nome }}</p>
             </div>
           </div>
           <button class="btn-close" (click)="closePayModal()">✕</button>
@@ -225,7 +214,7 @@
           <div class="modal-body">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Valor pago (R$) *</label>
+                <label class="form-label">Valor *</label>
                 <input
                   type="number"
                   name="valorPago"
@@ -236,14 +225,9 @@
                   class="form-control"
                   placeholder="ex: 187,35"
                 />
-                @if (o.valorDaFatura) {
-                  <small class="text-muted text-xs">
-                    Sugerido pela fatura calculada. Ao confirmar, as parcelas desta fatura ficam como pagas.
-                  </small>
-                }
               </div>
               <div class="form-group">
-                <label class="form-label">Data do pagamento *</label>
+                <label class="form-label">Data *</label>
                 <input type="date" name="pagoEm" [(ngModel)]="payDate" required class="form-control" />
               </div>
             </div>
@@ -255,7 +239,7 @@
               @if (savingPay) {
                 <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
               } @else {
-                Confirmar pagamento
+                Confirmar
               }
             </button>
           </div>
@@ -277,9 +261,8 @@
               </svg>
             </div>
             <div>
-              <h3>{{ editingBillId ? 'Editar Conta' : 'Nova Conta' }}</h3>
-              <p class="modal-subtitle">Defina quando a conta vence e quanto costuma custar</p>
-            </div>
+              <h3>{{ editingBillId ? 'Editar conta' : 'Nova conta' }}</h3>
+                          </div>
           </div>
           <button class="btn-close" (click)="closeBillModal()">✕</button>
         </div>
@@ -287,23 +270,20 @@
         <form (ngSubmit)="saveBill()" #billForm="ngForm">
           <div class="modal-body">
             <div class="form-group">
-              <label class="form-label">Vincular a um cartão de crédito (opcional)</label>
+              <label class="form-label">Cartão</label>
               <app-searchable-dropdown
                 [options]="cardOptions()"
                 [ngModel]="form.meioPagamentoId"
                 (ngModelChange)="onCardChange($event)"
                 name="meioPagamentoId"
-                placeholder="Sem vínculo (conta comum)"
-                emptyMessage="Nenhum cartão de crédito cadastrado"
+                placeholder="Nenhum"
+                emptyMessage="Nenhum cartão"
               ></app-searchable-dropdown>
-              <small class="text-muted text-xs">
-                Para a fatura do cartão: o valor vem dos lançamentos do mês e, ao pagar, as parcelas ficam como pagas.
-              </small>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Nome da conta *</label>
+                <label class="form-label">Nome *</label>
                 <input
                   type="text"
                   name="nome"
@@ -339,12 +319,12 @@
             <div class="form-row">
               @if (form.recorrencia === 'UNICA') {
                 <div class="form-group">
-                  <label class="form-label">Data de vencimento *</label>
+                  <label class="form-label">Vencimento *</label>
                   <input type="date" name="dataUnica" [(ngModel)]="form.dataUnica" required class="form-control" />
                 </div>
               } @else {
                 <div class="form-group">
-                  <label class="form-label">Dia do vencimento (1 a 31) *</label>
+                  <label class="form-label">Dia *</label>
                   <input
                     type="number"
                     name="diaVencimento"
@@ -355,11 +335,10 @@
                     class="form-control"
                     placeholder="ex: 10"
                   />
-                  <small class="text-muted text-xs">Em meses mais curtos, vence no último dia.</small>
                 </div>
                 @if (form.recorrencia === 'ANUAL') {
                   <div class="form-group">
-                    <label class="form-label">Mês do vencimento *</label>
+                    <label class="form-label">Mês *</label>
                     <app-searchable-dropdown
                       [options]="monthOptions"
                       [(ngModel)]="form.mesVencimento"
@@ -376,7 +355,7 @@
             <div class="form-row">
               @if (!form.meioPagamentoId) {
                 <div class="form-group">
-                  <label class="form-label">Valor previsto (R$)</label>
+                  <label class="form-label">Valor</label>
                   <input
                     type="number"
                     name="valorPrevisto"
@@ -384,12 +363,12 @@
                     step="0.01"
                     [(ngModel)]="form.valorPrevisto"
                     class="form-control"
-                    placeholder="Deixe vazio se o valor varia"
+                    placeholder="Variável"
                   />
                 </div>
               }
               <div class="form-group">
-                <label class="form-label">Avisar quantos dias antes</label>
+                <label class="form-label">Aviso (dias)</label>
                 <input
                   type="number"
                   name="lembrarDiasAntes"
@@ -403,11 +382,8 @@
 
             @if (form.recorrencia !== 'UNICA') {
               <div class="form-group">
-                <label class="form-label">Cobrar a partir de</label>
+                <label class="form-label">Início</label>
                 <input type="month" name="dataInicio" [(ngModel)]="form.dataInicio" required class="form-control" />
-                <small class="text-muted text-xs">
-                  Meses anteriores ao atual entram como atrasados até você marcar como pagos.
-                </small>
               </div>
             }
 
@@ -427,7 +403,7 @@
               @if (savingBill) {
                 <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
               } @else {
-                {{ editingBillId ? 'Salvar alterações' : 'Salvar conta' }}
+                Salvar
               }
             </button>
           </div>
@@ -439,7 +415,7 @@
   <app-confirm-modal
     [isOpen]="!!billToDelete"
     title="Excluir conta"
-    message="A conta e todo o histórico de pagamentos dela serão excluídos. Para só parar de cobrar, use Desativar."
+    message="O histórico também será excluído."
     [itemName]="billToDelete?.nome"
     confirmText="Excluir"
     [loading]="confirmLoading"
@@ -450,7 +426,7 @@
   <app-confirm-modal
     [isOpen]="!!occurrenceToUnpay"
     title="Desfazer pagamento"
-    message="A conta volta a ficar pendente. Se for fatura de cartão, as parcelas também voltam a ficar em aberto."
+    message="A conta volta a ficar pendente."
     [itemName]="occurrenceToUnpay?.nome"
     confirmText="Desfazer"
     variant="warning"
@@ -461,7 +437,7 @@
 
   <app-notice-modal
     [isOpen]="noticeOpen"
-    title="Não foi possível concluir"
+    title="Erro"
     [message]="noticeMessage"
     type="warning"
     (close)="noticeOpen = false"

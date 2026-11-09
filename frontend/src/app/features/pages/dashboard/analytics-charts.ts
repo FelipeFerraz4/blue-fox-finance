@@ -85,13 +85,12 @@ export function monthlyChartOptions(
         const prev = previous[i] ?? 0;
         const comparison =
           prev > 0
-            ? `${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1} (${formatBRL(prev)})`
-            : `Sem gastos em ${MONTH_NAMES[i].toLowerCase()} de ${year - 1}`;
+            ? `${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1}`
+            : `${year - 1}: sem gastos`;
         return (
           `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[i]} de ${year}</div>` +
           `<div style="margin-top:4px"><strong>${formatBRL(current[i])}</strong></div>` +
-          `<div style="color:${INK_SECONDARY};margin-top:2px">${comparison}</div>` +
-          `<div style="color:${MUTED};margin-top:6px;font-size:11px">Clique para filtrar este mês</div>`
+          `<div style="color:${INK_SECONDARY};margin-top:2px">${comparison}</div>`
         );
       },
     },
@@ -160,11 +159,9 @@ export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string |
       formatter: (p: any) => {
         const s = slices[p.dataIndex];
         const pct = total > 0 ? ((s.total / total) * 100).toFixed(1) : '0';
-        const hint = s.key === OTHERS_KEY ? '' : `<div style="color:${MUTED};margin-top:6px;font-size:11px">Clique para filtrar</div>`;
         return (
           `<div style="font-weight:600;color:${INK}">${escapeHtml(s.label)}</div>` +
-          `<div style="margin-top:4px"><strong>${formatBRL(s.total)}</strong> <span style="color:${MUTED}">· ${pct}% · ${s.count} item(ns)</span></div>` +
-          hint
+          `<div style="margin-top:4px"><strong>${formatBRL(s.total)}</strong> <span style="color:${MUTED}">· ${pct}%</span></div>`
         );
       },
     },
@@ -298,7 +295,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
       itemHeight: 12,
       icon: 'roundRect',
       textStyle: { color: INK_SECONDARY, fontSize: 12 },
-      data: ['✓ Pago', '● Pendente'],
+      data: ['Pago', 'Pendente'],
     },
     tooltip: {
       ...(BASE['tooltip'] as object),
@@ -306,15 +303,10 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
       axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,74,173,0.05)' } },
       formatter: (params: any[]) => {
         const c = contas[params[0].dataIndex];
-        const extra = [
-          c.quantidadeAtrasada ? `${c.quantidadeAtrasada} atrasada(s)` : '',
-          c.semValor ? `${c.semValor} sem valor definido` : '',
-        ].filter(Boolean).join(' · ');
         return (
           `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[c.mes - 1]}</div>` +
-          tooltipRow(STATUS_GOOD, `Pago (${c.quantidadePaga})`, c.pago) +
-          tooltipRow(STATUS_WARNING, `Pendente (${c.quantidadePendente})`, c.pendente) +
-          (extra ? `<div style="color:${MUTED};margin-top:6px;font-size:11px">${extra}</div>` : '')
+          tooltipRow(STATUS_GOOD, 'Pago', c.pago) +
+          tooltipRow(STATUS_WARNING, 'Pendente', c.pendente)
         );
       },
     },
@@ -328,7 +320,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
     yAxis: valueAxis,
     series: [
       {
-        name: '✓ Pago',
+        name: 'Pago',
         type: 'bar',
         stack: 'contas',
         // Cor na série (legenda) e por barra (esmaecer meses não selecionados)
@@ -341,7 +333,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
         })),
       },
       {
-        name: '● Pendente',
+        name: 'Pendente',
         type: 'bar',
         stack: 'contas',
         itemStyle: { color: STATUS_WARNING },

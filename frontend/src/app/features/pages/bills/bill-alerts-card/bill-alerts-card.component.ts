@@ -28,9 +28,9 @@ export class BillAlertsCardComponent implements OnInit {
   label(o: BillOccurrence): string {
     if (o.status === 'ATRASADA') {
       const dias = Math.abs(o.diasParaVencer);
-      return `Atrasada há ${dias} dia${dias > 1 ? 's' : ''}`;
+      return `Atrasada ${dias}d`;
     }
     if (o.status === 'VENCE_HOJE') return 'Vence hoje';
-    return o.diasParaVencer === 1 ? 'Vence amanhã' : `Vence em ${o.diasParaVencer} dias`;
+    return o.diasParaVencer === 1 ? 'Amanhã' : `Em ${o.diasParaVencer} dias`;
   }
 }

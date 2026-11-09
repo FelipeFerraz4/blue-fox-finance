@@ -115,7 +115,6 @@ export class AnalyticsStore {
       agendado: Number(agendado.toFixed(2)),
       mediaMensal: months.length ? Number((totalNoPeriodo / months.length).toFixed(2)) : 0,
       pagamentos,
-      valorMedio: pagamentos ? Number((total / pagamentos).toFixed(2)) : 0,
       percentualParcelado: total > 0 ? parcelado / total : 0,
       variacao,
       totalAnterior,

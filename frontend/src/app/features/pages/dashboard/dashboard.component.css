@@ -168,11 +168,7 @@
 }
 
 .kpi:first-child .kpi-label,
-.kpi:first-child .kpi-hint {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.kpi:first-child .kpi-value {
+.kpi:first-child .kpi:first-child .kpi-value {
   color: #ffffff;
 }
 
@@ -204,11 +200,6 @@
 
 .kpi-value.muted {
   color: #94a3b8;
-}
-
-.kpi-hint {
-  font-size: 0.78rem;
-  color: #64748b;
 }
 
 /* ---------- Grade de painéis ---------- */

@@ -10,7 +10,7 @@ import {
   AnalyticsFact,
   DimensionSlice,
 } from '../../../shared/model/types/analytics.model';
-import { AnalyticsStore, MONTH_LABELS, MONTH_NAMES } from './analytics.store';
+import { AnalyticsStore, MONTH_LABELS } from './analytics.store';
 import {
   OTHERS_KEY,
   billsOptions,
@@ -28,7 +28,6 @@ type SortKey = 'data' | 'nome' | 'loja' | 'categoria' | 'meioPagamento' | 'valor
 interface RankedPanel {
   dim: AnalyticsDimension;
   title: string;
-  subtitle: string;
   slices: DimensionSlice[];
 }
 
@@ -56,10 +55,6 @@ export class DashboardComponent implements OnInit {
   readonly isCurrentYear = computed(() => this.year() === new Date().getFullYear());
 
   readonly selectedMonth = computed(() => this.store.filters().mes as number | undefined);
-  readonly periodLabel = computed(() => {
-    const mes = this.selectedMonth();
-    return mes ? `${MONTH_NAMES[mes - 1]} de ${this.year()}` : `${this.year()}`;
-  });
   /** O Dashboard distribui os gastos pelo mês em que são pagos (parcelas no mês da fatura). */
   private readonly basis: AnalyticsBasis = 'fatura';
 
@@ -75,11 +70,11 @@ export class DashboardComponent implements OnInit {
   );
 
   readonly rankedPanels = computed<RankedPanel[]>(() => [
-    { dim: 'categoria', title: 'Por categoria', subtitle: 'Categoria do item comprado', slices: topSlices(this.store.byCategoria(), 8) },
-    { dim: 'meioPagamentoId', title: 'Por meio de pagamento', subtitle: 'Cartões, Pix, dinheiro...', slices: topSlices(this.store.byMeio(), 8) },
-    { dim: 'loja', title: 'Top lojas', subtitle: 'Onde você mais gastou', slices: topSlices(this.store.byLoja(), 10) },
-    { dim: 'comprador', title: 'Por comprador', subtitle: 'Quem fez a compra', slices: topSlices(this.store.byComprador(), 8) },
-    { dim: 'categoriaLoja', title: 'Por categoria de loja', subtitle: 'Tipo de estabelecimento', slices: topSlices(this.store.byCategoriaLoja(), 8) },
+    { dim: 'categoria', title: 'Categorias', slices: topSlices(this.store.byCategoria(), 8) },
+    { dim: 'meioPagamentoId', title: 'Meios de pagamento', slices: topSlices(this.store.byMeio(), 8) },
+    { dim: 'loja', title: 'Lojas', slices: topSlices(this.store.byLoja(), 10) },
+    { dim: 'comprador', title: 'Compradores', slices: topSlices(this.store.byComprador(), 8) },
+    { dim: 'categoriaLoja', title: 'Tipos de loja', slices: topSlices(this.store.byCategoriaLoja(), 8) },
   ]);
 
   /** Opções por painel, recalculadas só quando dados ou seleção mudam. */
