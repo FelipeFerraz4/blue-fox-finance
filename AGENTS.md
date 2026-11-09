@@ -34,8 +34,10 @@ frontend/src/app/
 │       │   └── buyers.service.ts                     # CRUD de compradores (/api/buyers)
 │       ├── categories/
 │       │   └── categories.service.ts                 # CRUD de categorias de itens e lojas (/api/categories)
-│       ├── dashboard/
-│       │   └── dashboard.service.ts                  # Métricas e indicadores consolidados (/api/dashboard)
+│       ├── analytics/
+│       │   └── analytics.service.ts                  # Dados do Dashboard com filtro cruzado (/api/analytics)
+│       ├── bills/
+│       │   └── bills.service.ts                      # Contas a pagar e avisos (/api/bills)
 │       ├── expenses/
 │       │   └── expenses.service.ts                   # Gestão de despesas, parcelas e preview (/api/expenses)
 │       ├── payment-methods/
@@ -56,8 +58,13 @@ frontend/src/app/
 │       │   │   └── about.component.ts                # Página "Sobre a Blue Fox Finance"
 │       │   └── updates/
 │       │       └── updates.component.ts              # Changelog e notas de versão
-│       ├── dashboard/
-│       │   └── dashboard.component.ts                # Dashboard financeiro com resumos e cartões
+│       ├── dashboard/                                # Dashboard único estilo Power BI (filtro cruzado)
+│       │   ├── dashboard.component.{ts,html,css}
+│       │   ├── analytics.store.ts                    # Estado e filtros (Signals)
+│       │   ├── analytics-charts.ts                   # Opções dos gráficos ECharts
+│       │   ├── echarts.setup.ts                      # Registro modular do ECharts
+│       │   └── chart-card/                           # Moldura dos painéis
+│       ├── bills/                                    # Contas a pagar + bill-alerts-card
 │       ├── expenses/                                 # Módulo de gestão de despesas
 │       │   ├── expense-list/
 │       │   │   └── expense-list.component.ts         # Listagem paginada, filtros, faturas e ações
@@ -100,7 +107,8 @@ frontend/src/app/
 │       └── types/                                    # Modelos e interfaces TypeScript do domínio
 │           ├── buyer.model.ts                        # Interface Buyer e DTOs
 │           ├── category.model.ts                     # Interfaces CategoriaItem e CategoriaLoja
-│           ├── dashboard.model.ts                    # Interfaces de estatísticas e visão geral
+│           ├── analytics.model.ts                    # Linhas e filtros do Dashboard
+│           ├── bill.model.ts                         # Contas a pagar e ocorrências
 │           ├── lancamento.model.ts                   # Interfaces de Lançamento, parcelas e filtros
 │           ├── payment-method.model.ts               # Interface PaymentMethod e modalidades
 │           ├── store.model.ts                        # Interface Store e DTOs
@@ -250,7 +258,7 @@ backend/src/
     │   ├── public.decorator.ts                       # Decorator @Public() para rotas abertas
     │   └── current-user.decorator.ts                 # Decorator @CurrentUser() para injeção do usuário
     │
-    ├── analytics/                                    # Página Análises (Power BI): linhas do ano para filtro cruzado no cliente
+    ├── analytics/                                    # API do Dashboard (Power BI): linhas do ano para filtro cruzado no cliente
     │   ├── analytics.controller.ts                   # GET /api/analytics?year=&basis=compra|fatura
     │   ├── analytics.service.ts                      # facts, ano anterior, compromissos futuros, resumo de contas
     │   ├── analytics.module.ts
@@ -277,11 +285,6 @@ backend/src/
     │   ├── categories.module.ts
     │   └── dto/
     │       └── category.dto.ts
-    │
-    ├── dashboard/                                    # Painel de métricas e indicadores
-    │   ├── dashboard.controller.ts                   # Endpoint: GET /api/dashboard
-    │   ├── dashboard.service.ts                      # Agregação de totais mensais, por categoria e faturas
-    │   └── dashboard.module.ts
     │
     ├── expenses/                                     # Gestão financeira de lançamentos
     │   ├── expenses.controller.ts                    # Endpoints: /api/expenses (CRUD, preview parcelas, status)
@@ -319,6 +322,8 @@ backend/prisma/
 │   ├── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
 │   ├── conta.prisma                                  # Contas a pagar (ContaPagar) e ocorrências (PagamentoConta)
 │   └── preferencia.prisma                            # Preferências de lançamento por usuário
+├── seeds/
+│   └── demo.seed.ts                                  # Seed de demonstração manual (SEED_USER_ID=<sub> npm run seed:demo)
 └── migrations/                                       # Migrations versionadas (prisma migrate deploy)
 ```
 

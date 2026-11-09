@@ -16,8 +16,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `main/`: Rotas públicas (`home/`, `about/`, `updates/`).
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação (`expense-form/`).
   - `admin/`: Painel administrativo com categorias de itens/lojas e perfil de usuário.
-  - `analytics/`: página **Análises** estilo Power BI (ECharts via `ngx-echarts`, registrado só no componente para ficar no chunk lazy). O backend devolve as linhas do ano numa chamada e o filtro cruzado roda no cliente (`analytics.store.ts`, Signals): cada painel agrega com todos os filtros exceto o da própria dimensão. A coluna/linha inteira de cada barra é clicável (`bindCategoryClick`).
-  - `dashboard/`, `buyers/`, `stores/`, `payment-methods/`, `bills/`: Módulos de páginas de domínio (`bills/` = Contas a Pagar, com `bill-alerts-card/` usado no dashboard).
+  - `dashboard/`: o **Dashboard** (tela única) estilo Power BI (ECharts via `ngx-echarts`, registrado só no componente para ficar no chunk lazy). O backend devolve as linhas do ano numa chamada e o filtro cruzado roda no cliente (`analytics.store.ts`, Signals): cada painel agrega com todos os filtros exceto o da própria dimensão. A coluna/linha inteira de cada barra é clicável (`bindCategoryClick`).
+  - `buyers/`, `stores/`, `payment-methods/`, `bills/`: Módulos de páginas de domínio (`bills/` = Contas a Pagar, com `bill-alerts-card/` exibido no topo do dashboard).
 - `src/app/shared`:
   - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`).
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
@@ -29,10 +29,9 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `auth`: Autenticação JWT via Keycloak, `JwtAuthGuard`, `RolesGuard`, decorators `@Roles()`, `@Public()`, `@CurrentUser()`. Roles em `roles.constants.ts` (espelho do realm). Todo controller de domínio leva `@Roles(...FINANCE_ACCESS_ROLES)` na classe (`ROLE_ADMIN`, `ROLE_FINANCE_ADMIN`, `ROLE_FINANCE_USER`); no frontend, as rotas internas usam `data: { roles: FINANCE_ACCESS_ROLES }`.
 - `buyers`: Módulo de compradores (`buyers.controller.ts`, `buyers.service.ts`, `buyer.dto.ts`).
 - `categories`: Categorias de itens e de lojas (`categories.controller.ts`, `categories.service.ts`).
-- `dashboard`: Métricas consolidadas e faturas mensais (`dashboard.controller.ts`, `dashboard.service.ts`).
 - `expenses`: Gestão de despesas, cálculo de parcelas e faturas de cartão (`expenses.controller.ts`, `expenses.service.ts`).
 - `payment-methods`: Meios de pagamento (`payment-methods.controller.ts`, `payment-methods.service.ts`).
-- `analytics`: `GET /api/analytics?year=&basis=compra|fatura`. `facts` = lançamentos do ano pela data da compra (mês em UTC, datas são meia-noite UTC) ou parcelas pelo `mesReferencia`; também `anoAnterior` (12 totais), `compromissosFuturos` (parcelas não pagas dos próximos 12 meses + parcelamentos em aberto) e `contas` (`BillsService.getYearSummary`).
+- `analytics`: API do Dashboard, `GET /api/analytics?year=&basis=compra|fatura`. `facts` = lançamentos do ano pela data da compra (mês em UTC, datas são meia-noite UTC) ou parcelas pelo `mesReferencia`; também `anoAnterior` (12 totais), `compromissosFuturos` (parcelas não pagas dos próximos 12 meses + parcelamentos em aberto) e `contas` (`BillsService.getYearSummary`).
 - `bills`: Contas a pagar recorrentes (mensal, anual, avulsa). `ContaPagar` é a regra; `PagamentoConta` é a ocorrência de cada mês, criada sob demanda (`ensureOccurrences`) desde `dataInicio`, então mês nunca aberto também aparece como atrasado. Nada é pago automaticamente: o usuário marca (`/occurrences/:id/pay`). Conta vinculada a cartão de crédito usa como valor a soma das parcelas do mês e, ao pagar, marca `Parcela.pago`. Status (`PAGA`, `ATRASADA`, `VENCE_HOJE`, `PROXIMA`, `PENDENTE`) é calculado com "hoje" no fuso `APP_TIMEZONE` (padrão `America/Sao_Paulo`). `/bills/alerts` alimenta o selo do menu e o card do dashboard.
   - **Fase futura (notificações):** cron diário (`@nestjs/schedule`, 8h de SP) reaproveitando `getAlerts` para todos os usuários; canal a definir (e-mail via claim `email` do Keycloak, Web Push ou Telegram); colunas `notificadoAntesEm`/`notificadoNoDiaEm` em `PagamentoConta` para não notificar duas vezes.
 - `stores`: Gestão de lojas e fornecedores (`stores.controller.ts`, `stores.service.ts`).
@@ -42,7 +41,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - Esquema modular em `prisma/schema/*.prisma` (`base.prisma`, `usuario.prisma`, `categoria.prisma`, `loja.prisma`, `pagamento.prisma`, `lancamento.prisma`, `preferencia.prisma`).
 - **Prisma 6** configurado por `backend/prisma.config.ts` (caminho do schema em pasta e das migrations; carrega o `.env` via `dotenv`). A CLI `prisma` é dependência de produção porque o container roda as migrations na inicialização.
 - **Migrations versionadas** em `prisma/migrations/`. Toda mudança de schema exige migration: `npm run prisma:migrate:dev -- --name <nome>`. Nunca use `db push --accept-data-loss`. O container roda `docker-entrypoint.sh`: baseline automático de bancos legados criados via `db push` (falha em vez de perder dados), `prisma migrate deploy` e `node dist/src/main`.
-- **Sem seeds de dados**: tudo é isolado por `userId` (`sub` do token, via `@CurrentUser('sub')`) e cada usuário começa vazio. Todo service filtra por `userId` e valida que IDs referenciados (comprador, loja, meio de pagamento) pertencem ao usuário.
+- **Sem seeds automáticos**: tudo é isolado por `userId` (`sub` do token, via `@CurrentUser('sub')`) e cada usuário começa vazio. Para desenvolvimento há um seed de demonstração manual, que nunca roda no container: `SEED_USER_ID=<sub do Keycloak> npm run seed:demo` (`prisma/seeds/demo.seed.ts`, ~2 anos de lançamentos, contas e parcelamentos; `SEED_RESET=true` apaga e recria os dados daquele usuário; recusa `NODE_ENV=production`). Todo service filtra por `userId` e valida que IDs referenciados (comprador, loja, meio de pagamento) pertencem ao usuário.
 
 ## 🚀 Comandos Úteis
 - **Frontend Build:** `cd frontend && npm run build`
