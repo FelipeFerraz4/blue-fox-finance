@@ -21,7 +21,7 @@ export class BillsFlow {
     const alerts = await this.bills.getAlerts(u.userId);
     const items = [...alerts.atrasadas, ...alerts.venceHoje, ...alerts.proximas];
     if (!items.length) {
-      return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.', final: true }];
+      return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.' }];
     }
 
     const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)}${o.valor !== null ? ` · ${F.brl(o.valor)}` : ''}`);
@@ -42,7 +42,7 @@ export class BillsFlow {
 
     if (action === 'unpay') {
       const view = await this.bills.unpay(u.userId, id);
-      return [{ text: `↩️ Confirmação de pagamento desfeita: <b>${F.esc(view.nome)}</b> voltou para pendente.`, final: true }];
+      return [{ text: `↩️ Confirmação de pagamento desfeita: <b>${F.esc(view.nome)}</b> voltou para pendente.` }];
     }
 
     if (action === 'pay') {
@@ -75,7 +75,6 @@ export class BillsFlow {
     return [
       {
         text: `✅ Pagamento confirmado: <b>${F.esc(view.nome)}</b> · ${F.brl(view.valorPago ?? 0)}`,
-        final: true,
         buttons: [[{ label: '↩️ Desfazer', data: `c::unpay:${occurrenceId}` }]],
       },
     ];

@@ -156,7 +156,7 @@ export class ExpenseFlow {
     switch (action) {
       case 'cancel':
         await this.link.clearState(u.canal, u.externalUserId);
-        return [{ text: 'Lançamento cancelado.', final: true }];
+        return [{ text: 'Lançamento cancelado.' }];
 
       case 'save':
         return this.save(u, state);
@@ -200,7 +200,7 @@ export class ExpenseFlow {
         const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
         if (!expense) return [{ text: 'Esse lançamento já não existe.' }];
         await this.expenses.remove(u.userId, expense.id);
-        return [{ text: `🗑 Excluído: <b>${F.esc(expense.nome)}</b> · ${F.brl(expense.valorTotal)}`, final: true }];
+        return [{ text: `🗑 Excluído: <b>${F.esc(expense.nome)}</b> · ${F.brl(expense.valorTotal)}` }];
       }
       case 'del': {
         const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
@@ -216,7 +216,7 @@ export class ExpenseFlow {
         ];
       }
       case 'keep':
-        return [{ text: 'Ok, mantido.', final: true }];
+        return [{ text: 'Ok, mantido.' }];
     }
     return [{ text: 'Opção inválida.' }];
   }
@@ -229,7 +229,7 @@ export class ExpenseFlow {
       orderBy: { createdAt: 'desc' },
       take: 5,
     });
-    if (!items.length) return [{ text: 'Você ainda não tem lançamentos.', final: true }];
+    if (!items.length) return [{ text: 'Você ainda não tem lançamentos.' }];
 
     const lines = items.map(
       (e, i) =>
@@ -583,7 +583,6 @@ export class ExpenseFlow {
       '/expenses',
     );
     reply.buttons = [[{ label: '↩️ Desfazer', data: `x::undo:${created.id}` }, ...(reply.buttons?.[0] ?? [])]];
-    reply.final = true;
     return [reply];
   }
 

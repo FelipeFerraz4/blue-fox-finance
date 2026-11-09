@@ -48,9 +48,7 @@ export class BotEngineService {
     }
 
     try {
-      const replies = await this.route(msg);
-      // Fim de uma operação (salvou, cancelou, confirmou pagamento…): mostra o menu de novo
-      return replies.some((r) => r.final) ? [...replies, this.menu()] : replies;
+      return await this.route(msg);
     } catch (err) {
       if (err instanceof HttpException) {
         // Erros de negócio dos services (ex.: "Meio de pagamento não existe")
@@ -96,7 +94,7 @@ export class BotEngineService {
           return this.expense.recent(u);
         case 'cancelar':
           await this.link.clearState(u.canal, u.externalUserId);
-          return [{ text: 'Ok, cancelado.', final: true }];
+          return [{ text: 'Ok, cancelado.' }];
         case 'desconectar':
           await this.link.unlinkUser(userId);
           return [{ text: 'Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.' }];
