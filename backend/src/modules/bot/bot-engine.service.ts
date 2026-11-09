@@ -7,7 +7,7 @@ import { ExpenseFlow } from './flows/expense.flow';
 import { BillsFlow } from './flows/bills.flow';
 import { SummaryFlow } from './flows/summary.flow';
 
-const RATE_LIMIT = 30; // mensagens por minuto por usuário do canal
+const RATE_LIMIT = 60; // mensagens por minuto por usuário (o assistente usa ~12 por lançamento)
 const RATE_WINDOW_MS = 60_000;
 
 export const BOT_COMMANDS = [
@@ -144,8 +144,8 @@ export class BotEngineService {
         '<b>Blue Fox Finance</b> 🦊',
         '',
         '<b>Lançar um gasto</b>',
-        '• /gasto e responda às perguntas',
-        '• ou mande direto: <code>45,90 pão @ padaria</code>',
+        '• /gasto e responda às perguntas (os mesmos campos do site)',
+        '• ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>',
         '',
         '<b>Consultar</b>',
         '/resumo · gastos do mês',

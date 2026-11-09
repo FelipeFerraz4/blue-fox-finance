@@ -10,13 +10,30 @@ import { BotFormat as F } from '../bot-format';
 import { BotButton, BotReply, BotUser, ConversationState, ExpenseDraft, ExpenseStep } from '../bot.types';
 
 type GastoState = Extract<ConversationState, { flow: 'gasto' }>;
+type Option = { id: string; label: string };
 
 const MAX_TEXT = 120;
+const MAX_OPTIONS = 10;
 const CANCEL = (nonce: string): BotButton => ({ label: '❌ Cancelar', data: `g:${nonce}:cancel` });
 
+/** Rótulos idênticos aos da tela "Novo Lançamento" do site. */
+const LABEL: Record<Exclude<ExpenseStep, 'confirmar'>, string> = {
+  comprador: 'Comprador',
+  loja: 'Loja',
+  data: 'Data da Compra',
+  meio: 'Meio de Pagamento',
+  tipo: 'Tipo de Pagamento',
+  parcelas: 'Número de Parcelas',
+  nome: 'Nome',
+  categoria: 'Categoria',
+  quantidade: 'Quantidade',
+  valor: 'Valor Unitário (R$)',
+};
+
 /**
- * Assistente de lançamento: pergunta só o que falta (padrões das preferências
- * já vêm preenchidos), mostra o resumo e grava pelo ExpensesService.
+ * Assistente de lançamento: pergunta campo a campo, na mesma ordem e com os
+ * mesmos nomes da tela "Novo Lançamento". Os padrões do perfil aparecem como
+ * primeira opção (⭐), mas nada é preenchido sem o usuário escolher.
  * Callbacks com estado: `g:<nonce>:<ação>:<arg>`. Sem estado: `x::<ação>:<id>`.
  */
 @Injectable()
@@ -33,20 +50,25 @@ export class ExpenseFlow {
   // Entrada
   // ---------------------------------------------------------------------------
 
-  /** `/gasto [valor] [item] [@ loja]`, ou texto solto começando por um valor. */
+  /**
+   * `/gasto`, ou atalho `/gasto 45,90 pão @ padaria` (também como texto solto
+   * começando pelo valor): o que foi digitado já entra no rascunho
+   * (valor unitário com quantidade 1, nome e loja) e o resto é perguntado.
+   */
   async start(u: BotUser, args: string): Promise<BotReply[]> {
     const hasMethod = await this.prisma.paymentMethod.count({ where: { userId: u.userId, ativo: true } });
     if (!hasMethod) {
       return [this.withSiteLink('Antes de lançar, cadastre um meio de pagamento no site.', '/payment-methods')];
     }
 
-    const draft = await this.defaults(u.userId);
+    const draft: ExpenseDraft = {};
     const [left, storeText] = args.split('@').map((s) => s.trim());
     if (left) {
       const [first, ...rest] = left.split(/\s+/);
       const valor = F.parseAmount(first);
       if (valor) {
-        draft.valor = valor;
+        draft.valorUnitario = valor;
+        draft.quantidade = 1;
         if (rest.length) draft.nome = rest.join(' ').slice(0, MAX_TEXT);
       } else {
         draft.nome = left.slice(0, MAX_TEXT);
@@ -60,19 +82,25 @@ export class ExpenseFlow {
     const { draft } = state;
     const value = text.trim();
     switch (state.step) {
-      case 'valor': {
-        const valor = F.parseAmount(value);
-        if (!valor) return this.retry(u, state, 'Não entendi o valor. Exemplo: <code>45,90</code>');
-        draft.valor = valor;
+      case 'comprador': {
+        if (!value) return this.retry(u, state, 'Digite o nome do comprador.');
+        const buyer = await this.prisma.comprador.findFirst({
+          where: { userId: u.userId, nome: { equals: value, mode: 'insensitive' } },
+        });
+        draft.comprador = buyer?.nome ?? value.slice(0, MAX_TEXT);
+        draft.compradorId = buyer?.id ?? null;
         break;
       }
-      case 'nome':
-        if (!value) return this.retry(u, state, 'Digite o que foi comprado.');
-        draft.nome = value.slice(0, MAX_TEXT);
-        break;
       case 'loja':
+        if (!value) return this.retry(u, state, 'Digite o nome da loja.');
         await this.applyStoreText(u.userId, draft, value);
         break;
+      case 'data': {
+        const date = F.parseDate(value, BillScheduleHelper.today());
+        if (!date) return this.retry(u, state, 'Data inválida. Use <code>dd/mm</code> ou <code>dd/mm/aaaa</code>.');
+        draft.data = date;
+        break;
+      }
       case 'meio': {
         const method = await this.prisma.paymentMethod.findFirst({
           where: { userId: u.userId, ativo: true, nome: { contains: value, mode: 'insensitive' } },
@@ -81,31 +109,36 @@ export class ExpenseFlow {
         this.applyMethod(draft, method);
         break;
       }
+      case 'tipo':
+        return this.retry(u, state, 'Toque em <b>À Vista</b> ou <b>Parcelado</b>.');
+      case 'parcelas': {
+        const n = Number(value.replace(/x$/i, ''));
+        if (!Number.isInteger(n) || n < 2 || n > 48) return this.retry(u, state, 'Digite um número de 2 a 48.');
+        draft.parcelas = n;
+        break;
+      }
+      case 'nome':
+        if (!value) return this.retry(u, state, 'Digite o nome do item.');
+        draft.nome = value.slice(0, MAX_TEXT);
+        break;
       case 'categoria': {
+        if (!value) return this.retry(u, state, 'Digite a categoria.');
         const existing = await this.prisma.categoriaItem.findFirst({
           where: { userId: u.userId, nome: { equals: value, mode: 'insensitive' } },
         });
         draft.categoria = existing?.nome ?? value.slice(0, MAX_TEXT);
         break;
       }
-      case 'comprador': {
-        const buyer = await this.prisma.comprador.findFirst({
-          where: { userId: u.userId, nome: { equals: value, mode: 'insensitive' } },
-        });
-        draft.comprador = buyer?.nome ?? value.slice(0, MAX_TEXT);
-        draft.compradorId = buyer?.id ?? null;
+      case 'quantidade': {
+        const qty = F.parseQuantity(value);
+        if (!qty) return this.retry(u, state, 'Quantidade inválida. Exemplo: <code>1</code> ou <code>2,5</code>.');
+        draft.quantidade = qty;
         break;
       }
-      case 'parcelas': {
-        const n = Number(value.replace(/x$/i, ''));
-        if (!Number.isInteger(n) || n < 1 || n > 48) return this.retry(u, state, 'Digite um número de 1 a 48.');
-        draft.parcelas = n;
-        break;
-      }
-      case 'data': {
-        const date = F.parseDate(value, BillScheduleHelper.today());
-        if (!date) return this.retry(u, state, 'Data inválida. Use <code>dd/mm</code> ou <code>dd/mm/aaaa</code>.');
-        draft.data = date;
+      case 'valor': {
+        const valor = F.parseAmount(value);
+        if (!valor) return this.retry(u, state, 'Não entendi o valor. Exemplo: <code>45,90</code>');
+        draft.valorUnitario = valor;
         break;
       }
       case 'confirmar':
@@ -135,8 +168,17 @@ export class ExpenseFlow {
         return this.advance(u, draft);
       }
 
+      case 'tipo':
+        draft.tipo = arg === 'PARCELADO' ? 'PARCELADO' : 'A_VISTA';
+        draft.parcelas = draft.tipo === 'PARCELADO' ? undefined : 1;
+        return this.advance(u, draft);
+
       case 'parc':
-        draft.parcelas = Math.min(48, Math.max(1, Number(arg) || 1));
+        draft.parcelas = Math.min(48, Math.max(2, Number(arg) || 2));
+        return this.advance(u, draft);
+
+      case 'qty':
+        draft.quantidade = F.parseQuantity(arg ?? '') ?? 1;
         return this.advance(u, draft);
 
       case 'date':
@@ -191,8 +233,8 @@ export class ExpenseFlow {
 
     const lines = items.map(
       (e, i) =>
-        `${i + 1}. <b>${F.esc(e.nome)}</b> · ${F.brl(e.valorTotal)}\n    ${F.date(e.data)} · ${F.esc(e.loja)} · ${F.esc(e.meioPagamento.nome)}` +
-        (e.numeroParcelas > 1 ? ` · ${e.numeroParcelas}x` : ''),
+        `${i + 1}. <b>${F.esc(e.nome)}</b> · ${F.brl(e.valorTotal)}\n    ${F.date(e.data)} · ${F.esc(e.loja)} · ${F.esc(e.meioPagamento.nome)} · ` +
+        (e.numeroParcelas > 1 ? `Parcelado ${e.numeroParcelas}x` : 'À Vista'),
     );
     const buttons = items.map((e, i) => ({ label: `🗑 ${i + 1}`, data: `x::del:${e.id}` }));
     return [{ text: `<b>Últimos lançamentos</b>\n\n${lines.join('\n')}`, buttons: [buttons] }];
@@ -203,7 +245,6 @@ export class ExpenseFlow {
   // ---------------------------------------------------------------------------
 
   private async advance(u: BotUser, draft: ExpenseDraft, forced?: ExpenseStep): Promise<BotReply[]> {
-    await this.autofill(u.userId, draft);
     const step = forced ?? this.firstMissing(draft);
     const nonce = F.nonce();
     const { reply, options } = await this.prompt(u.userId, step, draft, nonce);
@@ -217,91 +258,63 @@ export class ExpenseFlow {
     return [{ text: message }, ...replies];
   }
 
+  /** Ordem da tela "Novo Lançamento": dados da compra e depois o item. */
   private firstMissing(d: ExpenseDraft): ExpenseStep {
-    if (!d.valor) return 'valor';
-    if (!d.nome) return 'nome';
-    if (!d.loja) return 'loja';
-    if (!d.meioPagamentoId) return 'meio';
-    if (!d.categoria) return 'categoria';
     if (!d.comprador) return 'comprador';
+    if (!d.loja) return 'loja';
+    if (!d.data) return 'data';
+    if (!d.meioPagamentoId) return 'meio';
+    if (!d.tipo) return 'tipo';
+    if (d.tipo === 'PARCELADO' && !d.parcelas) return 'parcelas';
+    if (!d.nome) return 'nome';
+    if (!d.categoria) return 'categoria';
+    if (!d.quantidade) return 'quantidade';
+    if (!d.valorUnitario) return 'valor';
     return 'confirmar';
   }
 
   private edit(u: BotUser, d: ExpenseDraft, field: ExpenseStep): Promise<BotReply[]> {
     switch (field) {
-      case 'valor':
-        d.valor = undefined;
-        break;
-      case 'nome':
-        d.nome = undefined;
+      case 'comprador':
+        d.comprador = undefined;
+        d.compradorId = null;
         break;
       case 'loja':
         d.loja = undefined;
         d.lojaId = null;
         break;
+      case 'data':
+        d.data = undefined;
+        break;
       case 'meio':
         d.meioPagamentoId = undefined;
         d.meioNome = undefined;
-        d.credito = false;
-        d.parcelas = 1;
+        d.modalidade = undefined;
+        break;
+      case 'tipo':
+        d.tipo = undefined;
+        d.parcelas = undefined;
+        break;
+      case 'nome':
+        d.nome = undefined;
         break;
       case 'categoria':
         d.categoria = undefined;
         break;
-      case 'comprador':
-        d.comprador = undefined;
-        d.compradorId = null;
-        // Força a pergunta mesmo com um único comprador
-        return this.advance(u, d, 'comprador');
-      case 'parcelas':
-      case 'data':
-        return this.advance(u, d, field);
+      case 'quantidade':
+        d.quantidade = undefined;
+        break;
+      case 'valor':
+        d.valorUnitario = undefined;
+        break;
     }
     return this.advance(u, d);
-  }
-
-  /** Preenche o que dá para deduzir sem perguntar. */
-  private async autofill(userId: string, d: ExpenseDraft) {
-    if (!d.categoria && d.lojaId) {
-      const store = await this.prisma.loja.findFirst({ where: { id: d.lojaId, userId }, select: { categoria: true } });
-      if (store?.categoria) d.categoria = store.categoria;
-    }
-    if (!d.meioPagamentoId) {
-      const methods = await this.prisma.paymentMethod.findMany({ where: { userId, ativo: true }, take: 2 });
-      if (methods.length === 1) this.applyMethod(d, methods[0]);
-    }
-    if (!d.comprador) {
-      const buyers = await this.prisma.comprador.findMany({ where: { userId, ativo: true }, take: 2 });
-      if (buyers.length === 0) {
-        d.comprador = 'Eu';
-      } else if (buyers.length === 1) {
-        d.comprador = buyers[0].nome;
-        d.compradorId = buyers[0].id;
-      }
-    }
-  }
-
-  private async defaults(userId: string): Promise<ExpenseDraft> {
-    const prefs = await this.preferences.getExpensePreferences(userId);
-    const draft: ExpenseDraft = { parcelas: 1, data: BillScheduleHelper.today() };
-    if (prefs.compradorPadrao) {
-      draft.comprador = prefs.compradorPadrao.nome;
-      draft.compradorId = prefs.compradorPadrao.id;
-    }
-    if (prefs.lojaPadrao) {
-      draft.loja = prefs.lojaPadrao.nome;
-      draft.lojaId = prefs.lojaPadrao.id;
-    }
-    if (prefs.meioPagamentoPadrao) this.applyMethod(draft, prefs.meioPagamentoPadrao);
-    if (prefs.categoriaPadrao) draft.categoria = prefs.categoriaPadrao;
-    return draft;
   }
 
   private applyMethod(d: ExpenseDraft, m: { id: string; nome: string; modalidade: ModalidadePagamento }) {
     d.meioPagamentoId = m.id;
     d.meioNome = m.nome;
-    d.credito = m.modalidade === ModalidadePagamento.CREDITO;
-    if (!d.credito) d.parcelas = 1;
+    d.modalidade = m.modalidade;
   }
 
   private async applyStoreText(userId: string, d: ExpenseDraft, text: string) {
@@ -317,6 +330,14 @@ export class ExpenseFlow {
   private async applyOption(userId: string, step: ExpenseStep, d: ExpenseDraft, id: string) {
     // Os ids vêm do próprio estado, mas a consulta continua filtrando por userId
     switch (step) {
+      case 'comprador': {
+        const buyer = await this.prisma.comprador.findFirst({ where: { id, userId } });
+        if (buyer) {
+          d.comprador = buyer.nome;
+          d.compradorId = buyer.id;
+        }
+        break;
+      }
       case 'loja': {
         const store = await this.prisma.loja.findFirst({ where: { id, userId } });
         if (store) {
@@ -333,14 +354,6 @@ export class ExpenseFlow {
       case 'categoria':
         d.categoria = id;
         break;
-      case 'comprador': {
-        const buyer = await this.prisma.comprador.findFirst({ where: { id, userId } });
-        if (buyer) {
-          d.comprador = buyer.nome;
-          d.compradorId = buyer.id;
-        }
-        break;
-      }
     }
   }
 
@@ -354,132 +367,143 @@ export class ExpenseFlow {
     d: ExpenseDraft,
     nonce: string,
   ): Promise<{ reply: BotReply; options?: string[] }> {
-    const pick = (items: { id: string; label: string }[], perRow: number) =>
-      F.rows(
+    if (step === 'confirmar') return { reply: this.summary(d, nonce) };
+
+    const title = `<b>${LABEL[step]}</b>`;
+    const choose = async (hint: string, suggestion: Option | null, list: Option[], perRow = 2) => {
+      // Sugestão (padrão do perfil) primeiro, marcada com ⭐; sem repetir na lista
+      const items = [
+        ...(suggestion ? [{ ...suggestion, label: `⭐ ${suggestion.label}` }] : []),
+        ...list.filter((o) => o.id !== suggestion?.id),
+      ].slice(0, MAX_OPTIONS);
+      const buttons = F.rows(
         items.map((it, i) => ({ label: F.label(it.label), data: `g:${nonce}:pick:${i}` })),
         perRow,
       );
+      return {
+        reply: { text: `${title}\n${items.length ? hint : hint.replace(/^Toque numa opção ou d/, 'D')}`, buttons: [...buttons, [CANCEL(nonce)]] },
+        options: items.map((i) => i.id),
+      };
+    };
+    const ask = (hint: string, buttons: BotButton[][] = []) => ({
+      reply: { text: `${title}\n${hint}`, buttons: [...buttons, [CANCEL(nonce)]] },
+    });
 
     switch (step) {
-      case 'valor':
-        return { reply: { text: '💰 Qual o valor?\n<i>Exemplo: 45,90</i>', buttons: [[CANCEL(nonce)]] } };
-
-      case 'nome':
-        return {
-          reply: { text: `💰 ${F.brl(d.valor!)}\n🛒 O que foi comprado?`, buttons: [[CANCEL(nonce)]] },
-        };
+      case 'comprador': {
+        const prefs = await this.preferences.getExpensePreferences(userId);
+        const buyers = await this.prisma.comprador.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } });
+        const suggestion = prefs.compradorPadrao ? { id: prefs.compradorPadrao.id, label: prefs.compradorPadrao.nome } : null;
+        return choose('Toque numa opção ou digite o nome.', suggestion, buyers.map((b) => ({ id: b.id, label: b.nome })));
+      }
 
       case 'loja': {
+        const prefs = await this.preferences.getExpensePreferences(userId);
         const stores = await this.topStores(userId);
-        const items = stores.map((s) => ({ id: s.id, label: s.nome }));
-        return {
-          reply: {
-            text: stores.length ? '🏪 Onde foi? Toque numa loja ou digite o nome.' : '🏪 Onde foi? Digite o nome da loja.',
-            buttons: [...pick(items, 2), [CANCEL(nonce)]],
-          },
-          options: items.map((i) => i.id),
-        };
-      }
-
-      case 'meio': {
-        const methods = await this.prisma.paymentMethod.findMany({
-          where: { userId, ativo: true },
-          orderBy: { nome: 'asc' },
-          take: 12,
-        });
-        const items = methods.map((m) => ({ id: m.id, label: m.nome }));
-        return {
-          reply: { text: '💳 Como pagou?', buttons: [...pick(items, 2), [CANCEL(nonce)]] },
-          options: items.map((i) => i.id),
-        };
-      }
-
-      case 'categoria': {
-        const cats = await this.prisma.categoriaItem.findMany({
-          where: { userId, ativo: true },
-          orderBy: { nome: 'asc' },
-          take: 12,
-        });
-        // Para categoria, a "opção" guardada é o próprio nome (Lancamento.categoria é texto)
-        const items = cats.map((c) => ({ id: c.nome, label: c.nome }));
-        return {
-          reply: {
-            text: cats.length ? '🏷 Qual a categoria? Toque ou digite.' : '🏷 Qual a categoria? Digite o nome.',
-            buttons: [...pick(items, 3), [CANCEL(nonce)]],
-          },
-          options: items.map((i) => i.id),
-        };
-      }
-
-      case 'comprador': {
-        const buyers = await this.prisma.comprador.findMany({
-          where: { userId, ativo: true },
-          orderBy: { nome: 'asc' },
-          take: 12,
-        });
-        const items = buyers.map((b) => ({ id: b.id, label: b.nome }));
-        return {
-          reply: { text: '👤 Quem comprou? Toque ou digite.', buttons: [...pick(items, 2), [CANCEL(nonce)]] },
-          options: items.map((i) => i.id),
-        };
-      }
-
-      case 'parcelas': {
-        const buttons: BotButton[] = [{ label: 'À vista', data: `g:${nonce}:parc:1` }];
-        for (let n = 2; n <= 12; n++) buttons.push({ label: `${n}x`, data: `g:${nonce}:parc:${n}` });
-        return {
-          reply: { text: '🔢 Em quantas vezes? Toque ou digite (até 48).', buttons: [...F.rows(buttons, 4), [CANCEL(nonce)]] },
-        };
+        const suggestion = prefs.lojaPadrao ? { id: prefs.lojaPadrao.id, label: prefs.lojaPadrao.nome } : null;
+        return choose('Toque numa opção ou digite o nome.', suggestion, stores.map((s) => ({ id: s.id, label: s.nome })));
       }
 
       case 'data':
-        return {
-          reply: {
-            text: '📅 Qual a data? Toque ou digite <code>dd/mm</code>.',
-            buttons: [
-              [
-                { label: 'Hoje', data: `g:${nonce}:date:hoje` },
-                { label: 'Ontem', data: `g:${nonce}:date:ontem` },
-              ],
-              [CANCEL(nonce)],
-            ],
-          },
-        };
+        return ask('Toque numa opção ou digite <code>dd/mm</code> ou <code>dd/mm/aaaa</code>.', [[
+          { label: `Hoje (${F.date(BillScheduleHelper.today()).slice(0, 5)})`, data: `g:${nonce}:date:hoje` },
+          { label: 'Ontem', data: `g:${nonce}:date:ontem` },
+        ]]);
 
-      case 'confirmar':
-        return { reply: this.summary(d, nonce) };
+      case 'meio': {
+        const prefs = await this.preferences.getExpensePreferences(userId);
+        const methods = await this.prisma.paymentMethod.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } });
+        const toOption = (m: { id: string; nome: string; modalidade: string }) => ({
+          id: m.id,
+          label: `${m.nome} · ${F.modalidade(m.modalidade)}`,
+        });
+        const suggestion = prefs.meioPagamentoPadrao ? toOption(prefs.meioPagamentoPadrao) : null;
+        return choose('Toque numa opção.', suggestion, methods.map(toOption), 1);
+      }
+
+      case 'tipo':
+        return ask('Toque numa opção.', [[
+          { label: 'À Vista', data: `g:${nonce}:tipo:A_VISTA` },
+          { label: 'Parcelado', data: `g:${nonce}:tipo:PARCELADO` },
+        ]]);
+
+      case 'parcelas': {
+        const buttons: BotButton[] = [];
+        for (let n = 2; n <= 12; n++) buttons.push({ label: `${n}x`, data: `g:${nonce}:parc:${n}` });
+        return ask('Toque numa opção ou digite (até 48).', F.rows(buttons, 4));
+      }
+
+      case 'nome':
+        return ask('Digite o nome do item.\n<i>Exemplo: Teclado Mecânico, Arroz 5kg, Remédio…</i>');
+
+      case 'categoria': {
+        const [prefs, cats, store] = await Promise.all([
+          this.preferences.getExpensePreferences(userId),
+          this.prisma.categoriaItem.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } }),
+          d.lojaId ? this.prisma.loja.findFirst({ where: { id: d.lojaId, userId }, select: { categoria: true } }) : null,
+        ]);
+        // Mesma regra do site: categoria da loja; senão a categoria padrão do perfil
+        const suggested = store?.categoria || prefs.categoriaPadrao;
+        // Para categoria, a "opção" guardada é o próprio nome (Lancamento.categoria é texto)
+        return choose(
+          'Toque numa opção ou digite o nome.',
+          suggested ? { id: suggested, label: suggested } : null,
+          cats.map((c) => ({ id: c.nome, label: c.nome })),
+          3,
+        );
+      }
+
+      case 'quantidade': {
+        const buttons = [1, 2, 3, 4, 5, 6].map((n) => ({ label: String(n), data: `g:${nonce}:qty:${n}` }));
+        return ask('Toque numa opção ou digite (aceita decimais, ex.: <code>1,5</code>).', [buttons]);
+      }
+
+      case 'valor':
+        return ask(
+          d.quantidade && d.quantidade !== 1
+            ? `Digite o valor de cada unidade (quantidade: ${F.quantity(d.quantidade)}).\n<i>Exemplo: 45,90</i>`
+            : 'Digite o valor.\n<i>Exemplo: 45,90</i>',
+        );
     }
   }
 
+  private total(d: ExpenseDraft): number {
+    // Mesmo cálculo do ExpensesService quando o total não é informado
+    return Number(((d.quantidade ?? 1) * (d.valorUnitario ?? 0)).toFixed(2));
+  }
+
   private summary(d: ExpenseDraft, nonce: string): BotReply {
-    const installment =
-      d.parcelas > 1 ? `  <i>(${d.parcelas}x de ${F.brl(Math.round((d.valor! / d.parcelas) * 100) / 100)})</i>` : '';
+    const total = this.total(d);
+    const tipo =
+      d.tipo === 'PARCELADO'
+        ? `Parcelado em ${d.parcelas}x de ${F.brl(Math.round((total / d.parcelas!) * 100) / 100)}`
+        : 'À Vista';
+    const line = (label: string, value: string) => `<b>${label}:</b> ${value}`;
     const text = [
       '<b>Confirma o lançamento?</b>',
       '',
-      `🛒 <b>${F.esc(d.nome)}</b>`,
-      `💰 ${F.brl(d.valor!)}${installment}`,
-      `🏪 ${F.esc(d.loja)}`,
-      `🏷 ${F.esc(d.categoria)}`,
-      `💳 ${F.esc(d.meioNome)}`,
-      `👤 ${F.esc(d.comprador)}`,
-      `📅 ${F.date(d.data)}`,
+      line(LABEL.comprador, F.esc(d.comprador)),
+      line(LABEL.loja, F.esc(d.loja)),
+      line(LABEL.data, F.date(d.data!)),
+      line(LABEL.meio, `${F.esc(d.meioNome)} · ${F.modalidade(d.modalidade)}`),
+      line(LABEL.tipo, tipo),
+      '',
+      line(LABEL.nome, F.esc(d.nome)),
+      line(LABEL.categoria, F.esc(d.categoria)),
+      line(LABEL.quantidade, F.quantity(d.quantidade!)),
+      line('Valor Unitário', F.brl(d.valorUnitario!)),
+      line('Valor Total', `<b>${F.brl(total)}</b>`),
     ].join('\n');
 
     const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
-    const lastRow = [edit('Comprador', 'comprador'), edit('Data', 'data')];
-    if (d.credito) lastRow.push(edit('Parcelas', 'parcelas'));
-
     return {
       text,
       buttons: [
-        [
-          { label: '✅ Salvar', data: `g:${nonce}:save` },
-          CANCEL(nonce),
-        ],
-        [edit('Valor', 'valor'), edit('Item', 'nome'), edit('Loja', 'loja')],
-        [edit('Categoria', 'categoria'), edit('Pagamento', 'meio')],
-        lastRow,
+        [{ label: '✅ Salvar', data: `g:${nonce}:save` }, CANCEL(nonce)],
+        [edit('Comprador', 'comprador'), edit('Loja', 'loja'), edit('Data', 'data')],
+        [edit('Meio de Pagamento', 'meio'), edit('Tipo', 'tipo')],
+        [edit('Nome', 'nome'), edit('Categoria', 'categoria')],
+        [edit('Quantidade', 'quantidade'), edit('Valor Unitário', 'valor')],
       ],
     };
   }
@@ -491,16 +515,16 @@ export class ExpenseFlow {
       where: { userId, lojaId: { not: null } },
       _count: { lojaId: true },
       orderBy: { _count: { lojaId: 'desc' } },
-      take: 8,
+      take: MAX_OPTIONS,
     });
     const ids = used.map((u) => u.lojaId!) as string[];
     const top = await this.prisma.loja.findMany({ where: { userId, id: { in: ids } } });
     const ordered = ids.map((id) => top.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s);
-    if (ordered.length < 8) {
+    if (ordered.length < MAX_OPTIONS) {
       const rest = await this.prisma.loja.findMany({
         where: { userId, id: { notIn: ids } },
         orderBy: { nome: 'asc' },
-        take: 8 - ordered.length,
+        take: MAX_OPTIONS - ordered.length,
       });
       ordered.push(...rest);
     }
@@ -520,40 +544,41 @@ export class ExpenseFlow {
       return [{ text: 'Esse lançamento já foi processado.' }];
     }
 
-    const parcelas = d.credito ? d.parcelas : 1;
+    const parcelas = d.tipo === 'PARCELADO' ? d.parcelas! : 1;
+    // Mesmo payload que a tela "Novo Lançamento" envia
     const created = await this.expenses.create(
       u.userId,
       {
         comprador: d.comprador!,
         compradorId: d.compradorId ?? undefined,
-        nome: d.nome!,
         loja: d.loja!,
         lojaId: d.lojaId ?? undefined,
-        data: d.data,
-        categoria: d.categoria!,
-        quantidade: 1,
-        valorUnitario: d.valor!,
-        valorTotal: d.valor!,
+        data: d.data!,
         meioPagamentoId: d.meioPagamentoId!,
-        tipo: parcelas > 1 ? TipoLancamento.PARCELADO : TipoLancamento.A_VISTA,
+        tipo: d.tipo === 'PARCELADO' ? TipoLancamento.PARCELADO : TipoLancamento.A_VISTA,
         numeroParcelas: parcelas,
+        nome: d.nome!,
+        categoria: d.categoria!,
+        quantidade: d.quantidade!,
+        valorUnitario: d.valorUnitario!,
+        valorTotal: this.total(d),
       },
       OrigemLancamento.TELEGRAM,
     );
 
     const first = created.parcelas[0];
-    const payment =
-      parcelas > 1
-        ? `${parcelas}x de ${F.brl(first.valor)}, 1ª em ${F.monthName(first.mesReferencia).toLowerCase()}`
-        : first && d.credito
-          ? `fatura de ${F.monthName(first.mesReferencia).toLowerCase()}`
-          : '';
+    const tipo = parcelas > 1 ? `Parcelado em ${parcelas}x de ${F.brl(first.valor)}` : 'À Vista';
+    const invoice =
+      created.meioPagamento.modalidade === ModalidadePagamento.CREDITO && first
+        ? ` · 1ª na fatura de ${F.monthName(first.mesReferencia).toLowerCase()}`
+        : '';
 
     const reply = this.withSiteLink(
       [
         '✅ <b>Lançado!</b>',
-        `🛒 ${F.esc(created.nome)} · ${F.brl(created.valorTotal)}`,
-        `🏪 ${F.esc(created.loja)} · 💳 ${F.esc(created.meioPagamento.nome)}${payment ? ` (${payment})` : ''}`,
+        `<b>${F.esc(created.nome)}</b> · ${F.brl(created.valorTotal)}`,
+        `${F.esc(created.loja)} · ${F.date(created.data)}`,
+        `${F.esc(created.meioPagamento.nome)} · ${tipo}${invoice}`,
       ].join('\n'),
       '/expenses',
     );

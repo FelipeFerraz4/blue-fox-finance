@@ -35,6 +35,32 @@ export const BotFormat = {
     return value > 0 && value <= 10_000_000 ? value : null;
   },
 
+  /** Quantidade com até 3 casas ("1", "2,5", "0,250"). */
+  parseQuantity(raw: string): number | null {
+    const s = raw.trim().replace(',', '.');
+    if (!/^\d+(\.\d{1,3})?$/.test(s)) return null;
+    const value = Number(s);
+    return value > 0 && value <= 100_000 ? value : null;
+  },
+
+  /** Mesmos nomes da tela de lançamento do site. */
+  modalidade(modalidade?: string): string {
+    switch (modalidade) {
+      case 'CREDITO':
+        return 'Crédito';
+      case 'DEBITO':
+        return 'Débito';
+      case 'DINHEIRO_CONTA':
+        return 'Conta/Dinheiro';
+      default:
+        return 'Outro';
+    }
+  },
+
+  quantity(value: number): string {
+    return value.toLocaleString('pt-BR', { maximumFractionDigits: 3 });
+  },
+
   /** Aceita dd/mm, dd/mm/aa, dd/mm/aaaa, "hoje" e "ontem". Retorna YYYY-MM-DD ou null. */
   parseDate(raw: string, today: string): string | null {
     const s = raw.trim().toLowerCase();

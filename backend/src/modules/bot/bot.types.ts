@@ -24,23 +24,40 @@ export interface BotReply {
   buttons?: BotButton[][];
 }
 
-/** Rascunho do lançamento montado pelo assistente. */
+/**
+ * Rascunho do lançamento montado pelo assistente. Mesmos campos e ordem da
+ * tela "Novo Lançamento" do site; nada vem preenchido sem perguntar
+ * (os padrões do perfil só aparecem como sugestão).
+ */
 export interface ExpenseDraft {
-  valor?: number;
-  nome?: string;
-  loja?: string;
-  lojaId?: string | null;
-  categoria?: string;
-  meioPagamentoId?: string;
-  meioNome?: string;
-  credito?: boolean;
-  parcelas: number;
-  data: string; // YYYY-MM-DD
   comprador?: string;
   compradorId?: string | null;
+  loja?: string;
+  lojaId?: string | null;
+  data?: string; // YYYY-MM-DD
+  meioPagamentoId?: string;
+  meioNome?: string;
+  modalidade?: string;
+  tipo?: 'A_VISTA' | 'PARCELADO';
+  parcelas?: number;
+  nome?: string;
+  categoria?: string;
+  quantidade?: number;
+  valorUnitario?: number;
 }
 
-export type ExpenseStep = 'valor' | 'nome' | 'loja' | 'meio' | 'categoria' | 'comprador' | 'parcelas' | 'data' | 'confirmar';
+export type ExpenseStep =
+  | 'comprador'
+  | 'loja'
+  | 'data'
+  | 'meio'
+  | 'tipo'
+  | 'parcelas'
+  | 'nome'
+  | 'categoria'
+  | 'quantidade'
+  | 'valor'
+  | 'confirmar';
 
 /** Estado persistido da conversa em andamento. `nonce` invalida botões antigos. */
 export type ConversationState =
