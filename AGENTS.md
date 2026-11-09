@@ -38,6 +38,8 @@ frontend/src/app/
 │       │   └── analytics.service.ts                  # Dados do Dashboard com filtro cruzado (/api/analytics)
 │       ├── bills/
 │       │   └── bills.service.ts                      # Contas a pagar e avisos (/api/bills)
+│       ├── bot/
+│       │   └── bot-engine.service.ts                 # Bot do Telegram: núcleo canal-agnóstico (/api/bot)
 │       ├── expenses/
 │       │   └── expenses.service.ts                   # Gestão de despesas, parcelas e preview (/api/expenses)
 │       ├── payment-methods/
@@ -272,6 +274,13 @@ backend/src/
     │   └── dto/
     │       └── bill.dto.ts
     │
+    ├── bot/                                          # Bot de mensagens (Telegram; WhatsApp no futuro)
+    │   ├── bot-engine.service.ts                     # Roteia comandos/callbacks, rate limit, erros → mensagens
+    │   ├── bot-link.service.ts                       # Código de vínculo (hash, 10 min, uso único), vínculo 1↔1, estado da conversa
+    │   ├── bot-link.controller.ts                    # GET/DELETE /api/bot/link, POST /api/bot/link/code (JWT + roles)
+    │   ├── flows/                                    # expense.flow (assistente /gasto, /ultimos), bills.flow (/contas), summary.flow (/resumo)
+    │   └── telegram/                                 # telegram.adapter (grammY, webhook/polling) e telegram.controller (POST /api/bot/telegram, @Public + secret)
+    │
     ├── buyers/                                       # Gestão de compradores/pagadores
     │   ├── buyers.controller.ts                      # Endpoints: GET, POST, PUT, DELETE /api/buyers
     │   ├── buyers.service.ts                         # Regras de negócio e persistência via Prisma
@@ -321,6 +330,7 @@ backend/prisma/
 │   ├── pagamento.prisma                              # Modelo MeioPagamento e ModalidadePagamento
 │   ├── lancamento.prisma                             # Modelos Lancamento e ItemLancamento
 │   ├── conta.prisma                                  # Contas a pagar (ContaPagar) e ocorrências (PagamentoConta)
+│   ├── bot.prisma                                    # BotVinculo, BotCodigoVinculo, BotConversa (bot do Telegram)
 │   └── preferencia.prisma                            # Preferências de lançamento por usuário
 ├── seeds/
 │   └── demo.seed.ts                                  # Seed de demonstração manual (SEED_USER_ID=<sub> npm run seed:demo)

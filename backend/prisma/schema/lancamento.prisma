@@ -3,6 +3,11 @@ enum TipoLancamento {
   PARCELADO
 }
 
+enum OrigemLancamento {
+  WEB
+  TELEGRAM
+}
+
 model Lancamento {
   id              String         @id @default(uuid())
   userId          String
@@ -24,6 +29,7 @@ model Lancamento {
   tipo            TipoLancamento @default(A_VISTA)
   numeroParcelas  Int            @default(1)
   observacoes     String?
+  origem          OrigemLancamento @default(WEB)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
