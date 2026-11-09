@@ -1,89 +1,69 @@
+/* Faixa compacta de uma linha; o card inteiro leva para Contas a Pagar */
 .bill-alerts {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.75rem;
   background: #ffffff;
   border: 1px solid var(--gray-200);
-  border-left: 4px solid var(--warning);
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
+  border-left: 3px solid var(--warning);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--gray-800);
+  font-size: 0.82rem;
+  transition: box-shadow 0.15s ease;
+}
+
+.bill-alerts:hover {
+  box-shadow: 0 4px 14px rgba(11, 19, 43, 0.08);
 }
 
 .bill-alerts.has-overdue {
   border-left-color: var(--danger);
 }
 
-.bill-alerts-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
-  font-family: 'Outfit', sans-serif;
-  color: var(--gray-900);
-}
-
-.bill-alerts-link {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.bill-alerts-link:hover {
-  text-decoration: underline;
-}
-
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--gray-100);
-  font-size: 0.9rem;
-}
-
-li:last-child {
-  border-bottom: none;
-}
-
-.name {
-  color: var(--gray-800);
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.when {
-  font-size: 0.8rem;
-  font-weight: 600;
+.bill-alerts-icon {
+  display: inline-flex;
   color: var(--warning);
+  flex-shrink: 0;
 }
 
-.status-ATRASADA .when {
+.has-overdue .bill-alerts-icon {
   color: var(--danger);
 }
 
-.value {
-  font-weight: 700;
+.bill-alerts-title {
+  font-family: 'Outfit', sans-serif;
   color: var(--gray-900);
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-@media (max-width: 480px) {
-  li {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
+.bill-alerts-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
 
-  .when {
-    grid-column: 1 / -1;
-    order: 3;
-  }
+.chip {
+  padding: 0.12rem 0.55rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--warning-light);
+  color: #b54708;
+}
+
+.chip.status-ATRASADA {
+  background: var(--danger-light);
+  color: #b42318;
+}
+
+.bill-alerts-link {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--primary);
+  flex-shrink: 0;
 }

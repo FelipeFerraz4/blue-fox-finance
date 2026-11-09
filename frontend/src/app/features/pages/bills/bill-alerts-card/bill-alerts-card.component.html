@@ -1,23 +1,26 @@
 @if (items().length > 0) {
-  <div class="bill-alerts" [class.has-overdue]="(alerts()?.atrasadas?.length ?? 0) > 0">
-    <div class="bill-alerts-header">
-      <strong>Contas a pagar</strong>
-      <a routerLink="/bills" class="bill-alerts-link">Abrir</a>
-    </div>
-    <ul>
+  <a
+    routerLink="/bills"
+    class="bill-alerts"
+    [class.has-overdue]="(alerts()?.atrasadas?.length ?? 0) > 0"
+    [attr.aria-label]="'Contas a pagar: ' + items().length + ' precisando de atenção. Abrir contas.'"
+  >
+    <span class="bill-alerts-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    </span>
+    <strong class="bill-alerts-title">Contas</strong>
+    <span class="bill-alerts-chips">
       @for (o of items(); track o.id) {
-        <li [class]="'status-' + o.status">
-          <span class="name">{{ o.nome }}</span>
-          <span class="when">{{ label(o) }}</span>
-          <span class="value">
-            @if (o.valor !== null) {
-              {{ o.valor | currency: 'BRL' }}
-            } @else {
-              —
-            }
-          </span>
-        </li>
+        <span class="chip" [class]="'chip status-' + o.status" [attr.title]="o.valor !== null ? (o.valor | currency: 'BRL') : null">
+          {{ o.nome }} · {{ label(o) }}
+        </span>
       }
-    </ul>
-  </div>
+    </span>
+    <span class="bill-alerts-link" aria-hidden="true">›</span>
+  </a>
 }

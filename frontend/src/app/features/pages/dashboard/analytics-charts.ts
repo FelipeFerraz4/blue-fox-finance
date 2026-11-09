@@ -28,7 +28,7 @@ const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: '
 const compact = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
 
 export const formatBRL = (v: number) => currency.format(v);
-const axisBRL = (v: number) => (v === 0 ? '0' : `R$ ${compact.format(v)}`);
+const axisBRL = (v: number) => (v === 0 ? '0' : v < 1000 ? `R$ ${Math.round(v)}` : `R$ ${compact.format(v)}`);
 
 /** O tooltip do ECharts renderiza HTML: rótulos vindos do usuário precisam de escape. */
 export function escapeHtml(text: string): string {
@@ -73,7 +73,6 @@ export function monthlyChartOptions(
   year: number,
   selected: number | undefined,
 ): EChartsCoreOption {
-  const maxIndex = current.indexOf(Math.max(...current));
   return {
     ...BASE,
     grid: { left: 4, right: 72, top: 4, bottom: 4, containLabel: true },
@@ -111,16 +110,14 @@ export function monthlyChartOptions(
         data: current.map((value, i) => {
           const isSelected = selected === i + 1;
           const dimmed = selected !== undefined && !isSelected;
-          // Rótulo direto só no selecionado (ou no maior mês, sem seleção)
-          const showLabel = value > 0 && (isSelected || (selected === undefined && i === maxIndex));
           return {
             value,
             itemStyle: { color: dimmed ? BRAND_MUTED : BRAND, borderRadius: [0, 4, 4, 0] },
             label: {
-              show: showLabel,
+              show: value > 0,
               position: 'right',
-              color: INK,
-              fontWeight: 600,
+              color: dimmed ? MUTED : INK,
+              fontWeight: isSelected ? 700 : 600,
               fontSize: 11,
               formatter: () => axisBRL(value),
             },
@@ -184,7 +181,7 @@ export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string |
         type: 'bar',
         barMaxWidth: 16,
         cursor: 'pointer',
-        data: slices.map((s, i) => {
+        data: slices.map((s) => {
           const isSelected = selectedKey === s.key;
           const dimmed = selectedKey !== undefined && !isSelected;
           const isOthers = s.key === OTHERS_KEY;
@@ -194,12 +191,11 @@ export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string |
               color: isOthers ? GHOST : dimmed ? BRAND_MUTED : BRAND,
               borderRadius: [0, 4, 4, 0],
             },
-            // Rótulo direto só no primeiro e no selecionado; o resto fica no tooltip
             label: {
-              show: isSelected || (selectedKey === undefined && i === 0),
+              show: s.total > 0,
               position: 'right',
-              color: INK,
-              fontWeight: 600,
+              color: dimmed || isOthers ? MUTED : INK,
+              fontWeight: isSelected ? 700 : 600,
               fontSize: 11,
               formatter: () => axisBRL(s.total),
             },
