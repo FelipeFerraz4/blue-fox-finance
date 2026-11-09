@@ -63,4 +63,5 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - Node do CI = Node dos Dockerfiles (22 / npm 10). Lockfile gerado com npm 11 quebra o `npm ci`; regenere com `npx -y npm@10 install --package-lock-only --ignore-scripts`.
 - O `frontend/package.json` tem `overrides` (`piscina`, `tar`) para zerar vulnerabilidades críticas que o Angular 19 fixa; podem ser removidos ao migrar o Angular.
 - Deploy: SSH (`appleboy/ssh-action`) na pasta `~/apps/blue-fox/blue-fox-finance` do usuário `deployer`, `git reset --hard origin/main` e `docker compose ... --env-file .env.prod up -d --build`. O `.env.prod` real precisa existir na VPS.
+- **Healthcheck:** `GET /api/health` (público; responde 503 se o banco cair) alimenta o healthcheck do container da API no compose; o front usa `wget` no nginx. Depois do `up`, o deploy espera os dois ficarem `healthy` (até 3 min) e falha em vermelho com os últimos logs se não ficarem.
 - Secrets do repo: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, opcionais `VPS_PORT` e `VPS_APP_PATH`.

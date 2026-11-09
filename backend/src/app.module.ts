@@ -15,6 +15,7 @@ import { BillsModule } from './modules/bills/bills.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BotModule } from './modules/bot/bot.module';
 import { UsersModule } from './modules/users/users.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UsersModule } from './modules/users/users.module';
     AnalyticsModule,
     BotModule,
     UsersModule,
+    HealthModule,
   ],
   providers: [
     {
