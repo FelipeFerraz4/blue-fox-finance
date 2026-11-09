@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { FINANCE_ACCESS_ROLES } from './core/services/auth/roles.constants';
+import { FINANCE_ACCESS_ROLES, KeycloakRole } from './core/services/auth/roles.constants';
 
 export const routes: Routes = [
   // 1. Rota Pública Inicial (Home Landing Page)
@@ -105,6 +105,14 @@ export const routes: Routes = [
       import('./features/pages/admin/store-categories/store-categories.component').then(
         (m) => m.StoreCategoriesComponent,
       ),
+  },
+  {
+    // Criação de usuários (Keycloak + banco): só admin do Finance
+    path: 'admin/users',
+    canActivate: [authGuard],
+    data: { roles: [KeycloakRole.FINANCE_ADMIN] },
+    loadComponent: () =>
+      import('./features/pages/admin/users/users.component').then((m) => m.UsersComponent),
   },
   {
     path: 'admin/user-profile',

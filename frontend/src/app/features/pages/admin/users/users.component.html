@@ -1,0 +1,174 @@
+<div class="users-page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Usuários</h1>
+      <p class="page-subtitle">Crie contas de acesso ao Blue Fox Finance</p>
+    </div>
+    <a routerLink="/admin" class="btn btn-secondary btn-sm">Voltar para Serviços</a>
+  </header>
+
+  @if (!configured()) {
+    <p class="notice notice-warning" role="status">
+      A criação de usuários ainda não está configurada neste ambiente (credenciais do Keycloak no backend).
+    </p>
+  }
+
+  <div class="users-grid">
+    <!-- Formulário -->
+    <section class="card" aria-labelledby="new-user-title">
+      <h2 id="new-user-title" class="card-title">Novo usuário</h2>
+      <p class="card-subtitle">
+        Recebe os papéis
+        @for (r of roles(); track r; let last = $last) {
+          <code>{{ r }}</code>{{ last ? '' : ' e ' }}
+        }
+        e troca a senha no primeiro acesso.
+      </p>
+
+      @if (created(); as c) {
+        <div class="created" role="status">
+          <p class="created-title">✅ {{ c.nome }} foi criado. Repasse os dados de acesso:</p>
+          <dl class="credentials">
+            <dt>Usuário</dt>
+            <dd><code>{{ c.username }}</code></dd>
+            <dt>Senha temporária</dt>
+            <dd><code>{{ c.senha }}</code></dd>
+          </dl>
+          <div class="created-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="copyCredentials()">
+              {{ copied() ? 'Copiado!' : 'Copiar dados de acesso' }}
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="created.set(null)">Fechar</button>
+          </div>
+          <p class="created-hint">A senha não fica salva no Finance: copie antes de fechar.</p>
+        </div>
+      }
+
+      @if (error()) {
+        <p class="notice notice-danger" role="alert">{{ error() }}</p>
+      }
+
+      <form #userForm="ngForm" (ngSubmit)="submit(userForm)" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nome">Nome *</label>
+            <input
+              id="nome"
+              name="nome"
+              class="form-control"
+              [(ngModel)]="form.nome"
+              required
+              maxlength="80"
+              autocomplete="off"
+              #nome="ngModel"
+              [class.is-invalid]="submitted && nome.invalid"
+            />
+            @if (submitted && nome.invalid) {
+              <span class="field-error">Informe o nome</span>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sobrenome">Sobrenome</label>
+            <input id="sobrenome" name="sobrenome" class="form-control" [(ngModel)]="form.sobrenome" maxlength="80" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">E-mail *</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="form-control"
+            [(ngModel)]="form.email"
+            required
+            email
+            maxlength="254"
+            autocomplete="off"
+            #email="ngModel"
+            [class.is-invalid]="submitted && email.invalid"
+          />
+          @if (submitted && email.invalid) {
+            <span class="field-error">Informe um e-mail válido</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="username">Usuário (login)</label>
+          <input
+            id="username"
+            name="username"
+            class="form-control"
+            [(ngModel)]="form.username"
+            pattern="^[a-zA-Z0-9._-]{3,50}$"
+            placeholder="Se vazio, o login é o e-mail"
+            autocomplete="off"
+            #username="ngModel"
+            [class.is-invalid]="submitted && username.invalid"
+          />
+          @if (submitted && username.invalid) {
+            <span class="field-error">3 a 50 caracteres: letras, números, ponto, _ ou -</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="senha">Senha temporária *</label>
+          <div class="password-row">
+            <input
+              id="senha"
+              name="senhaTemporaria"
+              class="form-control"
+              [type]="showPassword() ? 'text' : 'password'"
+              [(ngModel)]="form.senhaTemporaria"
+              required
+              minlength="8"
+              maxlength="128"
+              autocomplete="new-password"
+              #senha="ngModel"
+              [class.is-invalid]="submitted && senha.invalid"
+            />
+            <button type="button" class="btn btn-secondary btn-sm" (click)="showPassword.set(!showPassword())">
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="generatePassword()">Gerar</button>
+          </div>
+          @if (submitted && senha.invalid) {
+            <span class="field-error">Mínimo de 8 caracteres</span>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-pill" [disabled]="saving() || !configured()">
+            {{ saving() ? 'Criando…' : 'Criar usuário' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Lista -->
+    <section class="card" aria-labelledby="users-list-title">
+      <h2 id="users-list-title" class="card-title">Criados pelo Finance</h2>
+      @if (loading()) {
+        <p class="muted">Carregando…</p>
+      } @else if (users().length === 0) {
+        <p class="muted">Nenhum usuário criado por aqui ainda.</p>
+      } @else {
+        <ul class="user-list">
+          @for (u of users(); track u.id) {
+            <li class="user-row">
+              <span class="avatar" aria-hidden="true">{{ u.nome.charAt(0).toUpperCase() }}</span>
+              <div class="user-info">
+                <strong>{{ fullName(u) }}</strong>
+                <span class="muted">{{ u.email }}</span>
+                @if (u.username !== u.email) {
+                  <span class="muted">login: {{ u.username }}</span>
+                }
+              </div>
+              <span class="muted date">{{ u.createdAt | date: 'dd/MM/yyyy' }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</div>
