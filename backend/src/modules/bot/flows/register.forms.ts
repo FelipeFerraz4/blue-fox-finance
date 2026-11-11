@@ -106,9 +106,8 @@ export const FORMS: Record<FormKind, FormSpec> = {
         label: 'Categoria',
         type: 'choice',
         required: false,
-        allowText: true,
         skipLabel: 'Sem categoria',
-        hint: 'Toque numa opção ou digite o nome.',
+        hint: 'Toque numa opção. Para criar uma categoria nova, use /novacategorialoja.',
         choices: async (userId, prisma) =>
           (await prisma.categoriaLoja.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } })).map((c) => ({
             id: c.nome,

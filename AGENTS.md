@@ -47,7 +47,7 @@ frontend/src/app/
 │       ├── sidebar/
 │       │   └── sidebar.service.ts                    # Estado reativo do menu lateral (collapse/mobile)
 │       ├── stores/
-│       │   └── stores.service.ts                     # CRUD de lojas e fornecedores (/api/stores)
+│       │   └── stores.service.ts                     # CRUD de lojas (/api/stores); categoria precisa existir em CategoriaLoja
 │       └── user/
 │           └── user.service.ts                       # Preferências de perfil e avatares do sistema
 │

@@ -19,7 +19,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação/edição (`expense-form/`). Comprador, loja e categoria só cadastrados: o "+ Cadastrar …" dos dropdowns cria o item pela API e já seleciona (com `[createOnBlur]="false"`, para não cadastrar ao sair do campo); categorias vêm só de `CategoriaItem`, sem lista fixa.
   - `admin/`: Painel de administração (`admin.component.ts`), categorias de itens (`item-categories/`), categorias de lojas (`store-categories/`) e perfil de usuário (`user-profile/`, com `telegram-link-card/` para conectar o bot do Telegram via `BotService`) e `users/` (criação de usuários via `AdminUsersService`; rota e card só para `ROLE_FINANCE_ADMIN`: cards com `roles` são filtrados por `AuthService.hasRole`).
   - `buyers/`: Gestão de compradores/pagadores.
-  - `stores/`: Gestão de lojas e fornecedores.
+  - `stores/`: Gestão de lojas e fornecedores. Categoria só cadastrada: o "+ Cadastrar categoria de loja" cria em Categorias de Lojas pela API e já seleciona (`[createOnBlur]="false"`), sem lista fixa.
   - `payment-methods/`: Gestão de meios e modalidades de pagamento.
   - `bills/`: Contas a pagar (vencimentos do mês, marcar como paga, cadastro) e `bill-alerts-card/` (avisos no dashboard). O `BillsService` expõe o signal `alerts`, usado pelo selo da sidebar.
 
