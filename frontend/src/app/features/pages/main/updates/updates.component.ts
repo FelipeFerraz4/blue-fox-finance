@@ -987,14 +987,14 @@ export class UpdatesComponent {
 
   completedFeatures: FeatureItem[] = [
     {
-      title: 'Bot do Telegram: Cadastros pelo Chat',
+      title: 'Bot do Telegram',
       badge: 'Lançado v1.6',
       badgeClass: 'success',
-      description: 'Cadastre lojas, compradores, meios de pagamento, categorias e contas a pagar direto pelo Telegram, com os mesmos campos e regras do site.',
+      description: 'Registre gastos, consulte o mês, confirme pagamentos e faça cadastros conversando com o bot. Tudo aparece na hora no site.',
       details: [
-        'Comando /cadastrar e atalhos como /novaloja e /novaconta',
-        'Item que ainda não existe pode ser cadastrado no meio do lançamento, sem perder o que já foi preenchido',
-        'Comprador, loja e categoria sempre cadastrados, no site e no bot',
+        '/lancamento com os mesmos campos da tela Novo Lançamento',
+        '/resumo, /contas e /ultimos para consultas rápidas',
+        '/cadastrar lojas, compradores, meios, categorias e contas, inclusive no meio do lançamento',
       ],
     },
     {
@@ -1006,17 +1006,6 @@ export class UpdatesComponent {
         'Login pelo e-mail com senha temporária',
         'Troca de senha obrigatória no primeiro acesso',
         'Novos usuários começam com o papel de usuário do Finance',
-      ],
-    },
-    {
-      title: 'Bot do Telegram: Lançamentos e Consultas',
-      badge: 'Lançado v1.5',
-      badgeClass: 'success',
-      description: 'Registre gastos, consulte o resumo do mês e confirme pagamentos de contas conversando com o bot. Tudo aparece na hora no site.',
-      details: [
-        '/lancamento pergunta os mesmos campos da tela Novo Lançamento',
-        '/resumo, /contas e /ultimos para consultas rápidas',
-        'Conexão segura pelo Perfil, com código de uso único',
       ],
     },
     {
@@ -1053,47 +1042,14 @@ export class UpdatesComponent {
       ],
     },
     {
-      title: 'Central de Serviços & Preferências',
-      badge: 'Lançado v1.1',
-      badgeClass: 'success',
-      description: 'Hub de serviços com atalhos para os cadastros, perfil do usuário e padrões que agilizam os lançamentos.',
-      details: [
-        'Comprador, loja, meio de pagamento e categoria padrão',
-        'Avatares temáticos do ecossistema Blue Fox',
-        'Hub visual para gerenciar lojas, compradores e categorias',
-      ],
-    },
-    {
-      title: 'Lançamentos Agrupados & Múltiplos Itens',
+      title: 'Lançamentos, Faturas & Cadastros',
       badge: 'Lançado v1.0',
       badgeClass: 'success',
-      description: 'Permite registrar uma compra com um único cabeçalho (comprador, loja, data) e múltiplos itens detalhados com valores individuais.',
+      description: 'A base do sistema: compras com vários itens, parcelas calculadas pelo fechamento do cartão e cadastros que agilizam cada lançamento.',
       details: [
-        'Adição dinâmica de linhas de produtos',
-        'Cálculo automático do valor total da compra',
-        'Associação de cada item à sua categoria específica',
-      ],
-    },
-    {
-      title: 'Cálculo Inteligente de Faturas de Cartão',
-      badge: 'Lançado v1.0',
-      badgeClass: 'success',
-      description: 'Determina automaticamente o mês de vencimento da fatura com base no dia de fechamento do cartão de crédito cadastrado.',
-      details: [
-        'Divisão automática de compras parceladas',
-        'Projeção de parcelas mês a mês',
-        'Precisão para compras realizadas antes ou após o fechamento',
-      ],
-    },
-    {
-      title: 'Compradores & Categorização Dupla',
-      badge: 'Lançado v1.0',
-      badgeClass: 'success',
-      description: 'Gestão de múltiplos responsáveis por despesas e organização em dois níveis: tipos de produtos e categorias de lojas.',
-      details: [
-        'Cadastro centralizado de compradores',
-        'Cores personalizadas por categoria',
-        'Associação de cada loja com seu segmento',
+        'Uma compra com cabeçalho único e múltiplos itens',
+        'Mês da fatura e parcelas calculados pelo dia de fechamento',
+        'Compradores, lojas, categorias e padrões de lançamento',
       ],
     },
   ];
