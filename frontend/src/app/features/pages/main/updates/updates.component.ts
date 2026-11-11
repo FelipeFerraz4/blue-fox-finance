@@ -1110,30 +1110,9 @@ export class UpdatesComponent {
         'Sem avisos repetidos para a mesma conta',
       ],
     },
-    {
-      title: 'Bot com Inteligência Artificial',
-      badge: 'Em Andamento',
-      badgeClass: 'warning',
-      description: 'Lançamentos por texto livre, como "gastei 45,90 no mercado no pix", sempre com a tela de confirmação antes de salvar.',
-      details: [
-        'Interpretação de valor, loja, meio de pagamento e categoria',
-        'Foto do cupom fiscal com preenchimento automático',
-        'Mesmas regras e cadastros do site',
-      ],
-    },
   ];
 
   futureFeatures: FeatureItem[] = [
-    {
-      title: 'Bot no WhatsApp',
-      badge: 'Roadmap',
-      badgeClass: 'purple',
-      description: 'Os mesmos lançamentos, consultas e cadastros do Telegram, agora pelo WhatsApp.',
-      details: [
-        'API oficial do WhatsApp (Cloud API)',
-        'Mesma conta e mesmos dados do site',
-      ],
-    },
     {
       title: 'Exportação de Relatórios (PDF & Excel/CSV)',
       badge: 'Roadmap',
