@@ -249,21 +249,6 @@ export class ExpenseFlow {
         return this.register.start(u, REGISTRABLE[state.step].form, name, { draft, step: state.step });
       }
 
-      // Como no site ("+ Usar nova…"): usa o texto só neste lançamento, sem cadastrar
-      case 'usetext': {
-        const text = state.pending?.slice(0, MAX_TEXT);
-        if (!text || state.step === 'meio') return this.retry(u, state, 'Opção inválida.');
-        if (state.step === 'comprador') {
-          draft.comprador = text;
-          draft.compradorId = null;
-        } else if (state.step === 'loja') {
-          draft.loja = text;
-          draft.lojaId = null;
-        } else if (state.step === 'categoria') {
-          draft.categoria = text;
-        }
-        return this.advance(u, draft);
-      }
 
       case 'back':
         return this.advance(u, draft, state.step);
@@ -343,15 +328,18 @@ export class ExpenseFlow {
     return [{ text: message }, ...replies];
   }
 
-  /** Item digitado não existe: cadastrar agora, usar só neste lançamento (exceto meio) ou escolher outro. */
+  /** Item digitado não existe: cadastrar agora ou escolher outro (no bot, tudo precisa estar cadastrado). */
   private async notRegistered(u: BotUser, draft: ExpenseDraft, step: RegistrableStep, typed: string): Promise<BotReply[]> {
     const r = REGISTRABLE[step];
     const name = typed.trim().slice(0, MAX_TEXT);
     const nonce = F.nonce();
     await this.link.setState(u.canal, u.externalUserId, { flow: 'gasto', nonce, step, draft, pending: name });
-    const buttons: BotButton[][] = [[{ label: F.label(`➕ Cadastrar ${r.what}`, 32), data: `g:${nonce}:new` }]];
-    if (step !== 'meio') buttons.push([{ label: 'Usar só neste lançamento', data: `g:${nonce}:usetext` }]);
-    buttons.push([{ label: `↩️ ${r.outro}`, data: `g:${nonce}:back` }], [CANCEL(nonce)]);
+    // Tudo no lançamento precisa estar cadastrado: cadastrar agora ou escolher outro
+    const buttons: BotButton[][] = [
+      [{ label: F.label(`➕ Cadastrar ${r.what}`, 32), data: `g:${nonce}:new` }],
+      [{ label: `↩️ ${r.outro}`, data: `g:${nonce}:back` }],
+      [CANCEL(nonce)],
+    ];
     const article = step === 'loja' || step === 'categoria' ? 'cadastrada' : 'cadastrado';
     return [{ text: `<b>${F.esc(name)}</b> não está ${article} como ${r.what}.\nO que você quer fazer?`, buttons }];
   }
