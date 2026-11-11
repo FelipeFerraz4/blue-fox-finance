@@ -77,6 +77,11 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
 
   // === CRIAÇÃO DE NOVOS ITENS DINÂMICOS ===
   @Input() allowCreate: boolean = false;
+  /**
+   * Ao sair do campo com texto digitado, cria o item sozinho. Desligue quando criar
+   * grava no banco (ex.: "+ Cadastrar loja"): aí só o clique na opção ou Enter cria.
+   */
+  @Input() createOnBlur: boolean = true;
   @Input() createOptionText: string = '+ Adicionar item:';
 
   // === FUNÇÕES CUSTOMIZADAS ===
@@ -125,7 +130,13 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['options'] || changes['valueField'] || changes['labelField']) {
       this.refreshOptions();
-      this.syncDisplayValue();
+      // Telas que passam as opções por getter criam uma lista nova a cada ciclo:
+      // enquanto o usuário digita, só refiltra, sem sobrescrever o texto digitado
+      if (this.isTyping) {
+        this.filterOptions();
+      } else {
+        this.syncDisplayValue();
+      }
     }
     if (changes['value']) {
       this.syncDisplayValue();
@@ -230,7 +241,7 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
           this.isTyping = false;
           // Se o usuário digitou e não selecionou uma opção existente
           const term = this.displayValue.trim();
-          if (this.allowCreate && term && this.canCreateCustomOption) {
+          if (this.allowCreate && this.createOnBlur && term && this.canCreateCustomOption) {
             this.handleCreateNew();
           } else {
             // Restaura o valor válido anterior
@@ -341,9 +352,11 @@ export class SearchableDropdownComponent implements ControlValueAccessor, OnInit
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      if (this.isTyping && this.allowCreate && this.canCreateCustomOption && this.displayValue.trim()) {
+      if (this.isTyping && this.allowCreate && this.createOnBlur && this.canCreateCustomOption && this.displayValue.trim()) {
         this.handleCreateNew();
       } else {
+        // Clique fora sem criar: descarta o texto digitado e volta ao valor selecionado
+        this.isTyping = false;
         this.syncDisplayValue();
       }
       this.closeDropdown();
