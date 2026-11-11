@@ -113,15 +113,16 @@ export interface ExpenseItemForm {
                     [options]="buyerDropdownOptions"
                     [value]="selectedBuyerId"
                     (valueChange)="onBuyerOptionSelect($event)"
-                    placeholder="Selecione ou digite um comprador..."
+                    placeholder="Selecione ou cadastre um comprador..."
                     searchPlaceholder="Pesquisar comprador..."
                     [allowCreate]="true"
-                    createOptionText="+ Usar novo comprador:"
+                    [createOnBlur]="false"
+                    createOptionText="+ Cadastrar comprador:"
                     (createNew)="onBuyerCreateNew($event)"
                     [invalid]="formSubmitted && !selectedBuyerId"
                   ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedBuyerId" class="field-error-msg">
-                    Selecione ou digite um comprador
+                    Selecione ou cadastre um comprador
                   </span>
                 </div>
 
@@ -141,15 +142,16 @@ export interface ExpenseItemForm {
                     [options]="storeDropdownOptions"
                     [value]="selectedStoreId"
                     (valueChange)="onStoreOptionSelect($event)"
-                    placeholder="Selecione ou digite uma loja..."
+                    placeholder="Selecione ou cadastre uma loja..."
                     searchPlaceholder="Pesquisar loja..."
                     [allowCreate]="true"
-                    createOptionText="+ Usar nova loja:"
+                    [createOnBlur]="false"
+                    createOptionText="+ Cadastrar loja:"
                     (createNew)="onStoreCreateNew($event)"
                     [invalid]="formSubmitted && !selectedStoreId"
                   ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedStoreId" class="field-error-msg">
-                    Selecione ou digite uma loja
+                    Selecione ou cadastre uma loja
                   </span>
                 </div>
               </div>
@@ -315,11 +317,12 @@ export interface ExpenseItemForm {
                         [options]="itemCategoryOptions"
                         [(ngModel)]="item.categoria"
                         [name]="'item_categoria_' + item.id"
-                        placeholder="Selecione ou digite..."
+                        placeholder="Selecione ou cadastre..."
                         searchPlaceholder="Pesquisar categoria..."
                         [allowCreate]="true"
-                        createOptionText="+ Usar nova categoria:"
-                        (createNew)="item.categoria = $event"
+                        [createOnBlur]="false"
+                        createOptionText="+ Cadastrar categoria:"
+                        (createNew)="onCategoryCreateNew(item, $event)"
                         [invalid]="formSubmitted && (!item.categoria || !item.categoria.trim())"
                       ></app-searchable-dropdown>
                       <span *ngIf="formSubmitted && (!item.categoria || !item.categoria.trim())" class="field-error-msg">
@@ -1459,13 +1462,6 @@ export class ExpenseFormComponent implements OnInit {
       label: b.nome,
       sublabel: b.email || undefined,
     }));
-    if (this.selectedBuyerId === 'OUTRO' && this.commonData.comprador) {
-      list.push({
-        value: 'OUTRO',
-        label: this.commonData.comprador,
-        sublabel: 'Comprador personalizado',
-      });
-    }
     return list;
   }
 
@@ -1474,10 +1470,18 @@ export class ExpenseFormComponent implements OnInit {
     this.onBuyerSelected();
   }
 
+  /** "+ Cadastrar comprador": cria no cadastro e já seleciona (todo lançamento usa itens cadastrados). */
   onBuyerCreateNew(name: string) {
-    this.selectedBuyerId = 'OUTRO';
-    this.commonData.comprador = name;
-    this.commonData.compradorId = undefined;
+    const nome = name.trim();
+    if (!nome) return;
+    this.buyersService.create({ nome }).subscribe({
+      next: (buyer) => {
+        this.buyers = [...this.buyers, buyer];
+        this.selectedBuyerId = buyer.id;
+        this.onBuyerSelected();
+      },
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar o comprador.')),
+    });
   }
 
   get storeDropdownOptions(): DropdownOption[] {
@@ -1486,13 +1490,6 @@ export class ExpenseFormComponent implements OnInit {
       label: s.nome,
       sublabel: s.categoria || undefined,
     }));
-    if (this.selectedStoreId === 'OUTRA' && this.commonData.loja) {
-      list.push({
-        value: 'OUTRA',
-        label: this.commonData.loja,
-        sublabel: 'Loja personalizada',
-      });
-    }
     return list;
   }
 
@@ -1501,10 +1498,36 @@ export class ExpenseFormComponent implements OnInit {
     this.onStoreSelected();
   }
 
+  /** "+ Cadastrar loja": cria no cadastro e já seleciona. */
   onStoreCreateNew(name: string) {
-    this.selectedStoreId = 'OUTRA';
-    this.commonData.loja = name;
-    this.commonData.lojaId = undefined;
+    const nome = name.trim();
+    if (!nome) return;
+    this.storesService.create({ nome }).subscribe({
+      next: (store) => {
+        this.stores = [...this.stores, store];
+        this.selectedStoreId = store.id;
+        this.onStoreSelected();
+      },
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar a loja.')),
+    });
+  }
+
+  /** "+ Cadastrar categoria": cria a categoria de item e aplica ao item. */
+  onCategoryCreateNew(item: ExpenseItemForm, name: string) {
+    const nome = name.trim();
+    if (!nome) return;
+    this.categoriesService.createItemCategory({ nome }).subscribe({
+      next: (cat) => {
+        this.itemCategoriesList = [...this.itemCategoriesList, cat];
+        item.categoria = cat.nome;
+      },
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar a categoria.')),
+    });
+  }
+
+  private apiMessage(err: { error?: { message?: string | string[] } }, fallback: string): string {
+    const message = err?.error?.message;
+    return Array.isArray(message) ? message.join('; ') : message || fallback;
   }
 
   get paymentMethodDropdownOptions(): DropdownOption[] {
@@ -1522,21 +1545,9 @@ export class ExpenseFormComponent implements OnInit {
     this.onPaymentMethodChange();
   }
 
+  /** Só categorias cadastradas (Admin → Categorias de Itens ou "+ Cadastrar categoria"). */
   get itemCategoryOptions(): string[] {
-    const defaults = [
-      'Alimentação',
-      'Supermercado',
-      'Moradia',
-      'Transporte',
-      'Tecnologia',
-      'Saúde',
-      'Lazer',
-      'Educação',
-      'Vestuário',
-      'Outros',
-    ];
-    const registered = this.itemCategoriesList.map((c) => c.nome);
-    return Array.from(new Set([...registered, ...defaults])).filter(Boolean);
+    return this.itemCategoriesList.map((c) => c.nome);
   }
 
   loadBuyers() {
@@ -1835,12 +1846,10 @@ export class ExpenseFormComponent implements OnInit {
       return;
     }
 
-    if (this.selectedBuyerId === 'OUTRO') {
-      if (!this.commonData.comprador || !this.commonData.comprador.trim()) {
-        this.formErrorMessage = 'Por favor, digite o nome do Comprador.';
-        return;
-      }
-      this.commonData.compradorId = undefined;
+    // Comprador, loja e categoria precisam estar cadastrados
+    if (!this.buyers.some((b) => b.id === this.selectedBuyerId)) {
+      this.formErrorMessage = 'Selecione ou cadastre um Comprador.';
+      return;
     }
 
     // 2. Validação de Loja
@@ -1849,12 +1858,9 @@ export class ExpenseFormComponent implements OnInit {
       return;
     }
 
-    if (this.selectedStoreId === 'OUTRA') {
-      if (!this.commonData.loja || !this.commonData.loja.trim()) {
-        this.formErrorMessage = 'Por favor, digite o nome da Loja.';
-        return;
-      }
-      this.commonData.lojaId = undefined;
+    if (!this.stores.some((s) => s.id === this.selectedStoreId)) {
+      this.formErrorMessage = 'Selecione ou cadastre uma Loja.';
+      return;
     } else {
       const store = this.stores.find((s) => s.id === this.selectedStoreId);
       if (store) {
@@ -1896,6 +1902,10 @@ export class ExpenseFormComponent implements OnInit {
 
       if (!item.categoria || !item.categoria.trim()) {
         this.formErrorMessage = `Por favor, informe a Categoria do Item #${itemNum}.`;
+        return;
+      }
+      if (!this.itemCategoriesList.some((c) => c.nome.toLowerCase() === item.categoria.trim().toLowerCase())) {
+        this.formErrorMessage = `A categoria "${item.categoria.trim()}" do Item #${itemNum} não está cadastrada. Selecione ou cadastre uma categoria.`;
         return;
       }
 

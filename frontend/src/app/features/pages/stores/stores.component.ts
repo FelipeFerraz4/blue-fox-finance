@@ -220,12 +220,14 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   [options]="categoryOptions"
                   [(ngModel)]="newStore.categoria"
                   name="categoria"
-                  placeholder="Selecione ou busque uma categoria..."
+                  placeholder="Selecione, busque ou cadastre uma categoria..."
                   searchPlaceholder="Pesquisar categoria..."
                   [allowCreate]="true"
-                  createOptionText="+ Criar nova categoria:"
-                  (createNew)="newStore.categoria = $event"
+                  [createOnBlur]="false"
+                  createOptionText="+ Cadastrar categoria de loja:"
+                  (createNew)="onCategoryCreateNew($event)"
                 ></app-searchable-dropdown>
+                <span *ngIf="categoryError" class="field-error-msg">{{ categoryError }}</span>
               </div>
 
               <div class="status-switch-box">
@@ -476,6 +478,13 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       }
     }
 
+    .field-error-msg {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--danger, #dc2626);
+    }
+
     .category-filter-bar {
       display: flex;
       align-items: center;
@@ -684,21 +693,34 @@ export class StoresComponent implements OnInit {
 
   registeredCategories: CategoriaLoja[] = [];
 
+  categoryError = '';
+
+  /**
+   * Só categorias cadastradas em Categorias de Lojas. A categoria atual de uma loja
+   * antiga (texto solto) continua na lista para a edição não apagá-la.
+   */
   get categoryOptions(): string[] {
-    const defaults = [
-      'Supermercado',
-      'E-commerce',
-      'Farmácia',
-      'Eletrônicos & Informática',
-      'Restaurante & Alimentação',
-      'Vestuário & Calçados',
-      'Casa & Decoração',
-      'Serviços',
-      'Outros',
-    ];
     const registered = this.registeredCategories.map((c) => c.nome);
-    const existing = this.categories;
-    return Array.from(new Set([...registered, ...existing, ...defaults])).filter(Boolean);
+    const current = this.newStore.categoria?.trim();
+    const isRegistered = !current || registered.some((n) => n.toLowerCase() === current.toLowerCase());
+    return isRegistered ? registered : [...registered, current!];
+  }
+
+  /** "+ Cadastrar categoria de loja": cria em Categorias de Lojas e já seleciona. */
+  onCategoryCreateNew(name: string) {
+    const nome = name.trim();
+    if (!nome) return;
+    this.categoryError = '';
+    this.categoriesService.createStoreCategory({ nome }).subscribe({
+      next: (cat) => {
+        this.registeredCategories = [...this.registeredCategories, cat].sort((a, b) => a.nome.localeCompare(b.nome));
+        this.newStore.categoria = cat.nome;
+      },
+      error: (err) => {
+        const msg = err?.error?.message;
+        this.categoryError = (Array.isArray(msg) ? msg.join(' ') : msg) || 'Não foi possível cadastrar a categoria.';
+      },
+    });
   }
 
   constructor(
@@ -772,6 +794,7 @@ export class StoresComponent implements OnInit {
   }
 
   openAddModal() {
+    this.categoryError = '';
     this.editingId = null;
     this.newStore = {
       nome: '',
@@ -782,6 +805,7 @@ export class StoresComponent implements OnInit {
   }
 
   openEditModal(store: Store) {
+    this.categoryError = '';
     this.editingId = store.id;
     this.newStore = {
       nome: store.nome,

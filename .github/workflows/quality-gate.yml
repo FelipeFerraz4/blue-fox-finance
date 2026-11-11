@@ -141,6 +141,31 @@ jobs:
             docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down || true
             docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
+            # Espera os healthchecks do compose (API + banco via /api/health, e o nginx do front).
+            # Sem isso o deploy ficava verde mesmo com a API reiniciando em loop.
+            echo "🩺 Aguardando os containers ficarem saudáveis (até 3 min)..."
+            API_STATUS=starting
+            WEB_STATUS=starting
+            for i in $(seq 1 36); do
+              API_STATUS=$(docker inspect -f '{{.State.Health.Status}}' blue-fox-finance-api 2>/dev/null || echo ausente)
+              WEB_STATUS=$(docker inspect -f '{{.State.Health.Status}}' blue-fox-finance 2>/dev/null || echo ausente)
+              if [ "$API_STATUS" = "healthy" ] && [ "$WEB_STATUS" = "healthy" ]; then
+                break
+              fi
+              sleep 5
+            done
+            echo "   API: $API_STATUS | Frontend: $WEB_STATUS"
+            if [ "$API_STATUS" != "healthy" ]; then
+              echo "❌ A API não ficou saudável. Últimos logs:"
+              docker logs --tail 80 blue-fox-finance-api 2>&1 || true
+              exit 1
+            fi
+            if [ "$WEB_STATUS" != "healthy" ]; then
+              echo "❌ O frontend não ficou saudável. Últimos logs:"
+              docker logs --tail 40 blue-fox-finance 2>&1 || true
+              exit 1
+            fi
+
             echo "🧹 Removendo imagens órfãs/antigas..."
             docker image prune -f
 

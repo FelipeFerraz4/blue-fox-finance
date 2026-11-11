@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ModalidadePagamento, OrigemLancamento, TipoLancamento } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -7,7 +7,17 @@ import { PreferencesService } from '../../preferences/preferences.service';
 import { BillScheduleHelper } from '../../../common/helpers/bill-schedule.helper';
 import { BotLinkService } from '../bot-link.service';
 import { BotFormat as F } from '../bot-format';
-import { BotButton, BotReply, BotUser, ConversationState, ExpenseDraft, ExpenseStep } from '../bot.types';
+import {
+  BotButton,
+  BotReply,
+  BotUser,
+  ConversationState,
+  ExpenseDraft,
+  ExpenseStep,
+  FormKind,
+  RegistrableStep,
+} from '../bot.types';
+import { RegisterFlow } from './register.flow';
 
 type GastoState = Extract<ConversationState, { flow: 'gasto' }>;
 type Option = { id: string; label: string };
@@ -15,6 +25,15 @@ type Option = { id: string; label: string };
 const MAX_TEXT = 120;
 const MAX_OPTIONS = 10;
 const CANCEL = (nonce: string): BotButton => ({ label: '❌ Cancelar', data: `g:${nonce}:cancel` });
+
+/** Cadastro aberto quando o item digitado não existe (ou pelo botão ➕). */
+const REGISTRABLE: Record<RegistrableStep, { form: FormKind; novo: string; what: string; outro: string }> = {
+  comprador: { form: 'comprador', novo: 'Novo comprador', what: 'comprador', outro: 'Escolher outro' },
+  loja: { form: 'loja', novo: 'Nova loja', what: 'loja', outro: 'Escolher outra' },
+  meio: { form: 'meio', novo: 'Novo meio de pagamento', what: 'meio de pagamento', outro: 'Escolher outro' },
+  categoria: { form: 'categoria-item', novo: 'Nova categoria', what: 'categoria', outro: 'Escolher outra' },
+};
+const isRegistrable = (step: ExpenseStep): step is RegistrableStep => step in REGISTRABLE;
 
 /** Rótulos idênticos aos da tela "Novo Lançamento" do site. */
 const LABEL: Record<Exclude<ExpenseStep, 'confirmar'>, string> = {
@@ -44,6 +63,8 @@ export class ExpenseFlow {
     private readonly preferences: PreferencesService,
     private readonly link: BotLinkService,
     private readonly config: ConfigService,
+    @Inject(forwardRef(() => RegisterFlow))
+    private readonly register: RegisterFlow,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -56,11 +77,6 @@ export class ExpenseFlow {
    * (valor unitário com quantidade 1, nome e loja) e o resto é perguntado.
    */
   async start(u: BotUser, args: string): Promise<BotReply[]> {
-    const hasMethod = await this.prisma.paymentMethod.count({ where: { userId: u.userId, ativo: true } });
-    if (!hasMethod) {
-      return [this.withSiteLink('Antes de lançar, cadastre um meio de pagamento no site.', '/payment-methods')];
-    }
-
     const draft: ExpenseDraft = {};
     const [left, storeText] = args.split('@').map((s) => s.trim());
     if (left) {
@@ -74,8 +90,43 @@ export class ExpenseFlow {
         draft.nome = left.slice(0, MAX_TEXT);
       }
     }
-    if (storeText) await this.applyStoreText(u.userId, draft, storeText);
+    if (storeText && !(await this.applyStoreText(u.userId, draft, storeText))) {
+      draft.lojaSugerida = storeText.slice(0, MAX_TEXT);
+    }
+
+    const hasMethod = await this.prisma.paymentMethod.count({ where: { userId: u.userId, ativo: true } });
+    if (!hasMethod) {
+      // Sem meio de pagamento não dá para lançar: cadastra agora e segue o lançamento
+      const replies = await this.register.start(u, 'meio', '', { draft, step: 'meio' });
+      return [{ text: 'Você ainda não tem um meio de pagamento. Vamos cadastrar um e já seguir com o lançamento.' }, ...replies];
+    }
     return this.advance(u, draft);
+  }
+
+  /** Volta ao lançamento depois de cadastrar o item na hora, já com ele escolhido. */
+  async resume(u: BotUser, draft: ExpenseDraft, step: RegistrableStep, created: { id: string; nome: string; modalidade?: unknown }) {
+    switch (step) {
+      case 'comprador':
+        draft.comprador = created.nome;
+        draft.compradorId = created.id;
+        break;
+      case 'loja':
+        draft.loja = created.nome;
+        draft.lojaId = created.id;
+        break;
+      case 'meio':
+        this.applyMethod(draft, created as { id: string; nome: string; modalidade: ModalidadePagamento });
+        break;
+      case 'categoria':
+        draft.categoria = created.nome;
+        break;
+    }
+    return this.advance(u, draft);
+  }
+
+  /** Cadastro cancelado: volta para a mesma pergunta do lançamento. */
+  backTo(u: BotUser, draft: ExpenseDraft, step: RegistrableStep) {
+    return this.advance(u, draft, step);
   }
 
   async onText(u: BotUser, state: GastoState, text: string): Promise<BotReply[]> {
@@ -87,13 +138,14 @@ export class ExpenseFlow {
         const buyer = await this.prisma.comprador.findFirst({
           where: { userId: u.userId, nome: { equals: value, mode: 'insensitive' } },
         });
-        draft.comprador = buyer?.nome ?? value.slice(0, MAX_TEXT);
-        draft.compradorId = buyer?.id ?? null;
+        if (!buyer) return this.notRegistered(u, draft, 'comprador', value);
+        draft.comprador = buyer.nome;
+        draft.compradorId = buyer.id;
         break;
       }
       case 'loja':
         if (!value) return this.retry(u, state, 'Digite o nome da loja.');
-        await this.applyStoreText(u.userId, draft, value);
+        if (!(await this.applyStoreText(u.userId, draft, value))) return this.notRegistered(u, draft, 'loja', value);
         break;
       case 'data': {
         const date = F.parseDate(value, BillScheduleHelper.today());
@@ -105,7 +157,7 @@ export class ExpenseFlow {
         const method = await this.prisma.paymentMethod.findFirst({
           where: { userId: u.userId, ativo: true, nome: { contains: value, mode: 'insensitive' } },
         });
-        if (!method) return this.retry(u, state, 'Não achei esse meio de pagamento. Toque numa opção.');
+        if (!method) return this.notRegistered(u, draft, 'meio', value);
         this.applyMethod(draft, method);
         break;
       }
@@ -126,7 +178,8 @@ export class ExpenseFlow {
         const existing = await this.prisma.categoriaItem.findFirst({
           where: { userId: u.userId, nome: { equals: value, mode: 'insensitive' } },
         });
-        draft.categoria = existing?.nome ?? value.slice(0, MAX_TEXT);
+        if (!existing) return this.notRegistered(u, draft, 'categoria', value);
+        draft.categoria = existing.nome;
         break;
       }
       case 'quantidade': {
@@ -187,6 +240,18 @@ export class ExpenseFlow {
 
       case 'edit':
         return this.edit(u, draft, arg as ExpenseStep);
+
+      // Item digitado não existe (ou botão ➕): cadastrar agora e voltar ao lançamento
+      case 'new':
+      case 'create': {
+        if (!isRegistrable(state.step)) return this.retry(u, state, 'Opção inválida.');
+        const name = action === 'new' ? (state.pending ?? '') : '';
+        return this.register.start(u, REGISTRABLE[state.step].form, name, { draft, step: state.step });
+      }
+
+
+      case 'back':
+        return this.advance(u, draft, state.step);
     }
     return this.retry(u, state, 'Opção inválida.');
   }
@@ -246,6 +311,11 @@ export class ExpenseFlow {
 
   private async advance(u: BotUser, draft: ExpenseDraft, forced?: ExpenseStep): Promise<BotReply[]> {
     const step = forced ?? this.firstMissing(draft);
+    if (step === 'loja' && draft.lojaSugerida) {
+      const name = draft.lojaSugerida;
+      delete draft.lojaSugerida;
+      return this.notRegistered(u, draft, 'loja', name);
+    }
     const nonce = F.nonce();
     const { reply, options } = await this.prompt(u.userId, step, draft, nonce);
     await this.link.setState(u.canal, u.externalUserId, { flow: 'gasto', nonce, step, draft, options });
@@ -256,6 +326,22 @@ export class ExpenseFlow {
   private async retry(u: BotUser, state: GastoState, message: string): Promise<BotReply[]> {
     const replies = await this.advance(u, state.draft, state.step);
     return [{ text: message }, ...replies];
+  }
+
+  /** Item digitado não existe: cadastrar agora ou escolher outro (no bot, tudo precisa estar cadastrado). */
+  private async notRegistered(u: BotUser, draft: ExpenseDraft, step: RegistrableStep, typed: string): Promise<BotReply[]> {
+    const r = REGISTRABLE[step];
+    const name = typed.trim().slice(0, MAX_TEXT);
+    const nonce = F.nonce();
+    await this.link.setState(u.canal, u.externalUserId, { flow: 'gasto', nonce, step, draft, pending: name });
+    // Tudo no lançamento precisa estar cadastrado: cadastrar agora ou escolher outro
+    const buttons: BotButton[][] = [
+      [{ label: F.label(`➕ Cadastrar ${r.what}`, 32), data: `g:${nonce}:new` }],
+      [{ label: `↩️ ${r.outro}`, data: `g:${nonce}:back` }],
+      [CANCEL(nonce)],
+    ];
+    const article = step === 'loja' || step === 'categoria' ? 'cadastrada' : 'cadastrado';
+    return [{ text: `<b>${F.esc(name)}</b> não está ${article} como ${r.what}.\nO que você quer fazer?`, buttons }];
   }
 
   /** Ordem da tela "Novo Lançamento": dados da compra e depois o item. */
@@ -317,14 +403,17 @@ export class ExpenseFlow {
     d.modalidade = m.modalidade;
   }
 
-  private async applyStoreText(userId: string, d: ExpenseDraft, text: string) {
+  /** Aplica a loja cadastrada com esse nome. Retorna false se ela não existir. */
+  private async applyStoreText(userId: string, d: ExpenseDraft, text: string): Promise<boolean> {
     const name = text.trim().slice(0, MAX_TEXT);
-    if (!name) return;
+    if (!name) return false;
     const store = await this.prisma.loja.findFirst({
       where: { userId, nome: { equals: name, mode: 'insensitive' } },
     });
-    d.loja = store?.nome ?? name;
-    d.lojaId = store?.id ?? null;
+    if (!store) return false;
+    d.loja = store.nome;
+    d.lojaId = store.id;
+    return true;
   }
 
   private async applyOption(userId: string, step: ExpenseStep, d: ExpenseDraft, id: string) {
@@ -380,8 +469,13 @@ export class ExpenseFlow {
         items.map((it, i) => ({ label: F.label(it.label), data: `g:${nonce}:pick:${i}` })),
         perRow,
       );
+      // Cadastrar um item novo sem sair do lançamento
+      const create = isRegistrable(step) ? [[{ label: `➕ ${REGISTRABLE[step].novo}`, data: `g:${nonce}:create` }]] : [];
       return {
-        reply: { text: `${title}\n${items.length ? hint : hint.replace(/^Toque numa opção ou d/, 'D')}`, buttons: [...buttons, [CANCEL(nonce)]] },
+        reply: {
+          text: `${title}\n${items.length ? hint : hint.replace(/^Toque numa opção ou d/, 'D')}`,
+          buttons: [...buttons, ...create, [CANCEL(nonce)]],
+        },
         options: items.map((i) => i.id),
       };
     };
@@ -418,7 +512,7 @@ export class ExpenseFlow {
           label: `${m.nome} · ${F.modalidade(m.modalidade)}`,
         });
         const suggestion = prefs.meioPagamentoPadrao ? toOption(prefs.meioPagamentoPadrao) : null;
-        return choose('Toque numa opção.', suggestion, methods.map(toOption), 1);
+        return choose('Toque numa opção ou digite o nome.', suggestion, methods.map(toOption), 1);
       }
 
       case 'tipo':

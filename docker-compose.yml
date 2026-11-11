@@ -28,6 +28,9 @@ services:
       PORT: ${PORT:-3000}
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-bluefox_finance}?schema=public
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/auth/realms/blue-fox-global-group}
+      # Criação de usuários pela tela Admin → Usuários (service account com manage-users/view-users)
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID:-}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-}
       # Bot do Telegram (opcional): sem token fica desligado
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_MODE: ${TELEGRAM_MODE:-webhook}
@@ -37,6 +40,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # Saudável = API respondendo e banco acessível (GET /api/health). O deploy espera por isso.
+    # start_period cobre as migrations que rodam na inicialização.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
     networks:
       - finance-db
       - infra-net
@@ -49,6 +60,12 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - infra-net
 

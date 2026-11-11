@@ -17,25 +17,25 @@ export class CreateExpenseDto {
   @IsString()
   codigo?: string; // Se omitido, backend gera UUID
 
-  @IsString()
-  @IsNotEmpty()
-  comprador: string;
-
+  // Comprador, loja e categoria precisam estar cadastrados: os nomes gravados
+  // vêm do cadastro (comprador/loja em texto são ignorados se enviados)
   @IsOptional()
-  @IsUUID()
-  compradorId?: string;
+  @IsString()
+  comprador?: string;
+
+  @IsUUID('all', { message: 'Selecione um comprador cadastrado.' })
+  compradorId: string;
 
   @IsString()
   @IsNotEmpty()
   nome: string;
 
-  @IsString()
-  @IsNotEmpty()
-  loja: string;
-
   @IsOptional()
-  @IsUUID()
-  lojaId?: string;
+  @IsString()
+  loja?: string;
+
+  @IsUUID('all', { message: 'Selecione uma loja cadastrada.' })
+  lojaId: string;
 
   @IsDateString()
   data: string;

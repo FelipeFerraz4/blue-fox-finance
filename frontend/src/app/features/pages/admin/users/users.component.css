@@ -1,0 +1,262 @@
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0b132b;
+  margin: 0;
+}
+
+.page-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--gray-500);
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 74, 173, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
+  padding: 1.5rem;
+  min-width: 0;
+}
+
+.card-title {
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b132b;
+  margin: 0;
+}
+
+.card-subtitle {
+  margin: 0.25rem 0 1.25rem;
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+code {
+  background: var(--gray-100);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700, #334155);
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: #b42318;
+}
+
+.password-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.password-row .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.notice {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.notice-warning {
+  background: var(--warning-light);
+  color: #b54708;
+}
+
+.notice-danger {
+  background: var(--danger-light);
+  color: #b42318;
+  margin-bottom: 1rem;
+}
+
+.created {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--success-light);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.created-title {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+  color: #047857;
+  font-size: 0.9rem;
+}
+
+.credentials {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+}
+
+.credentials dt {
+  color: var(--gray-600);
+}
+
+.credentials dd {
+  margin: 0;
+  word-break: break-all;
+}
+
+.credentials code {
+  background: #ffffff;
+  font-size: 0.85rem;
+}
+
+.created-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.created-hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--gray-600);
+}
+
+.muted {
+  color: var(--gray-500);
+  font-size: 0.82rem;
+}
+
+.user-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.user-row:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-info strong {
+  font-size: 0.9rem;
+  color: #0b132b;
+}
+
+.user-info .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 1.1rem;
+  }
+
+  .password-row {
+    flex-wrap: wrap;
+  }
+
+  .password-row .form-control {
+    flex-basis: 100%;
+  }
+}

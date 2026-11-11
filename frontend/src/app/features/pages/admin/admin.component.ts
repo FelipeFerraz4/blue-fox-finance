@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserService, UserProfile, SystemAvatar } from '../../../core/services/user/user.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { KeycloakRole } from '../../../core/services/auth/roles.constants';
 
 interface AdminModuleCard {
   title: string;
@@ -12,6 +14,8 @@ interface AdminModuleCard {
   badgeType?: 'primary' | 'cyan' | 'warning' | 'success';
   icon: string;
   color: string;
+  /** Se definido, o card só aparece para quem tem um destes papéis */
+  roles?: string[];
 }
 
 @Component({
@@ -113,7 +117,7 @@ interface AdminModuleCard {
 
       <div class="modules-grid">
         <a
-          *ngFor="let card of moduleCards"
+          *ngFor="let card of visibleCards"
           [routerLink]="card.route"
           class="module-card"
         >
@@ -126,6 +130,12 @@ interface AdminModuleCard {
               <svg *ngIf="card.icon === 'store'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <svg *ngIf="card.icon === 'user-plus'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="22" y1="11" x2="16" y2="11"/>
               </svg>
               <svg *ngIf="card.icon === 'user'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -695,6 +705,17 @@ export class AdminComponent implements OnInit {
       color: '#0284c7',
     },
     {
+      title: 'Usuários',
+      category: 'Acesso & Contas',
+      description: 'Crie contas de acesso ao Finance (papel de usuário comum, senha temporária).',
+      route: '/admin/users',
+      badge: 'Admin',
+      badgeType: 'warning',
+      icon: 'user-plus',
+      color: '#7c3aed',
+      roles: [KeycloakRole.FINANCE_ADMIN],
+    },
+    {
       title: 'Perfil & Configurações de Usuário',
       category: 'Segurança & Identidade',
       description: 'Edição de nome, e-mail, telefone, username e avatar oficial do sistema.',
@@ -758,7 +779,15 @@ export class AdminComponent implements OnInit {
     },
   ];
 
-  constructor(public readonly userService: UserService) {
+  /** Cards permitidos para os papéis do usuário logado */
+  get visibleCards(): AdminModuleCard[] {
+    return this.moduleCards.filter((c) => !c.roles || c.roles.some((r) => this.auth.hasRole(r)));
+  }
+
+  constructor(
+    public readonly userService: UserService,
+    private readonly auth: AuthService,
+  ) {
     this.profile = this.userService.currentProfile;
     this.currentAvatar = this.userService.getAvatarById(this.profile.avatarId);
   }

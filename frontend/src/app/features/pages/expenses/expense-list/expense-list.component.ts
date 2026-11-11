@@ -6,6 +6,8 @@ import { ExpensesService } from '../../../../core/services/expenses/expenses.ser
 import { PaymentMethodsService } from '../../../../core/services/payment-methods/payment-methods.service';
 import { StoresService } from '../../../../core/services/stores/stores.service';
 import { BuyersService } from '../../../../core/services/buyers/buyers.service';
+import { CategoriesService } from '../../../../core/services/categories/categories.service';
+import { CategoriaItem } from '../../../../shared/model/types/category.model';
 import { LancamentoGrouped, Lancamento } from '../../../../shared/model/types/lancamento.model';
 import { PaymentMethod } from '../../../../shared/model/types/payment-method.model';
 import { Store } from '../../../../shared/model/types/store.model';
@@ -755,10 +757,11 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   [options]="editBuyerOptions"
                   [value]="editSelectedBuyerId"
                   (valueChange)="onEditBuyerOptionSelect($event)"
-                  placeholder="Selecione ou digite um comprador..."
+                  placeholder="Selecione ou cadastre um comprador..."
                   searchPlaceholder="Pesquisar comprador..."
                   [allowCreate]="true"
-                  createOptionText="+ Usar novo comprador:"
+                  [createOnBlur]="false"
+                  createOptionText="+ Cadastrar comprador:"
                   (createNew)="onEditBuyerCreateNew($event)"
                 ></app-searchable-dropdown>
               </div>
@@ -770,10 +773,11 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   [options]="editStoreOptions"
                   [value]="editSelectedStoreId"
                   (valueChange)="onEditStoreOptionSelect($event)"
-                  placeholder="Selecione ou digite uma loja..."
+                  placeholder="Selecione ou cadastre uma loja..."
                   searchPlaceholder="Pesquisar loja..."
                   [allowCreate]="true"
-                  createOptionText="+ Usar nova loja:"
+                  [createOnBlur]="false"
+                  createOptionText="+ Cadastrar loja:"
                   (createNew)="onEditStoreCreateNew($event)"
                 ></app-searchable-dropdown>
               </div>
@@ -795,14 +799,15 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <div class="form-group">
                 <label class="form-label">Categoria *</label>
                 <app-searchable-dropdown
-                  [options]="itemCategoryOptions"
+                  [options]="editCategoryOptions"
                   [(ngModel)]="editForm.categoria"
                   name="editCategoria"
-                  placeholder="Selecione ou digite..."
+                  placeholder="Selecione ou cadastre..."
                   searchPlaceholder="Pesquisar categoria..."
                   [allowCreate]="true"
-                  createOptionText="+ Usar nova categoria:"
-                  (createNew)="editForm.categoria = $event"
+                  [createOnBlur]="false"
+                  createOptionText="+ Cadastrar categoria:"
+                  (createNew)="onEditCategoryCreateNew($event)"
                 ></app-searchable-dropdown>
               </div>
 
@@ -1886,7 +1891,7 @@ export class ExpenseListComponent implements OnInit {
       list.push({
         value: 'OUTRO',
         label: this.editForm.comprador,
-        sublabel: 'Comprador personalizado',
+        sublabel: 'Não cadastrado: selecione ou cadastre',
       });
     }
     return list;
@@ -1897,10 +1902,18 @@ export class ExpenseListComponent implements OnInit {
     this.onEditBuyerChange();
   }
 
+  /** "+ Cadastrar comprador": cria no cadastro e já seleciona. */
   onEditBuyerCreateNew(name: string) {
-    this.editSelectedBuyerId = 'OUTRO';
-    this.editForm.comprador = name;
-    this.editForm.compradorId = undefined;
+    const nome = name.trim();
+    if (!nome) return;
+    this.buyersService.create({ nome }).subscribe({
+      next: (buyer) => {
+        this.buyersList = [...this.buyersList, buyer];
+        this.editSelectedBuyerId = buyer.id;
+        this.onEditBuyerChange();
+      },
+      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar o comprador.')),
+    });
   }
 
   get editStoreOptions(): DropdownOption[] {
@@ -1913,7 +1926,7 @@ export class ExpenseListComponent implements OnInit {
       list.push({
         value: 'OUTRA',
         label: this.editForm.loja,
-        sublabel: 'Loja personalizada',
+        sublabel: 'Não cadastrada: selecione ou cadastre',
       });
     }
     return list;
@@ -1924,34 +1937,59 @@ export class ExpenseListComponent implements OnInit {
     this.onEditStoreChange();
   }
 
+  /** "+ Cadastrar loja": cria no cadastro e já seleciona. */
   onEditStoreCreateNew(name: string) {
-    this.editSelectedStoreId = 'OUTRA';
-    this.editForm.loja = name;
-    this.editForm.lojaId = undefined;
+    const nome = name.trim();
+    if (!nome) return;
+    this.storesService.create({ nome }).subscribe({
+      next: (store) => {
+        this.storesList = [...this.storesList, store];
+        this.editSelectedStoreId = store.id;
+        this.onEditStoreChange();
+      },
+      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar a loja.')),
+    });
   }
 
-  itemCategoryOptions: string[] = [
-    'Alimentação',
-    'Supermercado',
-    'Moradia',
-    'Transporte',
-    'Tecnologia',
-    'Saúde',
-    'Lazer',
-    'Educação',
-    'Vestuário',
-    'Outros',
-  ];
+  /** "+ Cadastrar categoria": cria a categoria de item e aplica. */
+  onEditCategoryCreateNew(name: string) {
+    const nome = name.trim();
+    if (!nome) return;
+    this.categoriesService.createItemCategory({ nome }).subscribe({
+      next: (cat) => {
+        this.itemCategoriesList = [...this.itemCategoriesList, cat];
+        this.editForm.categoria = cat.nome;
+      },
+      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar a categoria.')),
+    });
+  }
+
+  private apiMessage(err: { error?: { message?: string | string[] } }, fallback: string): string {
+    const message = err?.error?.message;
+    return Array.isArray(message) ? message.join('; ') : message || fallback;
+  }
+
+  /** Categorias de item cadastradas (só elas podem ser usadas no lançamento). */
+  itemCategoriesList: CategoriaItem[] = [];
+
+  get editCategoryOptions(): string[] {
+    return this.itemCategoriesList.map((c) => c.nome);
+  }
 
   constructor(
     private readonly expensesService: ExpensesService,
     private readonly paymentMethodsService: PaymentMethodsService,
     private readonly storesService: StoresService,
     private readonly buyersService: BuyersService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   ngOnInit() {
     this.loadFilterOptions();
+    this.categoriesService.getItemCategories(true).subscribe({
+      next: (cats) => (this.itemCategoriesList = cats),
+      error: (err) => console.error('Erro ao carregar categorias de itens:', err),
+    });
     this.loadExpenses();
   }
 
@@ -2283,12 +2321,13 @@ export class ExpenseListComponent implements OnInit {
   saveEdit() {
     if (!this.editingItem) return;
 
-    if (!this.editForm.comprador?.trim()) {
-      this.editError = 'O comprador é obrigatório.';
+    // Comprador, loja e categoria precisam estar cadastrados (lançamentos antigos podem ter texto solto)
+    if (!this.buyersList.some((b) => b.id === this.editSelectedBuyerId)) {
+      this.editError = 'Selecione ou cadastre um comprador.';
       return;
     }
-    if (!this.editForm.loja?.trim()) {
-      this.editError = 'A loja é obrigatória.';
+    if (!this.storesList.some((st) => st.id === this.editSelectedStoreId)) {
+      this.editError = 'Selecione ou cadastre uma loja.';
       return;
     }
     if (!this.editForm.nome?.trim()) {
@@ -2297,6 +2336,10 @@ export class ExpenseListComponent implements OnInit {
     }
     if (!this.editForm.categoria?.trim()) {
       this.editError = 'A categoria é obrigatória.';
+      return;
+    }
+    if (!this.itemCategoriesList.some((c) => c.nome.toLowerCase() === this.editForm.categoria.trim().toLowerCase())) {
+      this.editError = `A categoria "${this.editForm.categoria.trim()}" não está cadastrada. Selecione ou cadastre uma categoria.`;
       return;
     }
     if (!this.editForm.data) {

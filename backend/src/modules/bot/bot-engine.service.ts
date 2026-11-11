@@ -6,6 +6,18 @@ import { BotIncoming, BotReply, BotUser } from './bot.types';
 import { ExpenseFlow } from './flows/expense.flow';
 import { BillsFlow } from './flows/bills.flow';
 import { SummaryFlow } from './flows/summary.flow';
+import { RegisterFlow } from './flows/register.flow';
+import { FormKind } from './bot.types';
+
+/** Atalhos diretos para cada cadastro (ex.: "/novaloja Padaria Sol"). */
+const REGISTER_COMMANDS: Record<string, FormKind> = {
+  novaloja: 'loja',
+  novocomprador: 'comprador',
+  novomeio: 'meio',
+  novacategoria: 'categoria-item',
+  novacategorialoja: 'categoria-loja',
+  novaconta: 'conta',
+};
 
 const RATE_LIMIT = 60; // mensagens por minuto por usuário (o assistente usa ~12 por lançamento)
 const RATE_WINDOW_MS = 60_000;
@@ -13,6 +25,7 @@ const RATE_WINDOW_MS = 60_000;
 export const BOT_COMMANDS = [
   // O Telegram só aceita a-z, 0-9 e _ em comandos: "/lançamento" digitado também é aceito
   { command: 'lancamento', description: 'Novo lançamento' },
+  { command: 'cadastrar', description: 'Cadastrar loja, comprador, meio, categoria ou conta' },
   { command: 'resumo', description: 'Gastos do mês' },
   { command: 'contas', description: 'Contas a pagar' },
   { command: 'ultimos', description: 'Últimos lançamentos' },
@@ -36,6 +49,7 @@ export class BotEngineService {
     private readonly expense: ExpenseFlow,
     private readonly billsFlow: BillsFlow,
     private readonly summaryFlow: SummaryFlow,
+    private readonly register: RegisterFlow,
     private readonly config: ConfigService,
   ) {}
 
@@ -85,6 +99,9 @@ export class BotEngineService {
         case 'novo':
         case 'gasto': // nome antigo, mantido para quem já se acostumou
           return this.expense.start(u, args);
+        case 'cadastrar':
+        case 'cadastro':
+          return this.register.menu();
         case 'resumo':
           return this.summaryFlow.summary(u);
         case 'contas':
@@ -104,6 +121,7 @@ export class BotEngineService {
         case 'menu':
           return [this.menu()];
         default:
+          if (REGISTER_COMMANDS[command]) return this.register.start(u, REGISTER_COMMANDS[command], args);
           return [{ text: 'Não conheço esse comando.' }, this.menu()];
       }
     }
@@ -113,6 +131,7 @@ export class BotEngineService {
     const state = await this.link.getState(u.canal, u.externalUserId);
     if (state?.flow === 'gasto') return this.expense.onText(u, state, text);
     if (state?.flow === 'conta-valor') return this.billsFlow.onText(u, state, text);
+    if (state?.flow === 'cadastro') return this.register.onText(u, state, text);
     if (F.parseAmount(text.split(/\s+/)[0] ?? '')) return this.expense.start(u, text);
     return [this.menu()];
   }
@@ -128,6 +147,15 @@ export class BotEngineService {
         return this.expense.onStatelessCallback(u, action, arg);
       case 'c':
         return this.billsFlow.onCallback(u, action, arg);
+      case 'f': {
+        const state = await this.link.getState(u.canal, u.externalUserId);
+        return this.register.onCallback(u, state, nonce, action, arg);
+      }
+      case 'r':
+        if (Object.values(REGISTER_COMMANDS).includes(action as FormKind)) {
+          return this.register.start(u, action as FormKind);
+        }
+        break;
       case 'm':
         // Botões do menu inicial
         switch (action) {
@@ -139,6 +167,8 @@ export class BotEngineService {
             return this.billsFlow.list(u);
           case 'ultimos':
             return this.expense.recent(u);
+          case 'cadastrar':
+            return this.register.menu();
         }
     }
     return [{ text: 'Esse botão não é mais válido.' }];
@@ -168,6 +198,9 @@ export class BotEngineService {
         '/contas · contas a pagar e confirmação de pagamento',
         '/ultimos · últimos lançamentos',
         '',
+        '<b>Cadastros</b>',
+        '/cadastrar · loja, comprador, meio de pagamento, categoria ou conta a pagar',
+        '',
         '<b>Outros</b>',
         '/cancelar · cancela o que estiver em andamento',
         '/desconectar · desvincula sua conta',
@@ -179,6 +212,7 @@ export class BotEngineService {
           { label: '🔔 Contas', data: 'm::contas' },
           { label: '🧾 Últimos', data: 'm::ultimos' },
         ],
+        [{ label: '🗂 Cadastrar', data: 'm::cadastrar' }],
       ],
     };
   }

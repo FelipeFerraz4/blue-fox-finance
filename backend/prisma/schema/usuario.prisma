@@ -15,3 +15,19 @@ model Comprador {
   @@map("compradores")
 }
 
+
+// Usuários criados pela tela de administração (Admin → Usuários).
+// O Keycloak continua sendo a fonte da verdade da conta e dos papéis; esta tabela
+// registra quem foi criado, por quem e quando (listagem e auditoria).
+model Usuario {
+  id         String   @id @default(uuid())
+  keycloakId String   @unique // "sub" do token: o mesmo userId usado nos dados do Finance
+  username   String   @unique
+  email      String   @unique
+  nome       String
+  sobrenome  String?
+  criadoPor  String // "sub" do admin que criou
+  createdAt  DateTime @default(now())
+
+  @@map("usuarios")
+}

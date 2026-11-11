@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
 
@@ -58,13 +58,13 @@ export class StoresService {
       data: {
         userId,
         nome: dto.nome.trim(),
-        categoria: dto.categoria?.trim() || null,
+        categoria: await this.registeredCategory(userId, dto.categoria),
       },
     });
   }
 
   async update(userId: string, id: string, dto: UpdateStoreDto) {
-    await this.findOne(userId, id);
+    const current = await this.findOne(userId, id);
 
     if (dto.nome) {
       const existing = await this.prisma.loja.findFirst({
@@ -84,9 +84,33 @@ export class StoresService {
       where: { id },
       data: {
         nome: dto.nome ? dto.nome.trim() : undefined,
-        categoria: dto.categoria !== undefined ? (dto.categoria?.trim() || null) : undefined,
+        categoria: await this.categoryForUpdate(userId, current.categoria, dto.categoria),
       },
     });
+  }
+
+  /**
+   * A categoria da loja precisa estar cadastrada em Categorias de Lojas.
+   * Devolve o nome com a grafia do cadastro (ou null se vier vazia).
+   */
+  private async registeredCategory(userId: string, categoria?: string | null): Promise<string | null> {
+    const nome = categoria?.trim();
+    if (!nome) return null;
+    const registered = await this.prisma.categoriaLoja.findFirst({
+      where: { userId, nome: { equals: nome, mode: 'insensitive' } },
+    });
+    if (!registered) {
+      throw new BadRequestException(`A categoria de loja "${nome}" não está cadastrada. Cadastre-a em Categorias de Lojas.`);
+    }
+    return registered.nome;
+  }
+
+  /** No update só valida se a categoria mudou: lojas antigas com texto solto continuam editáveis. */
+  private async categoryForUpdate(userId: string, current: string | null, categoria?: string | null) {
+    if (categoria === undefined) return undefined;
+    const nome = categoria?.trim() || null;
+    if (nome && current && nome.toLowerCase() === current.toLowerCase()) return current;
+    return this.registeredCategory(userId, nome);
   }
 
   async remove(userId: string, id: string) {
