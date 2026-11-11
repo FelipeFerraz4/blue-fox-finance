@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateExpenseDto, PreviewInstallmentsDto, UpdateExpenseDto } from './dto/expense.dto';
 import { InvoiceCalculatorHelper } from '../../common/helpers/invoice-calculator.helper';
@@ -19,23 +19,9 @@ export class ExpensesService {
       throw new NotFoundException('Meio de pagamento informado não existe ou não pertence ao seu usuário.');
     }
 
-    if (dto.lojaId) {
-      const store = await this.prisma.loja.findFirst({
-        where: { id: dto.lojaId, userId },
-      });
-      if (!store) {
-        throw new NotFoundException('Loja informada não existe ou não pertence ao seu usuário.');
-      }
-    }
-
-    if (dto.compradorId) {
-      const buyer = await this.prisma.comprador.findFirst({
-        where: { id: dto.compradorId, userId },
-      });
-      if (!buyer) {
-        throw new NotFoundException('Comprador informado não existe ou não pertence ao seu usuário.');
-      }
-    }
+    const buyer = await this.registeredBuyer(userId, dto.compradorId);
+    const store = await this.registeredStore(userId, dto.lojaId);
+    const categoria = await this.registeredCategory(userId, dto.categoria);
 
     const calculatedTotal =
       dto.valorTotal ?? Number((dto.quantidade * dto.valorUnitario).toFixed(2));
@@ -59,13 +45,13 @@ export class ExpensesService {
       data: {
         userId,
         codigo,
-        comprador: dto.comprador,
-        compradorId: dto.compradorId || null,
+        comprador: buyer.nome,
+        compradorId: buyer.id,
         nome: dto.nome,
-        loja: dto.loja,
-        lojaId: dto.lojaId || null,
+        loja: store.nome,
+        lojaId: store.id,
         data: purchaseDate,
-        categoria: dto.categoria,
+        categoria,
         quantidade: dto.quantidade,
         valorUnitario: dto.valorUnitario,
         valorTotal: calculatedTotal,
@@ -304,23 +290,21 @@ export class ExpensesService {
       throw new NotFoundException('Meio de pagamento não encontrado ou não pertence ao seu usuário.');
     }
 
-    if (dto.lojaId) {
-      const store = await this.prisma.loja.findFirst({
-        where: { id: dto.lojaId, userId },
-      });
-      if (!store) {
-        throw new NotFoundException('Loja informada não existe ou não pertence ao seu usuário.');
-      }
-    }
-
-    if (dto.compradorId) {
-      const buyer = await this.prisma.comprador.findFirst({
-        where: { id: dto.compradorId, userId },
-      });
-      if (!buyer) {
-        throw new NotFoundException('Comprador informado não existe ou não pertence ao seu usuário.');
-      }
-    }
+    // Ao alterar comprador, loja ou categoria, eles precisam estar cadastrados
+    const buyer =
+      dto.compradorId !== undefined || dto.comprador !== undefined
+        ? await this.registeredBuyer(userId, dto.compradorId)
+        : null;
+    const store =
+      dto.lojaId !== undefined || dto.loja !== undefined ? await this.registeredStore(userId, dto.lojaId) : null;
+    const categoria = dto.categoria !== undefined ? await this.registeredCategory(userId, dto.categoria) : null;
+    const references = {
+      comprador: buyer?.nome ?? existing.comprador,
+      compradorId: buyer ? buyer.id : existing.compradorId,
+      loja: store?.nome ?? existing.loja,
+      lojaId: store ? store.id : existing.lojaId,
+      categoria: categoria ?? existing.categoria,
+    };
 
     const quantidade = dto.quantidade !== undefined ? dto.quantidade : Number(existing.quantidade);
     const valorUnitario = dto.valorUnitario !== undefined ? dto.valorUnitario : Number(existing.valorUnitario);
@@ -360,12 +344,8 @@ export class ExpensesService {
         return tx.lancamento.update({
           where: { id },
           data: {
-            comprador: dto.comprador ?? existing.comprador,
-            compradorId: dto.compradorId !== undefined ? dto.compradorId : existing.compradorId,
+            ...references,
             nome: dto.nome ?? existing.nome,
-            loja: dto.loja ?? existing.loja,
-            lojaId: dto.lojaId !== undefined ? dto.lojaId : existing.lojaId,
-            categoria: dto.categoria ?? existing.categoria,
             quantidade,
             valorUnitario,
             valorTotal,
@@ -399,12 +379,8 @@ export class ExpensesService {
     return this.prisma.lancamento.update({
       where: { id },
       data: {
-        comprador: dto.comprador ?? existing.comprador,
-        compradorId: dto.compradorId !== undefined ? dto.compradorId : existing.compradorId,
+        ...references,
         nome: dto.nome ?? existing.nome,
-        loja: dto.loja ?? existing.loja,
-        lojaId: dto.lojaId !== undefined ? dto.lojaId : existing.lojaId,
-        categoria: dto.categoria ?? existing.categoria,
         observacoes: dto.observacoes !== undefined ? dto.observacoes : existing.observacoes,
       },
       include: {
@@ -424,5 +400,30 @@ export class ExpensesService {
       where: { id },
     });
   }
-}
 
+  // ---------------------------------------------------------------------------
+  // Comprador, loja e categoria: só cadastrados (os nomes vêm do cadastro)
+  // ---------------------------------------------------------------------------
+
+  private async registeredBuyer(userId: string, id?: string | null) {
+    const buyer = id ? await this.prisma.comprador.findFirst({ where: { id, userId } }) : null;
+    if (!buyer) throw new BadRequestException('Selecione um comprador cadastrado.');
+    return buyer;
+  }
+
+  private async registeredStore(userId: string, id?: string | null) {
+    const store = id ? await this.prisma.loja.findFirst({ where: { id, userId } }) : null;
+    if (!store) throw new BadRequestException('Selecione uma loja cadastrada.');
+    return store;
+  }
+
+  /** Devolve o nome como está no cadastro (sem diferenciar maiúsculas). */
+  private async registeredCategory(userId: string, nome?: string | null) {
+    const value = nome?.trim();
+    const category = value
+      ? await this.prisma.categoriaItem.findFirst({ where: { userId, nome: { equals: value, mode: 'insensitive' } } })
+      : null;
+    if (!category) throw new BadRequestException(`A categoria "${value ?? ''}" não está cadastrada.`);
+    return category.nome;
+  }
+}
