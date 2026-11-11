@@ -283,7 +283,7 @@ backend/src/
     │   ├── bot-engine.service.ts                     # Roteia comandos/callbacks, rate limit, erros → mensagens
     │   ├── bot-link.service.ts                       # Código de vínculo (hash, 10 min, uso único), vínculo 1↔1, estado da conversa
     │   ├── bot-link.controller.ts                    # GET/DELETE /api/bot/link, POST /api/bot/link/code (JWT + roles)
-    │   ├── flows/                                    # expense.flow (assistente /lancamento, /ultimos), bills.flow (/contas), summary.flow (/resumo)
+    │   ├── flows/                                    # expense.flow (assistente /lancamento, /ultimos), bills.flow (/contas), summary.flow (/resumo), register.flow + register.forms (/cadastrar)
     │   └── telegram/                                 # telegram.adapter (grammY, webhook/polling) e telegram.controller (POST /api/bot/telegram, @Public + secret)
     │
     ├── buyers/                                       # Gestão de compradores/pagadores
