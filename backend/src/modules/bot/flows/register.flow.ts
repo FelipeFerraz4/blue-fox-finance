@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -10,7 +10,8 @@ import { BillsService } from '../../bills/bills.service';
 import { BillScheduleHelper } from '../../../common/helpers/bill-schedule.helper';
 import { BotLinkService } from '../bot-link.service';
 import { BotFormat as F } from '../bot-format';
-import { BotButton, BotReply, BotUser, ConversationState, FormKind } from '../bot.types';
+import { BotButton, BotReply, BotUser, ConversationState, ExpenseDraft, FormKind, RegistrableStep } from '../bot.types';
+import { ExpenseFlow } from './expense.flow';
 import { FieldSpec, FieldValue, FORM_MENU, FORMS, FormSpec, Option, Values } from './register.forms';
 
 type CadastroState = Extract<ConversationState, { flow: 'cadastro' }>;
@@ -34,6 +35,8 @@ export class RegisterFlow {
     private readonly paymentMethods: PaymentMethodsService,
     private readonly categories: CategoriesService,
     private readonly bills: BillsService,
+    @Inject(forwardRef(() => ExpenseFlow))
+    private readonly expense: ExpenseFlow,
   ) {}
 
   /** `/cadastrar`: escolhe o que cadastrar. */
@@ -49,8 +52,18 @@ export class RegisterFlow {
     ];
   }
 
-  async start(u: BotUser, kind: FormKind, firstText?: string): Promise<BotReply[]> {
-    const state: CadastroState = { flow: 'cadastro', nonce: '', form: kind, step: '', values: {}, labels: {}, answered: [] };
+  /**
+   * `resume`: cadastro aberto no meio de um lançamento (item digitado que não existia
+   * ou botão ➕). Ao salvar, volta ao lançamento com o item escolhido; ao cancelar,
+   * volta para a mesma pergunta.
+   */
+  async start(
+    u: BotUser,
+    kind: FormKind,
+    firstText?: string,
+    resume?: { draft: ExpenseDraft; step: RegistrableStep },
+  ): Promise<BotReply[]> {
+    const state: CadastroState = { flow: 'cadastro', nonce: '', form: kind, step: '', values: {}, labels: {}, answered: [], resume };
     // Ex.: "/novaloja Padaria Sol" já responde o nome (em Conta, o Cartão continua sendo perguntado antes)
     const nameField = FORMS[kind].fields.find((f) => f.key === 'nome');
     if (firstText?.trim() && nameField) this.apply(state, nameField, firstText);
@@ -91,6 +104,9 @@ export class RegisterFlow {
 
     switch (action) {
       case 'cancel':
+        if (state.resume) {
+          return [{ text: 'Cadastro cancelado. Voltando ao lançamento.' }, ...(await this.expense.backTo(u, state.resume.draft, state.resume.step))];
+        }
         await this.link.clearState(u.canal, u.externalUserId);
         return [{ text: 'Cadastro cancelado.' }];
 
@@ -237,7 +253,8 @@ export class RegisterFlow {
     const spec = FORMS[state.form];
     const n = state.nonce;
     const hint = field.hint ?? this.defaultHint(field);
-    const text = `🗂 <i>${spec.title}</i>\n<b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
+    const context = state.resume ? ' · para o lançamento' : '';
+    const text = `🗂 <i>${spec.title}${context}</i>\n<b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
 
     const choices = await this.choices(userId, field);
     const quick = field.quick?.(BillScheduleHelper.today()) ?? [];
@@ -338,8 +355,9 @@ export class RegisterFlow {
       return [{ text: 'Esse cadastro já foi processado.' }];
     }
 
+    let created: { id: string; nome: string; modalidade?: unknown };
     try {
-      await this.persist(u.userId, state.form, payload);
+      created = await this.persist(u.userId, state.form, payload);
     } catch (err) {
       if (err instanceof HttpException) {
         // Ex.: nome repetido. Volta ao resumo para corrigir, sem perder o que foi digitado
@@ -354,10 +372,15 @@ export class RegisterFlow {
     const details = fields
       .filter((f) => state.values[f.key] !== null && state.values[f.key] !== undefined && state.values[f.key] !== '')
       .map((f) => `${f.label}: ${this.display(state, f)}`);
-    return [{ text: [`✅ ${spec.doneLabel}: <b>${F.esc(String(state.values.nome))}</b>`, ...details].join('\n') }];
+    const done: BotReply = { text: [`✅ ${spec.doneLabel}: <b>${F.esc(String(state.values.nome))}</b>`, ...details].join('\n') };
+    if (state.resume) {
+      // Volta ao lançamento já com o item recém-cadastrado escolhido
+      return [done, ...(await this.expense.resume(u, state.resume.draft, state.resume.step, created))];
+    }
+    return [done];
   }
 
-  private persist(userId: string, kind: FormKind, payload: Record<string, unknown>) {
+  private persist(userId: string, kind: FormKind, payload: Record<string, unknown>): Promise<{ id: string; nome: string; modalidade?: unknown }> {
     switch (kind) {
       case 'loja':
         return this.stores.create(userId, payload as never);

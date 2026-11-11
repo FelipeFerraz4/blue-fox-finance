@@ -44,7 +44,12 @@ export interface ExpenseDraft {
   categoria?: string;
   quantidade?: number;
   valorUnitario?: number;
+  /** Loja digitada no atalho que ainda não está cadastrada: perguntada ao chegar na Loja */
+  lojaSugerida?: string;
 }
+
+/** Perguntas do lançamento que aceitam cadastrar o item na hora. */
+export type RegistrableStep = 'comprador' | 'loja' | 'meio' | 'categoria';
 
 export type ExpenseStep =
   | 'comprador'
@@ -61,7 +66,15 @@ export type ExpenseStep =
 
 /** Estado persistido da conversa em andamento. `nonce` invalida botões antigos. */
 export type ConversationState =
-  | { flow: 'gasto'; nonce: string; step: ExpenseStep; draft: ExpenseDraft; options?: string[] }
+  | {
+      flow: 'gasto';
+      nonce: string;
+      step: ExpenseStep;
+      draft: ExpenseDraft;
+      options?: string[];
+      /** Texto digitado que não existe no cadastro, aguardando a decisão (cadastrar / usar / voltar) */
+      pending?: string;
+    }
   | { flow: 'conta-valor'; nonce: string; occurrenceId: string; nome: string }
   | {
       flow: 'cadastro';
@@ -74,6 +87,8 @@ export type ConversationState =
       /** Campos já respondidos (inclui os pulados) */
       answered: string[];
       options?: string[];
+      /** Cadastro aberto no meio de um lançamento: ao salvar ou cancelar, volta para ele */
+      resume?: { draft: ExpenseDraft; step: RegistrableStep };
     };
 
 /** Cadastros disponíveis pelo bot (os mesmos do site). */
