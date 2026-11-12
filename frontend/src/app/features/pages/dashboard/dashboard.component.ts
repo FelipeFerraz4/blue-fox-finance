@@ -14,12 +14,14 @@ import { AnalyticsStore, MONTH_LABELS } from './analytics.store';
 import {
   OTHERS_KEY,
   billsOptions,
+  setChartTheme,
   commitmentsOptions,
   monthlyChartOptions,
   rankedBarHeight,
   rankedBarOptions,
   topSlices,
 } from './analytics-charts';
+import { ThemeService } from '../../../core/services/theme/theme.service';
 import { ChartCardComponent } from './chart-card/chart-card.component';
 import { BillAlertsCardComponent } from '../bills/bill-alerts-card/bill-alerts-card.component';
 
@@ -60,7 +62,16 @@ export class DashboardComponent implements OnInit {
 
   // ----- Gráficos -----------------------------------------------------------
 
+  private readonly theme = inject(ThemeService);
+  /** Troca a paleta dos gráficos junto com o tema; cada opção de gráfico lê este sinal. */
+  private readonly chartTheme = computed(() => {
+    const t = this.theme.effective();
+    setChartTheme(t);
+    return t;
+  });
+
   readonly monthlyOptions = computed(() =>
+    this.chartTheme() &&
     monthlyChartOptions(
       this.store.monthly(),
       this.store.overview()?.anoAnterior ?? Array(12).fill(0),
@@ -79,6 +90,7 @@ export class DashboardComponent implements OnInit {
 
   /** Opções por painel, recalculadas só quando dados ou seleção mudam. */
   readonly rankedOptions = computed(() => {
+    this.chartTheme();
     const filters = this.store.filters();
     return Object.fromEntries(
       this.rankedPanels().map((p) => [p.dim, rankedBarOptions(p.slices, filters[p.dim] as string | undefined)]),
@@ -93,13 +105,14 @@ export class DashboardComponent implements OnInit {
 
   readonly commitments = computed(() => this.store.overview()?.compromissosFuturos ?? null);
   readonly commitmentsChart = computed(() => {
+    this.chartTheme();
     const fc = this.commitments();
     return fc ? commitmentsOptions(fc) : null;
   });
 
   readonly contas = computed(() => this.store.overview()?.contas ?? []);
   readonly hasBills = computed(() => this.contas().some((c) => c.quantidadePaga + c.quantidadePendente > 0));
-  readonly billsChart = computed(() => billsOptions(this.contas(), this.selectedMonth()));
+  readonly billsChart = computed(() => this.chartTheme() && billsOptions(this.contas(), this.selectedMonth()));
   readonly billsPeriod = computed(() => {
     const mes = this.selectedMonth();
     const list = mes ? this.contas().filter((c) => c.mes === mes) : this.contas();

@@ -1,6 +1,6 @@
 /* Mesmo visual dos cards do perfil */
 .tg-card {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 16px;
   border: 1px solid rgba(0, 74, 173, 0.08);
   box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
@@ -27,8 +27,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e0f2fe;
-  color: #0284c7;
+  background: var(--surface-brand);
+  color: var(--link);
 }
 
 .tg-header-text {
@@ -40,7 +40,7 @@
   font-family: var(--font-outfit), sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0b132b;
+  color: var(--text-strong);
   margin: 0;
 }
 
@@ -56,7 +56,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   background: var(--success-light);
-  color: #047857;
+  color: var(--success-text);
   flex-shrink: 0;
 }
 
@@ -81,12 +81,12 @@
 
 .tg-success {
   background: var(--success-light);
-  color: #047857;
+  color: var(--success-text);
 }
 
 .tg-error {
   background: var(--danger-light);
-  color: #b42318;
+  color: var(--danger-text);
 }
 
 .tg-tips,

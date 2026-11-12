@@ -19,7 +19,8 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
   - `dashboard/`: o **Dashboard** (tela única) estilo Power BI (ECharts via `ngx-echarts`, registrado só no componente para ficar no chunk lazy). O backend devolve as linhas do ano numa chamada e o filtro cruzado roda no cliente (`analytics.store.ts`, Signals): cada painel agrega com todos os filtros exceto o da própria dimensão. A coluna/linha inteira de cada barra é clicável (`bindCategoryClick`).
   - `buyers/`, `stores/`, `payment-methods/`, `bills/`: Módulos de páginas de domínio (`bills/` = Contas a Pagar, com `bill-alerts-card/` exibido no topo do dashboard).
 - `src/app/shared`:
-  - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`).
+  - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`, `a11y-toolbar`).
+- **Tema claro/escuro e acessibilidade:** barra flutuante em todas as páginas (A-/A+, restaurar, alto contraste, leitura em voz alta, tema), com `ThemeService`/`AccessibilityService` e tokens de cor em `styles.css`. Código novo usa só os tokens (detalhes em `frontend/CLAUDE.md`, seção Tema e acessibilidade).
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 

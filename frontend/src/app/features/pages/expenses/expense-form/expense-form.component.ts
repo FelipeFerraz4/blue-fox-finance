@@ -629,7 +629,7 @@ export interface ExpenseItemForm {
       height: 38px;
       border-radius: 10px;
       background: linear-gradient(135deg, rgba(56, 182, 255, 0.2) 0%, rgba(0, 74, 173, 0.2) 100%);
-      color: #004aad;
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -715,7 +715,7 @@ export interface ExpenseItemForm {
 
     /* Card de Seção (Dados Gerais) */
     .form-section-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid rgba(0, 74, 173, 0.12);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.05);
@@ -738,8 +738,8 @@ export interface ExpenseItemForm {
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: #eef6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -781,8 +781,8 @@ export interface ExpenseItemForm {
       padding: 0.2rem 0.55rem;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #004aad;
-      background: #eff6ff;
+      color: var(--link);
+      background: var(--surface-brand);
       border: 1px solid rgba(56, 182, 255, 0.35);
       border-radius: 6px;
       text-decoration: none;
@@ -792,8 +792,8 @@ export interface ExpenseItemForm {
     }
 
     .btn-manage-link:hover {
-      background: #dbeafe;
-      color: #003080;
+      background: var(--surface-brand-strong);
+      color: var(--link);
       border-color: #38b6ff;
       transform: translateY(-1px);
     }
@@ -826,8 +826,8 @@ export interface ExpenseItemForm {
     .badge-count {
       font-size: 0.78rem;
       font-weight: 700;
-      color: #004aad;
-      background: #eef6ff;
+      color: var(--link);
+      background: var(--surface-brand);
       border: 1px solid rgba(56, 182, 255, 0.35);
       padding: 0.2rem 0.6rem;
       border-radius: 50px;
@@ -850,7 +850,7 @@ export interface ExpenseItemForm {
     }
 
     .item-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid rgba(0, 74, 173, 0.12);
       border-radius: 14px;
       box-shadow: 0 2px 10px rgba(0, 74, 173, 0.04);
@@ -869,7 +869,7 @@ export interface ExpenseItemForm {
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 1.25rem;
-      background: #f8fafc;
+      background: var(--surface-2);
       border-bottom: 1px solid rgba(0, 74, 173, 0.08);
     }
 
@@ -883,8 +883,8 @@ export interface ExpenseItemForm {
       font-family: var(--font-outfit), sans-serif;
       font-weight: 700;
       font-size: 0.78rem;
-      color: #004aad;
-      background: #eef6ff;
+      color: var(--link);
+      background: var(--surface-brand);
       border: 1px solid rgba(56, 182, 255, 0.35);
       padding: 0.2rem 0.6rem;
       border-radius: 50px;
@@ -906,9 +906,9 @@ export interface ExpenseItemForm {
       gap: 0.35rem;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #dc2626;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
+      color: var(--danger-text);
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
       border-radius: 8px;
       padding: 0.3rem 0.65rem;
       cursor: pointer;
@@ -916,9 +916,9 @@ export interface ExpenseItemForm {
     }
 
     .btn-remove-item:hover {
-      background: #fee2e2;
-      color: #b91c1c;
-      border-color: #fca5a5;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: var(--danger-border);
       transform: translateY(-1px);
     }
 
@@ -947,7 +947,7 @@ export interface ExpenseItemForm {
     }
 
     .text-total {
-      color: #004aad !important;
+      color: var(--link) !important;
       font-size: 1.05rem;
     }
 
@@ -966,7 +966,7 @@ export interface ExpenseItemForm {
       padding: 0.3rem 0.65rem;
       font-size: 0.78rem;
       font-weight: 500;
-      color: #004aad;
+      color: var(--link);
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -1000,8 +1000,8 @@ export interface ExpenseItemForm {
     }
 
     .btn-close-obs:hover {
-      color: #b91c1c;
-      background: #fee2e2;
+      color: var(--danger-text);
+      background: var(--danger-bg);
     }
 
     /* Botão Largo de Adicionar Item (Final da Lista) */
@@ -1015,7 +1015,7 @@ export interface ExpenseItemForm {
       border: 2px dashed rgba(56, 182, 255, 0.6);
       border-radius: 14px;
       background: rgba(56, 182, 255, 0.04);
-      color: #004aad;
+      color: var(--link);
       font-family: var(--font-outfit), sans-serif;
       font-weight: 700;
       font-size: 0.95rem;
@@ -1026,7 +1026,7 @@ export interface ExpenseItemForm {
     .btn-add-item-block:hover {
       background: rgba(56, 182, 255, 0.12);
       border-color: #004aad;
-      color: #003080;
+      color: var(--link);
       transform: translateY(-1px);
       box-shadow: 0 4px 14px rgba(0, 74, 173, 0.1);
     }
@@ -1035,8 +1035,8 @@ export interface ExpenseItemForm {
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #eef6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1078,7 +1078,7 @@ export interface ExpenseItemForm {
     }
 
     .preview-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid rgba(0, 74, 173, 0.12);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.05);
@@ -1099,11 +1099,11 @@ export interface ExpenseItemForm {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
       border-radius: 12px;
       padding: 0.75rem 1rem;
-      color: #b91c1c;
+      color: var(--danger-text);
       font-size: 0.84rem;
       font-weight: 500;
       margin-bottom: 0.75rem;
@@ -1165,8 +1165,8 @@ export interface ExpenseItemForm {
     .summary-value-badge {
       font-size: 0.78rem;
       font-weight: 700;
-      color: #004aad;
-      background: #ffffff;
+      color: var(--link);
+      background: var(--surface);
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.2rem 0.6rem;
       border-radius: 50px;
@@ -1176,12 +1176,12 @@ export interface ExpenseItemForm {
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
-      color: #004aad;
+      color: var(--link);
       letter-spacing: -0.02em;
     }
 
     .selected-method-info {
-      background: #f8fafc;
+      background: var(--surface-2);
       border: 1px solid rgba(0, 74, 173, 0.1);
       border-radius: 12px;
       padding: 0.85rem;
@@ -1209,8 +1209,8 @@ export interface ExpenseItemForm {
     }
 
     .rule-pill {
-      background: #eef6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(56, 182, 255, 0.35);
       padding: 0.25rem 0.55rem;
       border-radius: 6px;
@@ -1233,19 +1233,19 @@ export interface ExpenseItemForm {
     }
 
     .alert-error {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #991b1b;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger-text);
     }
 
     .alert-success {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #166534;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success-text);
     }
 
     .field-error-msg {
-      color: #dc2626;
+      color: var(--danger-text);
       font-size: 0.75rem;
       margin-top: 0.25rem;
       display: block;
@@ -1254,7 +1254,7 @@ export interface ExpenseItemForm {
 
     .is-invalid {
       border-color: #ef4444 !important;
-      background-color: #fff8f8 !important;
+      background-color: var(--danger-bg) !important;
     }
 
     .text-right { text-align: right !important; }
@@ -1301,7 +1301,7 @@ export interface ExpenseItemForm {
     }
 
     .parcela-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--gray-200);
       border-radius: var(--radius-md);
       padding: 0.75rem 1rem;
@@ -1318,7 +1318,7 @@ export interface ExpenseItemForm {
 
     .parcela-num {
       font-size: 0.9rem;
-      color: #0b132b;
+      color: var(--text-strong);
     }
 
     .parcela-val {

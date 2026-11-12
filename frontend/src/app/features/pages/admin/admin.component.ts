@@ -220,7 +220,7 @@ interface AdminModuleCard {
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
       letter-spacing: -0.02em;
       line-height: 1.25;
@@ -242,8 +242,8 @@ interface AdminModuleCard {
       font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.25rem 0.75rem;
       border-radius: 50px;
@@ -254,13 +254,13 @@ interface AdminModuleCard {
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
       font-size: 0.88rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.15rem 0 0 0;
     }
 
     /* Card de Visão Geral do Usuário */
     .user-overview-card {
-      background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-brand) 100%);
       border-radius: 18px;
       border: 1px solid rgba(0, 74, 173, 0.15);
       padding: 1.75rem 2rem;
@@ -291,7 +291,7 @@ interface AdminModuleCard {
       align-items: center;
       justify-content: center;
       box-shadow: 0 6px 18px rgba(0, 74, 173, 0.25);
-      border: 3px solid #ffffff;
+      border: 3px solid var(--surface);
       overflow: hidden;
     }
 
@@ -310,7 +310,7 @@ interface AdminModuleCard {
       height: 16px;
       border-radius: 50%;
       background: #10b981;
-      border: 2px solid #ffffff;
+      border: 2px solid var(--surface);
     }
 
     .user-details-group {
@@ -330,7 +330,7 @@ interface AdminModuleCard {
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.4rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
     }
 
@@ -349,7 +349,7 @@ interface AdminModuleCard {
       align-items: center;
       gap: 1.25rem;
       font-size: 0.86rem;
-      color: #475569;
+      color: var(--text-2);
       flex-wrap: wrap;
     }
 
@@ -373,13 +373,13 @@ interface AdminModuleCard {
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.3rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
     }
 
     .section-desc {
       font-size: 0.88rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.25rem 0 0 0;
     }
 
@@ -393,7 +393,7 @@ interface AdminModuleCard {
     }
 
     .module-card {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 16px;
       border: 1px solid rgba(0, 74, 173, 0.08);
       padding: 1.5rem;
@@ -447,26 +447,26 @@ interface AdminModuleCard {
     }
 
     .card-badge.primary {
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(0, 74, 173, 0.2);
     }
 
     .card-badge.cyan {
-      background: #e0f2fe;
-      color: #0284c7;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(2, 132, 199, 0.2);
     }
 
     .card-badge.warning {
-      background: #fef3c7;
-      color: #d97706;
+      background: var(--warning-bg);
+      color: var(--warning-text);
       border: 1px solid rgba(217, 119, 6, 0.2);
     }
 
     .card-badge.success {
-      background: #dcfce7;
-      color: #15803d;
+      background: var(--success-bg);
+      color: var(--success-text);
       border: 1px solid rgba(21, 128, 61, 0.2);
     }
 
@@ -486,14 +486,14 @@ interface AdminModuleCard {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #94a3b8;
+      color: var(--text-faint);
     }
 
     .card-heading {
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.15rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
       transition: color 0.15s ease;
       overflow-wrap: break-word;
@@ -501,14 +501,14 @@ interface AdminModuleCard {
     }
 
     .module-card:hover .card-heading {
-      color: #004aad;
+      color: var(--link);
     }
 
     .card-description {
       font-family: var(--font-inter), sans-serif;
       font-size: 0.86rem;
       line-height: 1.45;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0;
       overflow-wrap: break-word;
       word-break: break-word;
@@ -519,10 +519,10 @@ interface AdminModuleCard {
       align-items: center;
       justify-content: space-between;
       padding-top: 0.85rem;
-      border-top: 1px solid #f8fafc;
+      border-top: 1px solid var(--border-subtle);
       font-size: 0.82rem;
       font-weight: 600;
-      color: #004aad;
+      color: var(--link);
     }
 
     .arrow-icon {

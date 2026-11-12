@@ -25,7 +25,7 @@
 }
 
 .notice-modal-card {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 18px;
   width: 100%;
   max-width: 480px;
@@ -68,7 +68,7 @@
 .notice-icon-box.keycloak,
 .notice-icon-box.info {
   background: linear-gradient(135deg, rgba(56, 182, 255, 0.2) 0%, rgba(0, 74, 173, 0.2) 100%);
-  color: #004aad;
+  color: var(--link);
 }
 
 .notice-fox-img {
@@ -78,13 +78,13 @@
 }
 
 .notice-icon-box.warning {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .notice-icon-box.success {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .header-titles {
@@ -103,7 +103,7 @@
   font-family: var(--font-headers, 'Outfit', sans-serif);
   font-weight: 700;
   font-size: 1.2rem;
-  color: var(--gray-900, #0b132b);
+  color: var(--gray-900, var(--text-strong));
   margin: 0;
   line-height: 1.25;
 }
@@ -114,8 +114,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #004aad;
-  background: #eff6ff;
+  color: var(--link);
+  background: var(--surface-brand);
   border: 1px solid rgba(56, 182, 255, 0.4);
   padding: 0.15rem 0.5rem;
   border-radius: 50px;
@@ -128,7 +128,7 @@
   right: 1.25rem;
   background: transparent;
   border: none;
-  color: var(--gray-400, #94a3b8);
+  color: var(--gray-400, var(--text-faint));
   font-size: 1.2rem;
   cursor: pointer;
   line-height: 1;
@@ -138,7 +138,7 @@
 }
 
 .btn-close:hover {
-  color: var(--gray-700, #334155);
+  color: var(--gray-700, var(--text));
   background: rgba(0, 0, 0, 0.05);
 }
 
@@ -152,18 +152,18 @@
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.94rem;
   line-height: 1.55;
-  color: var(--gray-700, #334155);
+  color: var(--gray-700, var(--text));
   margin: 0;
 }
 
 .notice-details-box {
   margin-top: 1rem;
-  background: #f8fafc;
+  background: var(--surface-2);
   border: 1px solid rgba(0, 74, 173, 0.1);
   border-radius: 10px;
   padding: 0.85rem 1rem;
   font-size: 0.85rem;
-  color: var(--gray-600, #475569);
+  color: var(--gray-600, var(--text-2));
   line-height: 1.45;
 }
 

@@ -397,7 +397,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      color: #004aad;
+      color: var(--link);
       text-decoration: none;
       font-weight: 600;
       transition: color 0.15s ease;
@@ -408,11 +408,11 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     }
 
     .breadcrumb-separator {
-      color: #94a3b8;
+      color: var(--text-faint);
     }
 
     .breadcrumb-current {
-      color: #64748b;
+      color: var(--text-muted);
       font-weight: 500;
       word-break: break-word;
     }
@@ -435,7 +435,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
       letter-spacing: -0.02em;
       line-height: 1.25;
@@ -464,8 +464,8 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.2rem 0.65rem;
       border-radius: 50px;
@@ -475,7 +475,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
       font-size: 0.88rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.15rem 0 0 0;
     }
 
@@ -495,8 +495,8 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     }
 
     .feedback-banner.success {
-      background: #dcfce7;
-      color: #15803d;
+      background: var(--success-bg);
+      color: var(--success-text);
       border: 1px solid rgba(21, 128, 61, 0.2);
     }
 
@@ -522,7 +522,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     }
 
     .card {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 16px;
       border: 1px solid rgba(0, 74, 173, 0.08);
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
@@ -556,7 +556,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       align-items: center;
       justify-content: center;
       box-shadow: 0 8px 24px rgba(0, 74, 173, 0.25);
-      border: 3px solid #ffffff;
+      border: 3px solid var(--surface);
       overflow: hidden;
     }
 
@@ -575,7 +575,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       height: 18px;
       border-radius: 50%;
       background: #10b981;
-      border: 3px solid #ffffff;
+      border: 3px solid var(--surface);
     }
 
     .user-hero-info {
@@ -590,13 +590,13 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.25rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
     }
 
     .user-display-username {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0;
     }
 
@@ -616,15 +616,15 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     }
 
     .status-pill.online {
-      background: #dcfce7;
-      color: #15803d;
+      background: var(--success-bg);
+      color: var(--success-text);
     }
 
     .avatars-selection-section {
       width: 100%;
       margin-top: 1.75rem;
       padding-top: 1.25rem;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--border-subtle);
       text-align: left;
     }
 
@@ -635,7 +635,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #475569;
+      color: var(--text-2);
       margin-bottom: 0.75rem;
     }
 
@@ -652,7 +652,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       padding: 0.5rem 0.6rem;
       border-radius: 10px;
       border: 2px solid transparent;
-      background: #f8fafc;
+      background: var(--surface-2);
       cursor: pointer;
       transition: all 0.15s ease;
       text-align: left;
@@ -661,11 +661,11 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     }
 
     .avatar-option-btn:hover {
-      background: #eff6ff;
+      background: var(--surface-brand);
     }
 
     .avatar-option-btn.active {
-      background: #eff6ff;
+      background: var(--surface-brand);
     }
 
     .avatar-mini-icon {
@@ -688,7 +688,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
     .avatar-option-name {
       font-size: 0.76rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--text);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -706,7 +706,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       align-items: center;
       gap: 0.85rem;
       padding-bottom: 1.25rem;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-subtle);
       margin-bottom: 1.5rem;
       min-width: 0;
       width: 100%;
@@ -723,8 +723,8 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       min-width: 40px;
       min-height: 40px;
       border-radius: 10px;
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -736,14 +736,14 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.15rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
       word-break: break-word;
     }
 
     .card-subtitle {
       font-size: 0.82rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.15rem 0 0 0;
       word-break: break-word;
     }
@@ -780,28 +780,28 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       font-family: var(--font-inter), sans-serif;
       font-size: 0.84rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--text);
     }
 
     .required {
-      color: #ef4444;
+      color: var(--danger-text);
     }
 
     .form-control {
       width: 100%;
       padding: 0.7rem 0.9rem;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-strong);
       border-radius: 8px;
       font-size: 0.9rem;
       box-sizing: border-box;
       transition: all 0.2s ease;
       font-family: var(--font-inter), sans-serif;
-      background: #f8fafc;
+      background: var(--surface-2);
     }
 
     .form-control:focus {
       outline: none;
-      background: #ffffff;
+      background: var(--surface);
       border-color: #004aad;
       box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.12);
     }
@@ -812,7 +812,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
       gap: 0.75rem;
       margin-top: 1rem;
       padding-top: 1.25rem;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--border-subtle);
     }
 
     @media (max-width: 900px) {
