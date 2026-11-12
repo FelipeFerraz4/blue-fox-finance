@@ -5,11 +5,14 @@ import { filter } from 'rxjs/operators';
 import { NavbarComponent } from './shared/components/general/navbar/navbar.component';
 import { SidebarComponent } from './shared/components/general/sidebar/sidebar.component';
 import { SidebarService } from './core/services/sidebar/sidebar.service';
+import { A11yToolbarComponent } from './shared/components/general/a11y-toolbar/a11y-toolbar.component';
+import { ThemeService } from './core/services/theme/theme.service';
+import { AccessibilityService } from './core/services/accessibility/accessibility.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent, A11yToolbarComponent],
   template: `
     <!-- Layout Público (Home Landing Page) -->
     <ng-container *ngIf="isPublicPage">
@@ -32,13 +35,16 @@ import { SidebarService } from './core/services/sidebar/sidebar.service';
         </main>
       </div>
     </div>
+
+    <!-- Barra de acessibilidade (todas as páginas) -->
+    <app-a11y-toolbar></app-a11y-toolbar>
   `,
   styles: [`
     .app-layout {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background-color: #f8fafc;
+      background-color: var(--bg-page);
     }
 
     app-navbar {
@@ -78,6 +84,9 @@ export class AppComponent implements OnInit {
   constructor(
     public readonly sidebarService: SidebarService,
     private readonly router: Router,
+    // Instanciados no início para aplicar tema/fonte/contraste e ouvir o tema do sistema
+    _theme: ThemeService,
+    _a11y: AccessibilityService,
   ) {
     this.updateLayoutState(this.router.url);
   }
