@@ -168,7 +168,7 @@
 }
 
 .kpi:first-child .kpi-label,
-.kpi:first-child .kpi:first-child .kpi-value {
+.kpi:first-child .kpi-value {
   color: #ffffff;
 }
 
