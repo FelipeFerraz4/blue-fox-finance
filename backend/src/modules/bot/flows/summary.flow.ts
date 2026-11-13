@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TipoLancamento } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { BillsService } from '../../bills/bills.service';
 import { BillScheduleHelper } from '../../../common/helpers/bill-schedule.helper';
@@ -7,7 +8,8 @@ import { BotReply, BotUser } from '../bot.types';
 
 /**
  * `/resumo`: gastos do mês pelo mês do pagamento (mesma visão do Dashboard:
- * cada parcela conta no mês em que é paga).
+ * cada parcela conta no mês em que é paga) e os gastos futuros já assumidos
+ * (parcelas não pagas a partir do próximo mês, como em "Compromissos futuros").
  */
 @Injectable()
 export class SummaryFlow {
@@ -20,7 +22,9 @@ export class SummaryFlow {
     const month = BillScheduleHelper.currentMonth();
     const previous = BillScheduleHelper.addMonths(month, -1);
 
-    const [installments, previousTotal, alerts] = await Promise.all([
+    const next = BillScheduleHelper.addMonths(month, 1);
+
+    const [installments, previousTotal, future, alerts] = await Promise.all([
       this.prisma.parcela.findMany({
         where: { mesReferencia: month, lancamento: { userId: u.userId } },
         select: { valor: true, lancamento: { select: { categoria: true } } },
@@ -28,6 +32,14 @@ export class SummaryFlow {
       this.prisma.parcela.aggregate({
         where: { mesReferencia: previous, lancamento: { userId: u.userId } },
         _sum: { valor: true },
+      }),
+      this.prisma.parcela.findMany({
+        where: { pago: false, mesReferencia: { gte: next }, lancamento: { userId: u.userId } },
+        select: {
+          valor: true,
+          mesReferencia: true,
+          lancamento: { select: { id: true, tipo: true, meioPagamento: { select: { nome: true } } } },
+        },
       }),
       this.bills.getAlerts(u.userId),
     ]);
@@ -54,11 +66,54 @@ export class SummaryFlow {
         lines.push(`• ${F.esc(name)}: ${F.brl(value)} (${pct}%)`);
       }
     }
+    lines.push('', ...this.futureLines(future, next));
+
     if (alerts.total > 0) {
       const overdue = alerts.atrasadas.length ? `, ${alerts.atrasadas.length} atrasada(s)` : '';
       lines.push('', `🔔 ${alerts.total} conta(s) precisando de atenção${overdue}. Veja em /contas`);
     }
 
     return [{ text: lines.join('\n') }];
+  }
+
+  /**
+   * Próximo mês (por meio de pagamento), os dois meses seguintes e o total futuro
+   * (próximo mês incluído).
+   */
+  private futureLines(
+    future: { valor: unknown; mesReferencia: string; lancamento: { id: string; tipo: string; meioPagamento: { nome: string } } }[],
+    next: string,
+  ): string[] {
+    if (!future.length) return ['🗓️ <b>Gastos futuros</b>', 'Nenhuma parcela prevista a partir de ' + F.monthName(next).toLowerCase() + '.'];
+
+    const byMonth = new Map<string, number>();
+    const nextByMethod = new Map<string, number>();
+    const openPlans = new Set<string>();
+    let total = 0;
+    let lastMonth = next;
+    for (const p of future) {
+      const value = Number(p.valor);
+      total += value;
+      byMonth.set(p.mesReferencia, (byMonth.get(p.mesReferencia) ?? 0) + value);
+      if (p.mesReferencia === next) {
+        const method = p.lancamento.meioPagamento.nome;
+        nextByMethod.set(method, (nextByMethod.get(method) ?? 0) + value);
+      }
+      if (p.lancamento.tipo === TipoLancamento.PARCELADO) openPlans.add(p.lancamento.id);
+      if (p.mesReferencia > lastMonth) lastMonth = p.mesReferencia;
+    }
+
+    const lines = ['🗓️ <b>Gastos futuros</b>', `${F.monthName(next)}: <b>${F.brl(byMonth.get(next) ?? 0)}</b>`];
+    for (const [method, value] of [...nextByMethod.entries()].sort((a, b) => b[1] - a[1])) {
+      lines.push(`  • ${F.esc(method)}: ${F.brl(value)}`);
+    }
+    for (const m of [BillScheduleHelper.addMonths(next, 1), BillScheduleHelper.addMonths(next, 2)]) {
+      const value = byMonth.get(m) ?? 0;
+      if (value > 0) lines.push(`${F.monthName(m)}: ${F.brl(value)}`);
+    }
+    lines.push('', `Total futuro (a partir de ${F.monthName(next).toLowerCase()}): <b>${F.brl(total)}</b>`);
+    const plans = openPlans.size ? `${openPlans.size} parcelamento(s) em aberto, ` : '';
+    lines.push(`${plans}última parcela em ${F.monthName(lastMonth).toLowerCase()}`);
+    return lines;
   }
 }

@@ -26,7 +26,7 @@ export const BOT_COMMANDS = [
   // O Telegram só aceita a-z, 0-9 e _ em comandos: "/lançamento" digitado também é aceito
   { command: 'lancamento', description: 'Novo lançamento' },
   { command: 'cadastrar', description: 'Cadastrar loja, comprador, meio, categoria ou conta' },
-  { command: 'resumo', description: 'Gastos do mês' },
+  { command: 'resumo', description: 'Gastos do mês e futuros' },
   { command: 'contas', description: 'Contas a pagar' },
   { command: 'ultimos', description: 'Últimos lançamentos' },
   { command: 'cancelar', description: 'Cancelar o que estiver em andamento' },
@@ -194,7 +194,7 @@ export class BotEngineService {
         'ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>',
         '',
         '<b>Consultar</b>',
-        '/resumo · gastos do mês',
+        '/resumo · gastos do mês e dos próximos meses',
         '/contas · contas a pagar e confirmação de pagamento',
         '/ultimos · últimos lançamentos',
         '',
