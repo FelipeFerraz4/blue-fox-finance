@@ -92,6 +92,12 @@ export const BotFormat = {
     return `${d}/${m}/${y}`;
   },
 
+  /** Vencimento de conta (Date às 12:00 do horário local) → dd/mm */
+  dayMonth(date: Date | string): string {
+    const d = new Date(date);
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+  },
+
   monthName(month: string): string {
     const [y, m] = month.split('-').map(Number);
     const name = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('pt-BR', { month: 'long', timeZone: 'UTC' });

@@ -4,7 +4,8 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { BillOccurrenceView, BillsService } from '../../bills/bills.service';
 import { BillScheduleHelper } from '../../../common/helpers/bill-schedule.helper';
 import { BotFormat as F } from '../bot-format';
-import { BotReply, BotUser } from '../bot.types';
+import { BotButton, BotReply, BotUser } from '../bot.types';
+import { BillsFlow } from './bills.flow';
 
 type FutureInstallment = {
   valor: unknown;
@@ -16,6 +17,7 @@ type FutureInstallment = {
 type MonthBills = { items: BillOccurrenceView[]; total: number; variable: number };
 
 const MAX_LISTED_BILLS = 6;
+const MAX_AMOUNT_BUTTONS = 6;
 
 /**
  * `/resumo`: gastos do mês pelo mês do pagamento (mesma visão do Dashboard:
@@ -91,7 +93,9 @@ export class SummaryFlow {
       lines.push('', `🔔 ${alerts.total} conta(s) precisando de atenção${overdue}. Veja em /contas`);
     }
 
-    return [{ text: lines.join('\n') }];
+    const buttons = this.amountButtons(currentBills, upcomingBills[0], next);
+    if (buttons.length) lines.push('', '<i>Chegou a conta de valor variável? Toque para informar o valor do mês.</i>');
+    return [{ text: lines.join('\n'), ...(buttons.length ? { buttons } : {}) }];
   }
 
   private async monthBills(userId: string, month: string): Promise<MonthBills> {
@@ -104,24 +108,60 @@ export class SummaryFlow {
     };
   }
 
-  /** Contas fixas do mês atual: quanto já foi pago e quanto falta. */
+  /** Contas fixas do mês atual, uma a uma, com vencimento e situação, e os totais. */
   private currentBillsLines(bills: MonthBills, month: string): string[] {
     if (!bills.items.length) return [];
     const paid = bills.items.filter((o) => o.status === 'PAGA');
     const pending = bills.items.filter((o) => o.status !== 'PAGA');
-    const paidTotal = paid.reduce((sum, o) => sum + (o.valor ?? 0), 0);
-    const pendingTotal = pending.reduce((sum, o) => sum + (o.valor ?? 0), 0);
+    const sum = (list: BillOccurrenceView[]) => list.reduce((acc, o) => acc + (o.valor ?? 0), 0);
 
     const lines = ['', `🧾 <b>Contas fixas de ${F.monthName(month).toLowerCase()}</b>`];
-    lines.push(paid.length ? `Pagas: ${paid.length} de ${bills.items.length} (${F.brl(paidTotal)})` : `Nenhuma paga ainda (${bills.items.length} no mês)`);
-    if (pending.length) {
-      const variable = pending.filter((o) => o.valor === null).length;
-      const note = variable ? ` · ${variable} de valor variável fora da soma` : '';
-      lines.push(`Faltam: <b>${F.brl(pendingTotal)}</b> em ${pending.length} conta(s)${note}`);
-    } else {
-      lines.push('Todas pagas ✅');
+    for (const o of bills.items) {
+      const value = o.valor === null ? 'valor a informar' : F.brl(o.valor);
+      lines.push(`${this.billIcon(o)} ${F.esc(o.nome)} · ${F.dayMonth(o.dataVencimento)} · ${value} · ${this.billStatus(o)}`);
     }
+    const variable = pending.filter((o) => o.valor === null).length;
+    const note = variable ? ` (${variable} sem valor)` : '';
+    lines.push(`Pago: ${F.brl(sum(paid))} · Falta: <b>${F.brl(sum(pending))}</b>${note}`);
     return lines;
+  }
+
+  private billIcon(o: BillOccurrenceView): string {
+    switch (o.status) {
+      case 'PAGA':
+        return '✅';
+      case 'ATRASADA':
+        return '🔴';
+      case 'VENCE_HOJE':
+        return '🟠';
+      case 'PROXIMA':
+        return '🟡';
+      default:
+        return '⚪';
+    }
+  }
+
+  private billStatus(o: BillOccurrenceView): string {
+    switch (o.status) {
+      case 'PAGA':
+        return o.pagoEm ? `paga em ${F.dayMonth(o.pagoEm)}` : 'paga';
+      case 'ATRASADA':
+        return 'atrasada';
+      case 'VENCE_HOJE':
+        return 'vence hoje';
+      default:
+        return 'a pagar';
+    }
+  }
+
+  /** "Informar/Alterar valor" das contas variáveis pendentes do mês atual e do próximo. */
+  private amountButtons(current: MonthBills, next: MonthBills, nextMonth: string): BotButton[][] {
+    const shortMonth = F.monthName(nextMonth).slice(0, 3).toLowerCase();
+    const candidates = [
+      ...current.items.filter((o) => o.status !== 'PAGA' && o.valorVariavel).map((o) => BillsFlow.amountButton(o)),
+      ...next.items.filter((o) => o.status !== 'PAGA' && o.valorVariavel).map((o) => BillsFlow.amountButton(o, ` (${shortMonth})`)),
+    ];
+    return candidates.slice(0, MAX_AMOUNT_BUTTONS).map((b) => [b]);
   }
 
   /**
@@ -163,9 +203,8 @@ export class SummaryFlow {
     if (nextBills.items.length) {
       lines.push(`  • Contas fixas: ${F.brl(nextBills.total)} (${nextBills.items.length})`);
       for (const o of nextBills.items.slice(0, MAX_LISTED_BILLS)) {
-        const day = String(new Date(o.dataVencimento).getDate()).padStart(2, '0');
         const value = o.valor === null ? 'valor variável' : F.brl(o.valor);
-        lines.push(`      ◦ ${F.esc(o.nome)} (dia ${day}): ${value}`);
+        lines.push(`      ◦ ${F.esc(o.nome)} (${F.dayMonth(o.dataVencimento)}): ${value}`);
       }
       const hidden = nextBills.items.length - MAX_LISTED_BILLS;
       if (hidden > 0) lines.push(`      ◦ e mais ${hidden}`);

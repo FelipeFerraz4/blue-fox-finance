@@ -130,7 +130,7 @@ export class BotEngineService {
     // por um valor, ou mostra o menu (ex.: "oi" no início da conversa)
     const state = await this.link.getState(u.canal, u.externalUserId);
     if (state?.flow === 'gasto') return this.expense.onText(u, state, text);
-    if (state?.flow === 'conta-valor') return this.billsFlow.onText(u, state, text);
+    if (state?.flow === 'conta-valor' || state?.flow === 'conta-previsto') return this.billsFlow.onText(u, state, text);
     if (state?.flow === 'cadastro') return this.register.onText(u, state, text);
     if (F.parseAmount(text.split(/\s+/)[0] ?? '')) return this.expense.start(u, text);
     return [this.menu()];

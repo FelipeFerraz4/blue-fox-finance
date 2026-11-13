@@ -76,6 +76,8 @@ export type ConversationState =
       pending?: string;
     }
   | { flow: 'conta-valor'; nonce: string; occurrenceId: string; nome: string }
+  /** Valor previsto do mês de uma conta (ex.: variável que chegou), antes de pagar */
+  | { flow: 'conta-previsto'; nonce: string; occurrenceId: string; nome: string }
   | {
       flow: 'cadastro';
       nonce: string;

@@ -141,3 +141,11 @@ export class PayBillOccurrenceDto {
   @IsDateString()
   pagoEm?: string;
 }
+
+export class SetOccurrenceAmountDto {
+  // Valor previsto só deste mês (ex.: a conta de energia chegou). Não muda a regra da conta.
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
+  @Max(10_000_000)
+  valorPrevisto!: number;
+}

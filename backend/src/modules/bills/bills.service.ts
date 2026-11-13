@@ -21,6 +21,7 @@ export interface BillOccurrenceView {
   dataVencimento: Date;
   valor: number | null; // pago: valor pago; pendente: fatura do cartão ou valor previsto
   valorDaFatura: boolean; // true quando o valor vem da fatura calculada do cartão
+  valorVariavel: boolean; // conta sem valor previsto na regra (o valor do mês é informado à parte ou ao pagar)
   valorPago: number | null;
   pagoEm: Date | null;
   status: BillStatus;
@@ -95,6 +96,17 @@ export class BillsService {
         data,
         include: BILL_INCLUDE,
       });
+      // Valor informado à mão para um mês (setAmount) sobrevive à edição da regra
+      const manual = await tx.pagamentoConta.findMany({
+        where: {
+          contaId: id,
+          userId,
+          pagoEm: null,
+          mesReferencia: { gte: currentMonth },
+          valorPrevisto: existing.valorPrevisto === null ? { not: null } : { not: existing.valorPrevisto },
+        },
+        select: { mesReferencia: true, valorPrevisto: true },
+      });
       // Ocorrências pendentes do mês atual em diante (e antes do novo início) são
       // recriadas na próxima leitura com a regra nova. Pagas e atrasadas ficam como estão.
       await tx.pagamentoConta.deleteMany({
@@ -105,6 +117,14 @@ export class BillsService {
           OR: [{ mesReferencia: { gte: currentMonth } }, { mesReferencia: { lt: startMonth } }],
         },
       });
+      if (updated.ativo && !updated.meioPagamentoId) {
+        const rows = manual
+          .filter((m) => m.mesReferencia >= startMonth)
+          .map((m) => ({ ...m, dataVencimento: BillScheduleHelper.dueDateFor(updated, m.mesReferencia) }))
+          .filter((m): m is typeof m & { dataVencimento: Date } => m.dataVencimento !== null)
+          .map((m) => ({ userId, contaId: id, ...m }));
+        if (rows.length) await tx.pagamentoConta.createMany({ data: rows, skipDuplicates: true });
+      }
       return updated;
     });
   }
@@ -234,7 +254,23 @@ export class BillsService {
       await this.setInvoiceInstallmentsPaid(tx, userId, occurrence, true);
     });
 
-    return this.viewOf(userId, occurrence.id);
+    return this.getOccurrence(userId, occurrence.id);
+  }
+
+  /** Informa o valor de um mês de conta pendente (ex.: conta variável que chegou). */
+  async setAmount(userId: string, occurrenceId: string, valorPrevisto: number) {
+    const occurrence = await this.findOccurrence(userId, occurrenceId);
+    if (occurrence.pagoEm) {
+      throw new BadRequestException('Esta conta já foi paga neste mês.');
+    }
+    if (occurrence.conta.meioPagamentoId) {
+      throw new BadRequestException('O valor desta conta vem da fatura do cartão.');
+    }
+    await this.prisma.pagamentoConta.update({
+      where: { id: occurrence.id },
+      data: { valorPrevisto },
+    });
+    return this.getOccurrence(userId, occurrence.id);
   }
 
   async unpay(userId: string, occurrenceId: string) {
@@ -248,7 +284,7 @@ export class BillsService {
       await this.setInvoiceInstallmentsPaid(tx, userId, occurrence, false);
     });
 
-    return this.viewOf(userId, occurrence.id);
+    return this.getOccurrence(userId, occurrence.id);
   }
 
   // ---------------------------------------------------------------------------
@@ -320,6 +356,7 @@ export class BillsService {
         dataVencimento: o.dataVencimento,
         valor,
         valorDaFatura: fromInvoice,
+        valorVariavel: !cardId && o.conta.valorPrevisto === null,
         valorPago: o.valorPago !== null ? Number(o.valorPago) : null,
         pagoEm: o.pagoEm,
         status: BillScheduleHelper.statusOf(o, o.conta.lembrarDiasAntes, today),
@@ -379,7 +416,8 @@ export class BillsService {
     return occurrence;
   }
 
-  private async viewOf(userId: string, id: string) {
+  /** Uma ocorrência do usuário, já com valor e status calculados. */
+  async getOccurrence(userId: string, id: string) {
     const occurrence = await this.findOccurrence(userId, id);
     const [view] = await this.toViews(userId, [occurrence], BillScheduleHelper.today());
     return view;
