@@ -241,6 +241,12 @@ export class ExpenseFlow {
       case 'edit':
         return this.edit(u, draft, arg as ExpenseStep);
 
+      // Resumo: "Editar" troca os botões pela lista de campos; "Voltar" devolve o resumo
+      case 'editmenu':
+        return [this.editMenu(draft, state.nonce)];
+      case 'review':
+        return [{ ...this.summary(draft, state.nonce), replace: true }];
+
       // Item digitado não existe (ou botão ➕): cadastrar agora e voltar ao lançamento
       case 'new':
       case 'create': {
@@ -277,6 +283,7 @@ export class ExpenseFlow {
               { label: '🗑 Sim, excluir', data: `x::delok:${expense.id}` },
               { label: 'Não', data: 'x::keep' },
             ]],
+            noFollowUp: true,
           },
         ];
       }
@@ -589,15 +596,27 @@ export class ExpenseFlow {
       line('Valor Total', `<b>${F.brl(total)}</b>`),
     ].join('\n');
 
-    const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
     return {
       text,
       buttons: [
-        [{ label: '✅ Salvar', data: `g:${nonce}:save` }, CANCEL(nonce)],
+        [{ label: '✅ Salvar', data: `g:${nonce}:save` }, { label: '✏️ Editar', data: `g:${nonce}:editmenu` }],
+        [CANCEL(nonce)],
+      ],
+    };
+  }
+
+  /** Mesmo resumo, com a lista de campos que podem ser alterados no lugar dos botões. */
+  private editMenu(d: ExpenseDraft, nonce: string): BotReply {
+    const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
+    return {
+      text: `${this.summary(d, nonce).text}\n\n<i>Qual campo você quer alterar?</i>`,
+      replace: true,
+      buttons: [
         [edit('Comprador', 'comprador'), edit('Loja', 'loja'), edit('Data', 'data')],
         [edit('Meio de Pagamento', 'meio'), edit('Tipo', 'tipo')],
         [edit('Nome', 'nome'), edit('Categoria', 'categoria')],
         [edit('Quantidade', 'quantidade'), edit('Valor Unitário', 'valor')],
+        [{ label: '↩️ Voltar', data: `g:${nonce}:review` }],
       ],
     };
   }

@@ -22,6 +22,10 @@ export interface BotButton {
 export interface BotReply {
   text: string;
   buttons?: BotButton[][];
+  /** Resposta a um botão: substitui a mensagem clicada (texto e botões) em vez de enviar outra */
+  replace?: boolean;
+  /** Não acrescenta o "Mais alguma coisa?" (menu, despedida, avisos de vínculo) */
+  noFollowUp?: boolean;
 }
 
 /**

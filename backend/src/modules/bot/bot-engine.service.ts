@@ -90,8 +90,35 @@ export class BotEngineService {
     if (!userId) return [this.notLinked()];
     const u: BotUser = { userId, canal: msg.canal, externalUserId: msg.externalUserId };
 
-    if (msg.callbackData) return this.onCallback(u, msg.callbackData);
+    const replies = msg.callbackData ? await this.onCallback(u, msg.callbackData) : await this.onMessage(u, text, command, args);
+    return this.withFollowUp(u, replies);
+  }
 
+  /**
+   * Terminada uma operação (nenhuma conversa em andamento), acrescenta à última resposta
+   * um convite curto para continuar, com Sim (menu compacto) e Não (despedida).
+   */
+  private async withFollowUp(u: BotUser, replies: BotReply[]): Promise<BotReply[]> {
+    const last = replies[replies.length - 1];
+    if (!last || last.noFollowUp) return replies;
+    if (await this.link.getState(u.canal, u.externalUserId)) return replies;
+    return [
+      ...replies.slice(0, -1),
+      {
+        ...last,
+        text: `${last.text}\n\n<i>Mais alguma coisa?</i>`,
+        buttons: [
+          ...(last.buttons ?? []),
+          [
+            { label: '👍 Sim', data: 'm::mais' },
+            { label: '👋 Não', data: 'm::tchau' },
+          ],
+        ],
+      },
+    ];
+  }
+
+  private async onMessage(u: BotUser, text: string, command: string | null, args: string): Promise<BotReply[]> {
     if (command) {
       switch (command) {
         case 'lancamento':
@@ -113,8 +140,8 @@ export class BotEngineService {
           await this.link.clearState(u.canal, u.externalUserId);
           return [{ text: 'Ok, cancelado.' }];
         case 'desconectar':
-          await this.link.unlinkUser(userId);
-          return [{ text: 'Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.' }];
+          await this.link.unlinkUser(u.userId);
+          return [{ text: 'Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.', noFollowUp: true }];
         case 'start':
         case 'ajuda':
         case 'help':
@@ -169,6 +196,10 @@ export class BotEngineService {
             return this.expense.recent(u);
           case 'cadastrar':
             return this.register.menu();
+          case 'mais':
+            return [this.quickMenu()];
+          case 'tchau':
+            return [{ text: 'Até mais! 👋 Quando precisar, é só mandar uma mensagem.', noFollowUp: true }];
         }
     }
     return [{ text: 'Esse botão não é mais válido.' }];
@@ -205,16 +236,26 @@ export class BotEngineService {
         '/cancelar · cancela o que estiver em andamento',
         '/desconectar · desvincula sua conta',
       ].join('\n'),
-      buttons: [
-        [{ label: '➕ Novo lançamento', data: 'm::lancamento' }],
-        [
-          { label: '📊 Resumo', data: 'm::resumo' },
-          { label: '🔔 Contas', data: 'm::contas' },
-          { label: '🧾 Últimos', data: 'm::ultimos' },
-        ],
-        [{ label: '🗂 Cadastrar', data: 'm::cadastrar' }],
-      ],
+      buttons: this.menuButtons(),
+      noFollowUp: true,
     };
+  }
+
+  /** Só os botões do menu, para quem respondeu "Sim" ao "Mais alguma coisa?". */
+  private quickMenu(): BotReply {
+    return { text: 'O que vamos fazer?', buttons: this.menuButtons(), noFollowUp: true };
+  }
+
+  private menuButtons(): BotReply['buttons'] {
+    return [
+      [{ label: '➕ Novo lançamento', data: 'm::lancamento' }],
+      [
+        { label: '📊 Resumo', data: 'm::resumo' },
+        { label: '🔔 Contas', data: 'm::contas' },
+        { label: '🧾 Últimos', data: 'm::ultimos' },
+      ],
+      [{ label: '🗂 Cadastrar', data: 'm::cadastrar' }],
+    ];
   }
 
   private notLinked(): BotReply {
@@ -222,6 +263,7 @@ export class BotEngineService {
     const where = site ? ` em <b>${F.esc(site.replace(/\/$/, ''))}/admin/user-profile</b>` : ' no seu perfil do site';
     return {
       text: `Olá! Para usar o bot, conecte sua conta Blue Fox Finance: abra o seu perfil${where} e toque em <b>Conectar Telegram</b>.`,
+      noFollowUp: true,
     };
   }
 

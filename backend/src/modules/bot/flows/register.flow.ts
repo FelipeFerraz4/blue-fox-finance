@@ -48,6 +48,7 @@ export class RegisterFlow {
           FORM_MENU.map((m) => ({ label: m.label, data: `r::${m.kind}` })),
           2,
         ),
+        noFollowUp: true,
       },
     ];
   }
@@ -112,6 +113,12 @@ export class RegisterFlow {
 
       case 'save':
         return this.save(u, state);
+
+      // Resumo: "Editar" troca os botões pela lista de campos; "Voltar" devolve o resumo
+      case 'editmenu':
+        return [this.editMenu(state)];
+      case 'review':
+        return [{ ...this.summary(state), replace: true }];
 
       case 'edit': {
         const target = FORMS[state.form].fields.find((f) => f.key === arg);
@@ -324,12 +331,26 @@ export class RegisterFlow {
       buttons: [
         [
           { label: '✅ Salvar', data: `f:${n}:save` },
-          { label: '❌ Cancelar', data: `f:${n}:cancel` },
+          { label: '✏️ Editar', data: `f:${n}:editmenu` },
         ],
+        [{ label: '❌ Cancelar', data: `f:${n}:cancel` }],
+      ],
+    };
+  }
+
+  /** Mesmo resumo, com a lista de campos que podem ser alterados no lugar dos botões. */
+  private editMenu(state: CadastroState): BotReply {
+    const fields = this.visibleFields(FORMS[state.form], state.values);
+    const n = state.nonce;
+    return {
+      text: `${this.summary(state).text}\n\n<i>Qual campo você quer alterar?</i>`,
+      replace: true,
+      buttons: [
         ...F.rows(
           fields.map((f) => ({ label: f.short ?? f.label, data: `f:${n}:edit:${f.key}` })),
           3,
         ),
+        [{ label: '↩️ Voltar', data: `f:${n}:review` }],
       ],
     };
   }
