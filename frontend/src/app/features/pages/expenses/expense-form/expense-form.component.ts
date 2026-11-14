@@ -1606,15 +1606,7 @@ export class ExpenseFormComponent implements OnInit {
       if (found) {
         this.commonData.lojaId = found.id;
         this.commonData.loja = found.nome;
-
-        // Se a loja tiver categoria e os itens estiverem sem categoria, pré-preenche
-        if (found.categoria) {
-          for (const it of this.items) {
-            if (!it.categoria || !it.categoria.trim()) {
-              it.categoria = found.categoria;
-            }
-          }
-        }
+        // A categoria da loja (ex.: E-commerce) é de outra lista e não vira categoria do item
       }
     }
   }

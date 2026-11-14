@@ -68,7 +68,7 @@ export class BillsFlow {
       const current = view.valor !== null ? `\nValor atual: ${F.brl(view.valor)}` : '';
       return [
         {
-          text: `<b>Valor</b> de ${F.esc(view.nome)} (vence ${F.dayMonth(view.dataVencimento)})?${current}\n<i>Exemplo: 120,50 · /cancelar para sair</i>`,
+          text: `💰 <b>Valor de ${F.esc(view.nome)}</b> (vence ${F.dayMonth(view.dataVencimento)})${current}\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>`,
         },
       ];
     }
@@ -82,7 +82,7 @@ export class BillsFlow {
           occurrenceId: id,
           nome: view.nome,
         });
-        return [{ text: `<b>Valor pago</b> em ${F.esc(view.nome)}?\n<i>Exemplo: 120,50</i>` }];
+        return [{ text: `💰 <b>Valor pago em ${F.esc(view.nome)}</b>\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>` }];
       }
       return this.pay(u, id);
     }

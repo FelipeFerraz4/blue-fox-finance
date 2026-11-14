@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { BotButton } from './bot.types';
+import { BotButton, BotReply } from './bot.types';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -116,6 +116,13 @@ export const BotFormat = {
   },
 
   /** Limita rótulos de botão (o Telegram corta textos longos de forma feia). */
+  /** Acrescenta uma linha de abertura (nome da operação) acima da primeira pergunta. */
+  withIntro(replies: BotReply[], intro: string): BotReply[] {
+    const last = replies[replies.length - 1];
+    if (!last) return replies;
+    return [...replies.slice(0, -1), { ...last, text: `${intro}\n\n${last.text}` }];
+  },
+
   label(text: string, max = 28): string {
     return text.length > max ? `${text.slice(0, max - 1)}…` : text;
   },

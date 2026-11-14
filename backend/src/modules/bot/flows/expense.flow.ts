@@ -100,7 +100,8 @@ export class ExpenseFlow {
       const replies = await this.register.start(u, 'meio', '', { draft, step: 'meio' });
       return [{ text: 'Você ainda não tem um meio de pagamento. Vamos cadastrar um e já seguir com o lançamento.' }, ...replies];
     }
-    return this.advance(u, draft);
+    // O nome da operação aparece só na primeira pergunta
+    return F.withIntro(await this.advance(u, draft), '📝 <i>Novo lançamento</i>');
   }
 
   /** Volta ao lançamento depois de cadastrar o item na hora, já com ele escolhido. */
@@ -465,7 +466,7 @@ export class ExpenseFlow {
   ): Promise<{ reply: BotReply; options?: string[] }> {
     if (step === 'confirmar') return { reply: this.summary(d, nonce) };
 
-    const title = `<b>${LABEL[step]}</b>`;
+    const title = `📝 <b>${LABEL[step]}</b>`;
     const choose = async (hint: string, suggestion: Option | null, list: Option[], perRow = 2) => {
       // Sugestão (padrão do perfil) primeiro, marcada com ⭐; sem repetir na lista
       const items = [
@@ -538,13 +539,23 @@ export class ExpenseFlow {
         return ask('Digite o nome do item.\n<i>Exemplo: Teclado Mecânico, Arroz 5kg, Remédio…</i>');
 
       case 'categoria': {
-        const [prefs, cats, store] = await Promise.all([
+        const [prefs, cats, usedAtStore] = await Promise.all([
           this.preferences.getExpensePreferences(userId),
           this.prisma.categoriaItem.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } }),
-          d.lojaId ? this.prisma.loja.findFirst({ where: { id: d.lojaId, userId }, select: { categoria: true } }) : null,
+          d.lojaId
+            ? this.prisma.lancamento.groupBy({
+                by: ['categoria'],
+                where: { userId, lojaId: d.lojaId },
+                _count: { categoria: true },
+                orderBy: { _count: { categoria: 'desc' } },
+                take: 5,
+              })
+            : [],
         ]);
-        // Mesma regra do site: categoria da loja; senão a categoria padrão do perfil
-        const suggested = store?.categoria || prefs.categoriaPadrao;
+        // Sugestão ⭐: a categoria de item mais usada nesta loja; senão a padrão do perfil.
+        // A categoria da loja (ex.: E-commerce) é de outra lista e não serve para o item.
+        const active = new Set(cats.map((c) => c.nome));
+        const suggested = usedAtStore.map((g) => g.categoria).find((c) => active.has(c)) ?? prefs.categoriaPadrao;
         // Para categoria, a "opção" guardada é o próprio nome (Lancamento.categoria é texto)
         return choose(
           'Toque numa opção ou digite o nome.',
@@ -581,7 +592,7 @@ export class ExpenseFlow {
         : 'À Vista';
     const line = (label: string, value: string) => `<b>${label}:</b> ${value}`;
     const text = [
-      '<b>Confirma o lançamento?</b>',
+      '📝 <b>Confirma o lançamento?</b>',
       '',
       line(LABEL.comprador, F.esc(d.comprador)),
       line(LABEL.loja, F.esc(d.loja)),

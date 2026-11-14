@@ -68,7 +68,9 @@ export class RegisterFlow {
     // Ex.: "/novaloja Padaria Sol" já responde o nome (em Conta, o Cartão continua sendo perguntado antes)
     const nameField = FORMS[kind].fields.find((f) => f.key === 'nome');
     if (firstText?.trim() && nameField) this.apply(state, nameField, firstText);
-    return this.advance(u, state);
+    // O nome do cadastro aparece só na primeira pergunta; as demais trazem só a pergunta
+    const intro = `🗂 <i>${FORMS[kind].title}${resume ? ' · ao salvar, volta ao lançamento' : ''}</i>`;
+    return F.withIntro(await this.advance(u, state), intro);
   }
 
   async onText(u: BotUser, state: CadastroState, text: string): Promise<BotReply[]> {
@@ -260,8 +262,7 @@ export class RegisterFlow {
     const spec = FORMS[state.form];
     const n = state.nonce;
     const hint = field.hint ?? this.defaultHint(field);
-    const context = state.resume ? ' · para o lançamento' : '';
-    const text = `🗂 <i>${spec.title}${context}</i>\n<b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
+    const text = `🗂 <b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
 
     const choices = await this.choices(userId, field);
     const quick = field.quick?.(BillScheduleHelper.today()) ?? [];
@@ -322,7 +323,7 @@ export class RegisterFlow {
     const fields = this.visibleFields(spec, state.values);
     const n = state.nonce;
     const text = [
-      `<b>Confirma o cadastro?</b> · ${spec.title}`,
+      `🗂 <b>Confirma o cadastro?</b> · ${spec.title}`,
       '',
       ...fields.map((f) => `<b>${f.label}:</b> ${this.display(state, f)}`),
     ].join('\n');
