@@ -1,4 +1,5 @@
 import { ModalidadePagamento, RecorrenciaConta } from '@prisma/client';
+import { CATEGORY_COLORS, normalizeHex } from '../../../common/constants/category-colors';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateStoreDto } from '../../stores/dto/store.dto';
 import { CreateBuyerDto } from '../../buyers/dto/buyer.dto';
@@ -33,6 +34,12 @@ export interface FieldSpec {
   visible?: (v: Values) => boolean;
   choices?: (userId: string, prisma: PrismaService) => Promise<Option[]> | Option[];
   allowText?: boolean;
+  /** Texto digitado num campo de escolha que não bate com nenhuma opção (ex.: cor em hexadecimal) */
+  parseText?: (text: string) => Option | null;
+  /** Botões de opção por linha (padrão: 1, ou 2 com mais de 6 opções) */
+  perRow?: number;
+  /** Mensagem quando o texto digitado não serve (padrão: "Toque numa das opções.") */
+  invalidText?: string;
   /** Botões de atalho para campos de digitação (ex.: Hoje, Este mês) */
   quick?: (today: string) => Option[];
   skipLabel?: string;
@@ -59,20 +66,16 @@ const MODALIDADES: Option[] = [
   { id: ModalidadePagamento.OUTRO, label: 'Outro / Boleto / Financiamento' },
 ];
 
-/** Mesmas cores pré-definidas da tela de Categorias de Itens. */
-const CORES: Option[] = [
-  { id: '#004aad', label: 'Azul Blue Fox' },
-  { id: '#38b6ff', label: 'Ciano Blue Fox' },
-  { id: '#0b132b', label: 'Azul-marinho' },
-  { id: '#10b981', label: 'Esmeralda' },
-  { id: '#f59e0b', label: 'Âmbar' },
-  { id: '#ef4444', label: 'Vermelho' },
-  { id: '#8b5cf6', label: 'Roxo' },
-  { id: '#0ea5e9', label: 'Azul-céu' },
-  { id: '#14b8a6', label: 'Turquesa' },
-  { id: '#ec4899', label: 'Rosa' },
-  { id: '#64748b', label: 'Cinza' },
-];
+/** Mesmas cores da tela de Categorias de Itens, com o emoji mais próximo. */
+const CORES: Option[] = CATEGORY_COLORS.map((c) => ({ id: c.hex, label: `${c.emoji} ${c.label}` }));
+
+/** Cor digitada: nome de uma cor da paleta ("verde") ou qualquer código hexadecimal ("#ff8800"). */
+function parseColor(text: string): Option | null {
+  const byName = CATEGORY_COLORS.find((c) => c.label.toLowerCase() === text.trim().toLowerCase());
+  if (byName) return { id: byName.hex, label: `${byName.emoji} ${byName.label}` };
+  const hex = normalizeHex(text);
+  return hex ? { id: hex, label: `🎨 ${hex}` } : null;
+}
 
 const REPETICAO: Option[] = [
   { id: RecorrenciaConta.MENSAL, label: 'Mensal' },
@@ -175,7 +178,20 @@ export const FORMS: Record<FormKind, FormSpec> = {
     dto: CreateItemCategoryDto,
     fields: [
       name('nome', 'Nome da Categoria', 'Exemplo: Alimentação, Tecnologia, Moradia'),
-      { key: 'cor', label: 'Cor de Identificação', short: 'Cor', type: 'choice', required: false, skipLabel: 'Padrão', choices: () => CORES },
+      {
+        key: 'cor',
+        label: 'Cor de Identificação',
+        short: 'Cor',
+        type: 'choice',
+        required: false,
+        skipLabel: 'Automática',
+        hint:
+          'Toque numa cor ou digite qualquer outra em hexadecimal, ex.: <code>#ff8800</code> (pesquise "seletor de cores" no Google para achar o código).\n<i>Automática: uma cor que você ainda não usa.</i>',
+        invalidText: 'Não reconheci essa cor. Toque numa opção ou digite um código como <code>#ff8800</code>.',
+        choices: () => CORES,
+        parseText: parseColor,
+        perRow: 3,
+      },
     ],
     toDto: (v) => ({ nome: v.nome, cor: opt(v.cor, String) }),
   },

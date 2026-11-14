@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { nextCategoryColor, normalizeHex } from '../../common/constants/category-colors';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   CreateItemCategoryDto,
@@ -45,11 +46,18 @@ export class CategoriesService {
       throw new ConflictException(`Uma categoria de item com o nome "${dto.nome}" já está cadastrada.`);
     }
 
+    // Sem cor escolhida: a da paleta que o usuário menos usa, para as categorias variarem
+    let cor = normalizeHex(dto.cor);
+    if (!cor) {
+      const used = await this.prisma.categoriaItem.findMany({ where: { userId }, select: { cor: true } });
+      cor = nextCategoryColor(used.map((c) => c.cor));
+    }
+
     return this.prisma.categoriaItem.create({
       data: {
         userId,
         nome: dto.nome.trim(),
-        cor: dto.cor?.trim() || null,
+        cor,
         icone: dto.icone?.trim() || null,
         ativo: dto.ativo !== undefined ? dto.ativo : true,
       },
@@ -77,7 +85,7 @@ export class CategoriesService {
       where: { id },
       data: {
         nome: dto.nome ? dto.nome.trim() : undefined,
-        cor: dto.cor !== undefined ? (dto.cor?.trim() || null) : undefined,
+        cor: dto.cor !== undefined ? normalizeHex(dto.cor) : undefined,
         icone: dto.icone !== undefined ? (dto.icone?.trim() || null) : undefined,
         ativo: dto.ativo !== undefined ? dto.ativo : undefined,
       },

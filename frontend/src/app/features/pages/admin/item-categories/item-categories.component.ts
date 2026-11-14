@@ -1237,7 +1237,7 @@ export class ItemCategoriesComponent implements OnInit {
   currentEditId: string | null = null;
   formData: { nome: string; cor: string; ativo: boolean } = {
     nome: '',
-    cor: '#004aad',
+    cor: '#3b82f6',
     ativo: true,
   };
   definirComoPadrao = false;
@@ -1246,20 +1246,30 @@ export class ItemCategoriesComponent implements OnInit {
   showDeleteConfirm = false;
   categoryToDelete: CategoriaItem | null = null;
 
-  // Blue Fox Palette Presets
+  // Paleta variada (mesma do backend em common/constants/category-colors.ts e do bot)
   presetColors = [
-    '#004aad', // Blue Fox Primary
-    '#38b6ff', // Blue Fox Cyan
-    '#0b132b', // Blue Fox Navy
-    '#10b981', // Emerald
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#8b5cf6', // Purple
-    '#0ea5e9', // Sky Blue
-    '#14b8a6', // Teal
-    '#ec4899', // Pink
-    '#64748b', // Slate
+    '#ef4444', // Vermelho
+    '#f97316', // Laranja
+    '#eab308', // Amarelo
+    '#22c55e', // Verde
+    '#14b8a6', // Turquesa
+    '#3b82f6', // Azul
+    '#8b5cf6', // Roxo
+    '#ec4899', // Rosa
+    '#a16207', // Marrom
+    '#64748b', // Cinza
   ];
+
+  /** Cor da paleta que o usuário menos usa, para cada categoria nova vir diferente. */
+  private nextColor(): string {
+    const count = new Map(this.presetColors.map((c) => [c, 0]));
+    for (const cat of this.categories) {
+      const c = cat.cor?.toLowerCase();
+      if (c && count.has(c)) count.set(c, count.get(c)! + 1);
+    }
+    const min = Math.min(...count.values());
+    return this.presetColors.find((c) => count.get(c) === min)!;
+  }
 
   constructor(
     private readonly categoriesService: CategoriesService,
@@ -1310,7 +1320,7 @@ export class ItemCategoriesComponent implements OnInit {
     this.currentEditId = null;
     this.formData = {
       nome: '',
-      cor: '#004aad',
+      cor: this.nextColor(),
       ativo: true,
     };
     this.definirComoPadrao = false;

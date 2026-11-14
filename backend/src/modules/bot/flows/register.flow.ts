@@ -84,12 +84,15 @@ export class RegisterFlow {
       const match = choices.find((c) => c.label.toLowerCase() === value.toLowerCase() || c.id === value);
       if (match) {
         this.apply(state, field, match.id, match.label);
+      } else if (field.parseText?.(value)) {
+        const parsed = field.parseText(value)!;
+        this.apply(state, field, parsed.id, parsed.label);
       } else if (field.allowText && value) {
         this.apply(state, field, value.slice(0, 120));
       } else if (field.type === 'month' && /^\d{1,2}$/.test(value) && +value >= 1 && +value <= 12) {
         this.apply(state, field, value, choices[+value - 1]?.label);
       } else {
-        return this.retry(u, state, 'Toque numa das opções.');
+        return this.retry(u, state, field.invalidText ?? 'Toque numa das opções.');
       }
       return this.advance(u, state);
     }
@@ -267,7 +270,7 @@ export class RegisterFlow {
     const choices = await this.choices(userId, field);
     const quick = field.quick?.(BillScheduleHelper.today()) ?? [];
     const options = [...choices, ...quick].map((o) => o.id);
-    const perRow = field.type === 'month' ? 3 : choices.length > 6 ? 2 : 1;
+    const perRow = field.perRow ?? (field.type === 'month' ? 3 : choices.length > 6 ? 2 : 1);
 
     const buttons: BotButton[][] = [
       ...F.rows(
