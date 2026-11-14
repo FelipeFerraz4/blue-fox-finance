@@ -6,21 +6,25 @@ export const routes: Routes = [
   // 1. Rota Pública Inicial (Home Landing Page)
   {
     path: '',
+    data: { seo: 'home' },
     loadComponent: () =>
       import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: 'home',
+    data: { seo: 'home' },
     loadComponent: () =>
       import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: 'about',
+    data: { seo: 'about' },
     loadComponent: () =>
       import('./features/pages/main/about/about.component').then((m) => m.AboutComponent),
   },
   {
     path: 'updates',
+    data: { seo: 'updates' },
     loadComponent: () =>
       import('./features/pages/main/updates/updates.component').then((m) => m.UpdatesComponent),
   },

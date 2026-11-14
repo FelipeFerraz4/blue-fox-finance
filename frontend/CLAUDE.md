@@ -7,7 +7,7 @@ Este documento serve como guia de arquitetura e convenções do frontend do **Bl
 O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e manutenção:
 
 ### 1. `src/app/core` (Singletons e Lógica Global)
-- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`accessibility/`, `admin-users/`, `auth/`, `bot/`, `buyers/`, `categories/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `sidebar/`, `stores/`, `theme/`, `user/`).
+- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`accessibility/`, `admin-users/`, `auth/`, `bot/`, `buyers/`, `categories/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `seo/`, `sidebar/`, `stores/`, `theme/`, `user/`); conteúdo estático em `core/content/` (`seo.ts`).
 - **Guards (`core/guards/`):** Proteção de rotas com base em autenticação e papéis (`auth.guard.ts`).
 - **Interceptors (`core/interceptors/`):** Interceptação HTTP global como injeção de tokens JWT (`auth.interceptor.ts`).
 - **CoreModule (`core/core-module.ts`):** Módulo central de registro.
@@ -35,6 +35,19 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 - **Gráficos:** `analytics-charts.ts` tem uma paleta por tema (`setChartTheme`); o dashboard recalcula as opções quando `ThemeService.effective()` muda.
 - **Páginas públicas** (Início, Sobre, Atualizações) são navy por design e não usam os tokens; só recebem a barra.
 - Guias para outros projetos: skills `bluefox-theming` e `bluefox-accessibility` (`.agents/skills/` na raiz do workspace).
+
+## 🔎 SEO
+- **`SeoService`** (`core/services/seo/`, mesmo modelo do Blue Fox Global Group) é iniciado no `AppComponent` e age por rota: rota com `data: { seo: 'home' | 'about' | 'updates' }` recebe title, description, Open Graph/Twitter, canonical absoluto (`https://finance.bluefoxglobalgroup.com`) e, na home, JSON-LD `WebApplication`; **qualquer outra rota** recebe `robots: noindex, nofollow` e fica sem canonical. Textos em `core/content/seo.ts`.
+- **nginx** também manda `X-Robots-Tag: noindex, nofollow` nas rotas internas e em `/api/` (`map $request_uri`, porque o `try_files` troca o `$uri`). Rota interna nova = incluir no `map` do `nginx.conf`.
+- `public/robots.txt` (não bloqueia as internas de propósito: o Google precisa vê-las para ler o noindex), `public/sitemap.xml` (só públicas) e `public/og-default.jpg` (1200x630, < 100 KB). O `index.html` tem description e OG padrão para robôs que não executam JS.
+- **Página pública nova:** `data.seo` na rota + texto em `core/content/seo.ts` + entrada no `sitemap.xml`.
+
+## 🗺️ Roadmap: SEO e internacionalização (referência: blue-fox-global-group)
+1. ✅ **SEO básico** (acima).
+2. **Páginas públicas em `/pt` e `/en`** (como o Global Group): textos em `core/content/{pt,en}`, `TranslationService` com o idioma vindo da URL, hreflang, sitemap com os dois idiomas; `/`, `/home`, `/about`, `/updates` redirecionam para `/pt/...`.
+3. **Prerender das públicas** (`@angular/ssr` com `outputMode: 'static'`: públicas `Prerender`, internas `Client`; continua só nginx, sem Node). Exige `isPlatformBrowser` em Keycloak, `ThemeService`, `AccessibilityService` e `localStorage`.
+4. **Sistema interno traduzido:** sem idioma na URL; preferência do usuário. **Idioma e país são separados:** o idioma escolhe os textos; o **país/região** define moeda e formatação de data e número (ex.: Brasil → BRL, `dd/MM/yyyy`, `1.234,56`; EUA → USD, `MM/dd/yyyy`, `1,234.56`; Portugal → EUR). Preferências em `localStorage` (`bf-lang`, `bf-region`) e no backend (preferências do usuário, para o bot e outros aparelhos). Pipes próprios com `Intl` (o `LOCALE_ID` do Angular é fixo), meses do ECharts por `Intl`, login do Keycloak com `locale`. A moeda é só de exibição (os valores não são convertidos): é a moeda em que o usuário registra os gastos.
+5. **API e bot:** `Accept-Language` nas mensagens de erro; o bot usa a preferência salva (ou o `language_code` do Telegram) e formata valores pela região (hoje `BotFormat.brl`).
 
 ## 📅 Datas
 - A data da compra (`Lancamento.data`) é gravada como meia-noite UTC (`YYYY-MM-DD` enviado pelo formulário). Exiba sempre em UTC (`date:'dd/MM/yyyy':'UTC'`), senão no Brasil (UTC−3) aparece o dia anterior. Para "hoje", use a data local (`toLocaleDateString('en-CA')`), nunca `toISOString()`.

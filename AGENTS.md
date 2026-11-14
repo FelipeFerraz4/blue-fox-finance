@@ -44,6 +44,8 @@ frontend/src/app/
 │       │   └── expenses.service.ts                   # Gestão de despesas, parcelas e preview (/api/expenses)
 │       ├── payment-methods/
 │       │   └── payment-methods.service.ts            # CRUD de meios de pagamento e cartões (/api/payment-methods)
+│       ├── seo/
+│       │   └── seo.service.ts                        # Meta tags por rota: públicas (data.seo) indexadas, internas noindex
 │       ├── sidebar/
 │       │   └── sidebar.service.ts                    # Estado reativo do menu lateral (collapse/mobile)
 │       ├── stores/

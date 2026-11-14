@@ -21,6 +21,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `src/app/shared`:
   - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`, `a11y-toolbar`).
 - **Tema claro/escuro e acessibilidade:** barra flutuante em todas as páginas (A-/A+, restaurar, alto contraste, leitura em voz alta, tema), com `ThemeService`/`AccessibilityService` e tokens de cor em `styles.css`. Código novo usa só os tokens (detalhes em `frontend/CLAUDE.md`, seção Tema e acessibilidade).
+- **SEO:** `SeoService` por rota (públicas com `data.seo` indexadas; internas `noindex`, também via `X-Robots-Tag` no nginx), `robots.txt`, `sitemap.xml`, `og-default.jpg`. Roadmap de idiomas e país (moeda/data/número por região) em `frontend/CLAUDE.md`.
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 

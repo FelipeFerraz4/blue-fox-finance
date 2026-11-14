@@ -1,0 +1,8 @@
+# As páginas internas não são bloqueadas aqui de propósito: elas respondem
+# com "noindex" (meta e cabeçalho X-Robots-Tag), e o Google só vê o noindex
+# se puder acessá-las.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://finance.bluefoxglobalgroup.com/sitemap.xml

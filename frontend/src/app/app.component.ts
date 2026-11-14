@@ -8,6 +8,7 @@ import { SidebarService } from './core/services/sidebar/sidebar.service';
 import { A11yToolbarComponent } from './shared/components/general/a11y-toolbar/a11y-toolbar.component';
 import { ThemeService } from './core/services/theme/theme.service';
 import { AccessibilityService } from './core/services/accessibility/accessibility.service';
+import { SeoService } from './core/services/seo/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -87,8 +88,11 @@ export class AppComponent implements OnInit {
     // Instanciados no início para aplicar tema/fonte/contraste e ouvir o tema do sistema
     _theme: ThemeService,
     _a11y: AccessibilityService,
+    seo: SeoService,
   ) {
     this.updateLayoutState(this.router.url);
+    // Meta tags por rota: públicas indexadas, internas com noindex
+    seo.init();
   }
 
   ngOnInit(): void {
