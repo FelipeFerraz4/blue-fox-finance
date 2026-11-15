@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { BillOccurrenceView, BillsService } from '../../bills/bills.service';
 import { BotLinkService } from '../bot-link.service';
 import { BotFormat as F } from '../bot-format';
-import { BotReply, BotUser, ConversationState } from '../bot.types';
+import { BotButton, BotReply, BotUser, ConversationState } from '../bot.types';
 
-type ContaValorState = Extract<ConversationState, { flow: 'conta-valor' }>;
+type ContaValorState = Extract<ConversationState, { flow: 'conta-valor' | 'conta-previsto' }>;
 
 /**
  * `/contas`: avisos de vencimento com botão "Confirmar pagamento" (o bot não paga
- * nada: só registra um pagamento que o usuário já fez). Callbacks `c::<ação>:<id>`.
+ * nada: só registra um pagamento que o usuário já fez) e "Informar valor" para conta
+ * variável ainda sem valor no mês. Callbacks `c::<ação>:<id>`.
  */
 @Injectable()
 export class BillsFlow {
@@ -17,6 +18,12 @@ export class BillsFlow {
     private readonly link: BotLinkService,
   ) {}
 
+  /** Botão para informar (ou alterar) o valor do mês de uma conta variável pendente. */
+  static amountButton(o: BillOccurrenceView, suffix = ''): BotButton {
+    const verb = o.valor === null ? '✏️ Informar valor' : '✏️ Alterar valor';
+    return { label: F.label(`${verb} · ${o.nome}${suffix}`, 40), data: `c::amount:${o.id}` };
+  }
+
   async list(u: BotUser): Promise<BotReply[]> {
     const alerts = await this.bills.getAlerts(u.userId);
     const items = [...alerts.atrasadas, ...alerts.venceHoje, ...alerts.proximas];
@@ -24,10 +31,12 @@ export class BillsFlow {
       return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.' }];
     }
 
-    const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)}${o.valor !== null ? ` · ${F.brl(o.valor)}` : ''}`);
-    const buttons = items
-      .slice(0, 10)
-      .map((o) => [{ label: F.label(`✅ Confirmar pagamento · ${o.nome}`, 40), data: `c::pay:${o.id}` }]);
+    const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)}${o.valor !== null ? ` · ${F.brl(o.valor)}` : ' · valor a informar'}`);
+    const buttons: BotButton[][] = [];
+    for (const o of items.slice(0, 10)) {
+      buttons.push([{ label: F.label(`✅ Confirmar pagamento · ${o.nome}`, 40), data: `c::pay:${o.id}` }]);
+      if (o.valorVariavel && o.valor === null) buttons.push([BillsFlow.amountButton(o)]);
+    }
     return [
       {
         text: `<b>Contas a pagar</b>\n\n${lines.join('\n')}\n\n<i>Já pagou alguma? Toque para confirmar o pagamento.</i>`,
@@ -45,9 +54,26 @@ export class BillsFlow {
       return [{ text: `↩️ Confirmação de pagamento desfeita: <b>${F.esc(view.nome)}</b> voltou para pendente.` }];
     }
 
+    const view = await this.findPending(u, id);
+    if (!view) return [{ text: 'Essa conta não está mais pendente.', buttons: [[{ label: '📋 Ver contas', data: 'c::list' }]] }];
+
+    if (action === 'amount') {
+      if (view.valorDaFatura) return [{ text: 'O valor dessa conta vem da fatura do cartão.' }];
+      await this.link.setState(u.canal, u.externalUserId, {
+        flow: 'conta-previsto',
+        nonce: F.nonce(),
+        occurrenceId: id,
+        nome: view.nome,
+      });
+      const current = view.valor !== null ? `\nValor atual: ${F.brl(view.valor)}` : '';
+      return [
+        {
+          text: `💰 <b>Valor de ${F.esc(view.nome)}</b> (vence ${F.dayMonth(view.dataVencimento)})${current}\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>`,
+        },
+      ];
+    }
+
     if (action === 'pay') {
-      const view = await this.findView(u, id);
-      if (!view) return [{ text: 'Essa conta não está mais pendente.', buttons: [[{ label: '📋 Ver contas', data: 'c::list' }]] }];
       if (view.valor === null) {
         // Sem valor previsto: pergunta quanto foi pago
         await this.link.setState(u.canal, u.externalUserId, {
@@ -56,7 +82,7 @@ export class BillsFlow {
           occurrenceId: id,
           nome: view.nome,
         });
-        return [{ text: `<b>Valor pago</b> em ${F.esc(view.nome)}?\n<i>Exemplo: 120,50</i>` }];
+        return [{ text: `💰 <b>Valor pago em ${F.esc(view.nome)}</b>\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>` }];
       }
       return this.pay(u, id);
     }
@@ -67,7 +93,18 @@ export class BillsFlow {
     const valor = F.parseAmount(text);
     if (!valor) return [{ text: 'Não entendi o valor. Exemplo: <code>120,50</code> (ou /cancelar).' }];
     if (!(await this.link.consumeState(u.canal, u.externalUserId, state.nonce))) return [];
+    if (state.flow === 'conta-previsto') return this.setAmount(u, state.occurrenceId, valor);
     return this.pay(u, state.occurrenceId, valor);
+  }
+
+  private async setAmount(u: BotUser, occurrenceId: string, valor: number): Promise<BotReply[]> {
+    const view = await this.bills.setAmount(u.userId, occurrenceId, valor);
+    return [
+      {
+        text: `✏️ Valor registrado: <b>${F.esc(view.nome)}</b> · ${F.brl(valor)} · vence ${F.dayMonth(view.dataVencimento)}\n<i>Ele já entra no /resumo. Quando pagar, confirme aqui.</i>`,
+        buttons: [[{ label: F.label(`✅ Confirmar pagamento · ${view.nome}`, 40), data: `c::pay:${occurrenceId}` }]],
+      },
+    ];
   }
 
   private async pay(u: BotUser, occurrenceId: string, valorPago?: number): Promise<BotReply[]> {
@@ -80,10 +117,14 @@ export class BillsFlow {
     ];
   }
 
-  /** Ocorrência pendente do usuário (a busca pelos avisos já filtra por userId). */
-  private async findView(u: BotUser, id: string): Promise<BillOccurrenceView | null> {
-    const alerts = await this.bills.getAlerts(u.userId);
-    return [...alerts.atrasadas, ...alerts.venceHoje, ...alerts.proximas].find((o) => o.id === id) ?? null;
+  /** Ocorrência pendente do usuário (de qualquer mês), ou null se não existe ou já foi paga. */
+  private async findPending(u: BotUser, id: string): Promise<BillOccurrenceView | null> {
+    try {
+      const view = await this.bills.getOccurrence(u.userId, id);
+      return view.pagoEm ? null : view;
+    } catch {
+      return null;
+    }
   }
 
   private icon(o: BillOccurrenceView) {

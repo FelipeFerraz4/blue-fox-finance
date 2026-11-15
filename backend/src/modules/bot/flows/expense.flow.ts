@@ -100,7 +100,8 @@ export class ExpenseFlow {
       const replies = await this.register.start(u, 'meio', '', { draft, step: 'meio' });
       return [{ text: 'Você ainda não tem um meio de pagamento. Vamos cadastrar um e já seguir com o lançamento.' }, ...replies];
     }
-    return this.advance(u, draft);
+    // O nome da operação aparece só na primeira pergunta
+    return F.withIntro(await this.advance(u, draft), '📝 <i>Novo lançamento</i>');
   }
 
   /** Volta ao lançamento depois de cadastrar o item na hora, já com ele escolhido. */
@@ -241,6 +242,12 @@ export class ExpenseFlow {
       case 'edit':
         return this.edit(u, draft, arg as ExpenseStep);
 
+      // Resumo: "Editar" troca os botões pela lista de campos; "Voltar" devolve o resumo
+      case 'editmenu':
+        return [this.editMenu(draft, state.nonce)];
+      case 'review':
+        return [{ ...this.summary(draft, state.nonce), replace: true }];
+
       // Item digitado não existe (ou botão ➕): cadastrar agora e voltar ao lançamento
       case 'new':
       case 'create': {
@@ -277,6 +284,7 @@ export class ExpenseFlow {
               { label: '🗑 Sim, excluir', data: `x::delok:${expense.id}` },
               { label: 'Não', data: 'x::keep' },
             ]],
+            noFollowUp: true,
           },
         ];
       }
@@ -458,7 +466,7 @@ export class ExpenseFlow {
   ): Promise<{ reply: BotReply; options?: string[] }> {
     if (step === 'confirmar') return { reply: this.summary(d, nonce) };
 
-    const title = `<b>${LABEL[step]}</b>`;
+    const title = `📝 <b>${LABEL[step]}</b>`;
     const choose = async (hint: string, suggestion: Option | null, list: Option[], perRow = 2) => {
       // Sugestão (padrão do perfil) primeiro, marcada com ⭐; sem repetir na lista
       const items = [
@@ -531,13 +539,23 @@ export class ExpenseFlow {
         return ask('Digite o nome do item.\n<i>Exemplo: Teclado Mecânico, Arroz 5kg, Remédio…</i>');
 
       case 'categoria': {
-        const [prefs, cats, store] = await Promise.all([
+        const [prefs, cats, usedAtStore] = await Promise.all([
           this.preferences.getExpensePreferences(userId),
           this.prisma.categoriaItem.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } }),
-          d.lojaId ? this.prisma.loja.findFirst({ where: { id: d.lojaId, userId }, select: { categoria: true } }) : null,
+          d.lojaId
+            ? this.prisma.lancamento.groupBy({
+                by: ['categoria'],
+                where: { userId, lojaId: d.lojaId },
+                _count: { categoria: true },
+                orderBy: { _count: { categoria: 'desc' } },
+                take: 5,
+              })
+            : [],
         ]);
-        // Mesma regra do site: categoria da loja; senão a categoria padrão do perfil
-        const suggested = store?.categoria || prefs.categoriaPadrao;
+        // Sugestão ⭐: a categoria de item mais usada nesta loja; senão a padrão do perfil.
+        // A categoria da loja (ex.: E-commerce) é de outra lista e não serve para o item.
+        const active = new Set(cats.map((c) => c.nome));
+        const suggested = usedAtStore.map((g) => g.categoria).find((c) => active.has(c)) ?? prefs.categoriaPadrao;
         // Para categoria, a "opção" guardada é o próprio nome (Lancamento.categoria é texto)
         return choose(
           'Toque numa opção ou digite o nome.',
@@ -574,7 +592,7 @@ export class ExpenseFlow {
         : 'À Vista';
     const line = (label: string, value: string) => `<b>${label}:</b> ${value}`;
     const text = [
-      '<b>Confirma o lançamento?</b>',
+      '📝 <b>Confirma o lançamento?</b>',
       '',
       line(LABEL.comprador, F.esc(d.comprador)),
       line(LABEL.loja, F.esc(d.loja)),
@@ -589,15 +607,27 @@ export class ExpenseFlow {
       line('Valor Total', `<b>${F.brl(total)}</b>`),
     ].join('\n');
 
-    const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
     return {
       text,
       buttons: [
-        [{ label: '✅ Salvar', data: `g:${nonce}:save` }, CANCEL(nonce)],
+        [{ label: '✅ Salvar', data: `g:${nonce}:save` }, { label: '✏️ Editar', data: `g:${nonce}:editmenu` }],
+        [CANCEL(nonce)],
+      ],
+    };
+  }
+
+  /** Mesmo resumo, com a lista de campos que podem ser alterados no lugar dos botões. */
+  private editMenu(d: ExpenseDraft, nonce: string): BotReply {
+    const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
+    return {
+      text: `${this.summary(d, nonce).text}\n\n<i>Qual campo você quer alterar?</i>`,
+      replace: true,
+      buttons: [
         [edit('Comprador', 'comprador'), edit('Loja', 'loja'), edit('Data', 'data')],
         [edit('Meio de Pagamento', 'meio'), edit('Tipo', 'tipo')],
         [edit('Nome', 'nome'), edit('Categoria', 'categoria')],
         [edit('Quantidade', 'quantidade'), edit('Valor Unitário', 'valor')],
+        [{ label: '↩️ Voltar', data: `g:${nonce}:review` }],
       ],
     };
   }

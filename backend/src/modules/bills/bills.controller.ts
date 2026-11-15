@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { BillsService } from './bills.service';
-import { CreateBillDto, PayBillOccurrenceDto, UpdateBillDto } from './dto/bill.dto';
+import { CreateBillDto, PayBillOccurrenceDto, SetOccurrenceAmountDto, UpdateBillDto } from './dto/bill.dto';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { FINANCE_ACCESS_ROLES } from '../auth/roles.constants';
@@ -36,6 +36,15 @@ export class BillsController {
     @Body() dto: PayBillOccurrenceDto,
   ) {
     return this.billsService.pay(userId, id, dto);
+  }
+
+  @Patch('occurrences/:id/amount')
+  setAmount(
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+    @Body() dto: SetOccurrenceAmountDto,
+  ) {
+    return this.billsService.setAmount(userId, id, dto.valorPrevisto);
   }
 
   @Patch('occurrences/:id/unpay')

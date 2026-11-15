@@ -433,7 +433,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       padding: 0.15rem 0.55rem;
       border-radius: 50px;
       background: rgba(245, 158, 11, 0.12);
-      color: #b45309;
+      color: var(--warning-text);
       border: 1px solid rgba(245, 158, 11, 0.35);
       margin-left: 0.5rem;
       vertical-align: middle;
@@ -473,8 +473,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .badge-brand {
-      background: #e4f0fc;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(0, 74, 173, 0.15);
       font-weight: 600;
       font-size: 0.72rem;
@@ -536,7 +536,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     .kpi-card.selected {
       border-color: #38b6ff;
       box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.3);
-      background: #f8fbff;
+      background: var(--surface-2);
     }
 
     .kpi-icon {
@@ -550,21 +550,21 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .kpi-icon-blue {
-      background: #e4f0fc;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(0, 74, 173, 0.12);
     }
 
     .kpi-icon-green {
-      background: #ecfdf5;
+      background: var(--success-bg);
       color: #10b981;
       border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     .kpi-icon-gray {
-      background: #f1f5f9;
-      color: #64748b;
-      border: 1px solid #cbd5e1;
+      background: var(--surface-3);
+      color: var(--text-muted);
+      border: 1px solid var(--border-strong);
     }
 
     .kpi-info {
@@ -584,7 +584,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1.65rem;
       font-weight: 800;
-      color: #0b132b;
+      color: var(--text-strong);
       line-height: 1.1;
       margin-top: 0.2rem;
     }
@@ -676,8 +676,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      background: var(--surface-3);
+      border: 1px solid var(--border-strong);
       color: var(--gray-700);
       padding: 0.45rem 0.85rem;
       border-radius: 9999px;
@@ -690,8 +690,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .badge-filter:hover {
-      background: #e2e8f0;
-      color: #0b132b;
+      background: var(--border);
+      color: var(--text-strong);
     }
 
     .badge-filter.active {
@@ -713,7 +713,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     .dot-inactive { background-color: #94a3b8; }
 
     .badge-filter.active .dot-status {
-      background-color: #ffffff;
+      background-color: var(--surface);
     }
 
     .view-help-text {
@@ -802,8 +802,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: linear-gradient(135deg, #e4f0fc 0%, #dbeeff 100%);
-      color: #004aad;
+      background: linear-gradient(135deg, var(--surface-brand) 0%, var(--surface-brand) 100%);
+      color: var(--link);
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-weight: 700;
       font-size: 0.85rem;
@@ -824,7 +824,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .email-link {
-      color: #004aad;
+      color: var(--link);
       text-decoration: none;
       transition: color 0.15s ease;
     }
@@ -846,8 +846,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       border: 1px solid transparent;
       cursor: pointer;
       transition: all 0.2s ease;
-      background: #f1f5f9;
-      color: #64748b;
+      background: var(--surface-3);
+      color: var(--text-muted);
     }
 
     .status-toggle-pill .dot-indicator {
@@ -858,8 +858,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .status-toggle-pill.active {
-      background: #ecfdf5;
-      color: #065f46;
+      background: var(--success-bg);
+      color: var(--success-text);
       border-color: rgba(16, 185, 129, 0.25);
     }
 
@@ -891,21 +891,21 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .btn-action-edit {
-      background: #ffffff;
+      background: var(--surface);
       border-color: rgba(0, 74, 173, 0.2);
-      color: #004aad;
+      color: var(--link);
     }
 
     .btn-action-edit:hover {
-      background: #e4f0fc;
+      background: var(--surface-brand);
       border-color: #004aad;
       transform: translateY(-1px);
     }
 
     .btn-action-delete {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #dc2626;
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
     }
 
     .btn-action-delete:hover {
@@ -934,7 +934,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
 
     /* Cards para Mobile (< 640px) */
     .buyer-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 1rem;
@@ -955,7 +955,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
     }
 
     .mobile-card-body {
@@ -1000,7 +1000,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       width: 68px;
       height: 68px;
       border-radius: 50%;
-      background: #f1f5f9;
+      background: var(--surface-3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1016,7 +1016,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
 
     /* Modal de Cadastro / Edição */
     .modal-buyer-dialog {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 20px;
       border: 1.5px solid rgba(0, 74, 173, 0.18);
       box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
@@ -1075,7 +1075,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     .modal-header h3 {
       font-size: 1.2rem;
       margin: 0;
-      color: #0b132b;
+      color: var(--text-strong);
     }
 
     .modal-subtitle {
@@ -1107,9 +1107,9 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     }
 
     .alert-error {
-      background: #fee2e2;
-      border: 1px solid #fecaca;
-      color: #991b1b;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger-text);
     }
 
     /* Switch Customizado para Padrão */
@@ -1118,10 +1118,10 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       flex-direction: row !important;
       align-items: center !important;
       gap: 0.85rem !important;
-      background: #f8fafc !important;
+      background: var(--surface-2) !important;
       padding: 0.85rem 1rem !important;
       border-radius: 12px !important;
-      border: 1px solid var(--gray-200, #e2e8f0) !important;
+      border: 1px solid var(--gray-200, var(--border)) !important;
       margin-top: 1rem !important;
       margin-bottom: 0.5rem !important;
       width: 100% !important;
@@ -1148,7 +1148,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #cbd5e1;
+      background-color: var(--border-strong);
       transition: 0.25s;
       border-radius: 24px;
     }
@@ -1186,7 +1186,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       display: block !important;
       font-size: 0.88rem !important;
       font-weight: 600 !important;
-      color: #0b132b !important;
+      color: var(--text-strong) !important;
       line-height: 1.3 !important;
     }
 
@@ -1195,7 +1195,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
     .switch-label-text .text-muted {
       display: block !important;
       font-size: 0.75rem !important;
-      color: var(--gray-500, #64748b) !important;
+      color: var(--gray-500, var(--text-muted)) !important;
       line-height: 1.35 !important;
     }
 

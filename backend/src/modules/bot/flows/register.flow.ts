@@ -48,6 +48,7 @@ export class RegisterFlow {
           FORM_MENU.map((m) => ({ label: m.label, data: `r::${m.kind}` })),
           2,
         ),
+        noFollowUp: true,
       },
     ];
   }
@@ -67,7 +68,9 @@ export class RegisterFlow {
     // Ex.: "/novaloja Padaria Sol" já responde o nome (em Conta, o Cartão continua sendo perguntado antes)
     const nameField = FORMS[kind].fields.find((f) => f.key === 'nome');
     if (firstText?.trim() && nameField) this.apply(state, nameField, firstText);
-    return this.advance(u, state);
+    // O nome do cadastro aparece só na primeira pergunta; as demais trazem só a pergunta
+    const intro = `🗂 <i>${FORMS[kind].title}${resume ? ' · ao salvar, volta ao lançamento' : ''}</i>`;
+    return F.withIntro(await this.advance(u, state), intro);
   }
 
   async onText(u: BotUser, state: CadastroState, text: string): Promise<BotReply[]> {
@@ -81,12 +84,15 @@ export class RegisterFlow {
       const match = choices.find((c) => c.label.toLowerCase() === value.toLowerCase() || c.id === value);
       if (match) {
         this.apply(state, field, match.id, match.label);
+      } else if (field.parseText?.(value)) {
+        const parsed = field.parseText(value)!;
+        this.apply(state, field, parsed.id, parsed.label);
       } else if (field.allowText && value) {
         this.apply(state, field, value.slice(0, 120));
       } else if (field.type === 'month' && /^\d{1,2}$/.test(value) && +value >= 1 && +value <= 12) {
         this.apply(state, field, value, choices[+value - 1]?.label);
       } else {
-        return this.retry(u, state, 'Toque numa das opções.');
+        return this.retry(u, state, field.invalidText ?? 'Toque numa das opções.');
       }
       return this.advance(u, state);
     }
@@ -112,6 +118,12 @@ export class RegisterFlow {
 
       case 'save':
         return this.save(u, state);
+
+      // Resumo: "Editar" troca os botões pela lista de campos; "Voltar" devolve o resumo
+      case 'editmenu':
+        return [this.editMenu(state)];
+      case 'review':
+        return [{ ...this.summary(state), replace: true }];
 
       case 'edit': {
         const target = FORMS[state.form].fields.find((f) => f.key === arg);
@@ -253,13 +265,12 @@ export class RegisterFlow {
     const spec = FORMS[state.form];
     const n = state.nonce;
     const hint = field.hint ?? this.defaultHint(field);
-    const context = state.resume ? ' · para o lançamento' : '';
-    const text = `🗂 <i>${spec.title}${context}</i>\n<b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
+    const text = `🗂 <b>${field.label}</b>${field.required ? '' : ' <i>(opcional)</i>'}${hint ? `\n${hint}` : ''}`;
 
     const choices = await this.choices(userId, field);
     const quick = field.quick?.(BillScheduleHelper.today()) ?? [];
     const options = [...choices, ...quick].map((o) => o.id);
-    const perRow = field.type === 'month' ? 3 : choices.length > 6 ? 2 : 1;
+    const perRow = field.perRow ?? (field.type === 'month' ? 3 : choices.length > 6 ? 2 : 1);
 
     const buttons: BotButton[][] = [
       ...F.rows(
@@ -315,7 +326,7 @@ export class RegisterFlow {
     const fields = this.visibleFields(spec, state.values);
     const n = state.nonce;
     const text = [
-      `<b>Confirma o cadastro?</b> · ${spec.title}`,
+      `🗂 <b>Confirma o cadastro?</b> · ${spec.title}`,
       '',
       ...fields.map((f) => `<b>${f.label}:</b> ${this.display(state, f)}`),
     ].join('\n');
@@ -324,12 +335,26 @@ export class RegisterFlow {
       buttons: [
         [
           { label: '✅ Salvar', data: `f:${n}:save` },
-          { label: '❌ Cancelar', data: `f:${n}:cancel` },
+          { label: '✏️ Editar', data: `f:${n}:editmenu` },
         ],
+        [{ label: '❌ Cancelar', data: `f:${n}:cancel` }],
+      ],
+    };
+  }
+
+  /** Mesmo resumo, com a lista de campos que podem ser alterados no lugar dos botões. */
+  private editMenu(state: CadastroState): BotReply {
+    const fields = this.visibleFields(FORMS[state.form], state.values);
+    const n = state.nonce;
+    return {
+      text: `${this.summary(state).text}\n\n<i>Qual campo você quer alterar?</i>`,
+      replace: true,
+      buttons: [
         ...F.rows(
           fields.map((f) => ({ label: f.short ?? f.label, data: `f:${n}:edit:${f.key}` })),
           3,
         ),
+        [{ label: '↩️ Voltar', data: `f:${n}:review` }],
       ],
     };
   }

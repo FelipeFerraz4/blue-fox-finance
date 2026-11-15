@@ -4,7 +4,7 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.45rem 0.75rem;
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--gray-200);
   border-left: 3px solid var(--warning);
   border-radius: 10px;
@@ -24,12 +24,12 @@
 
 .bill-alerts-icon {
   display: inline-flex;
-  color: var(--warning);
+  color: var(--warning-text);
   flex-shrink: 0;
 }
 
 .has-overdue .bill-alerts-icon {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .bill-alerts-title {
@@ -53,17 +53,17 @@
   font-weight: 600;
   white-space: nowrap;
   background: var(--warning-light);
-  color: #b54708;
+  color: var(--warning-text);
 }
 
 .chip.status-ATRASADA {
   background: var(--danger-light);
-  color: #b42318;
+  color: var(--danger-text);
 }
 
 .bill-alerts-link {
   font-size: 1.1rem;
   line-height: 1;
-  color: var(--primary);
+  color: var(--link);
   flex-shrink: 0;
 }

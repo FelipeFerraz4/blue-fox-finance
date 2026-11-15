@@ -106,13 +106,13 @@ import { RouterModule } from '@angular/router';
           </div>
 
           <h1 class="hero-title">
-            Controle Financeiro de Alta Precisão &
-            <span class="title-highlight">Orçamento Estruturado</span>
+            Controle Financeiro de Alta Precisão,
+            <span class="title-highlight">no Site e no Telegram</span>
           </h1>
 
           <p class="hero-subtitle">
-            Gerencie compras em lote, parcelamentos inteligentes com cálculo automático de fechamento de cartões
-            e múltiplos compradores com a clareza e confiabilidade que o seu controle financeiro precisa.
+            Gerencie compras em lote, parcelamentos com cálculo automático pelo fechamento do cartão,
+            contas a pagar e múltiplos compradores, e registre gastos conversando com o bot do Telegram.
           </p>
 
           <!-- Apenas o botão de Login conforme solicitado -->
@@ -151,7 +151,7 @@ import { RouterModule } from '@angular/router';
                   </svg>
                   <span>bluefox-finance/dashboard</span>
                 </div>
-                <div class="mockup-badge">VERSÃO ATIVA &bull; v1.1</div>
+                <div class="mockup-badge">VERSÃO ATIVA &bull; v1.6</div>
               </div>
 
               <div class="mockup-body">
@@ -172,9 +172,9 @@ import { RouterModule } from '@angular/router';
                     <div class="mstat-sub">Por dia de fechamento</div>
                   </div>
                   <div class="mstat-card purple">
-                    <div class="mstat-label">Compradores</div>
-                    <div class="mstat-val">Multi-titular</div>
-                    <div class="mstat-sub">Divisão e rateio claro</div>
+                    <div class="mstat-label">Contas a Pagar</div>
+                    <div class="mstat-val">3 a vencer</div>
+                    <div class="mstat-sub">Avisos de vencimento</div>
                   </div>
                 </div>
 
@@ -190,6 +190,10 @@ import { RouterModule } from '@angular/router';
                   <div class="mstrip-item">
                     <span class="badge-mini-dot"></span>
                     <span>Categorias de Itens e Lojas Cadastradas</span>
+                  </div>
+                  <div class="mstrip-item">
+                    <span class="badge-mini-dot"></span>
+                    <span>Lançamentos pelo Telegram</span>
                   </div>
                 </div>
               </div>
@@ -245,7 +249,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <h3 class="feature-name">Catálogo de Lojas & Categorias</h3>
               <p class="feature-desc">
-                Classificação em dois níveis: estabelecimentos comerciais (Supermercado, Farmácia, E-commerce) e tipos de produtos com cores customizáveis.
+                Classificação em dois níveis: categorias de lojas (Supermercado, Farmácia, E-commerce) e de produtos, com cores customizáveis e cadastro rápido direto no lançamento.
               </p>
             </div>
 
@@ -258,9 +262,37 @@ import { RouterModule } from '@angular/router';
                   <rect x="3" y="16" width="7" height="5"/>
                 </svg>
               </div>
-              <h3 class="feature-name">Dashboard & Indicadores</h3>
+              <h3 class="feature-name">Dashboard Interativo</h3>
               <p class="feature-desc">
-                Visão do mês com totalizadores, filtros por período, faturas futuras agrupadas por meio de pagamento e controle de orçamento.
+                Painel com filtro cruzado: clique em um mês, categoria, loja ou comprador e todos os gráficos se ajustam. Inclui comparação com o ano anterior e compromissos futuros.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon icon-teal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                  <polyline points="9 16 11 18 15 14"/>
+                </svg>
+              </div>
+              <h3 class="feature-name">Contas a Pagar</h3>
+              <p class="feature-desc">
+                Contas mensais, anuais e avulsas com status de vencimento, avisos no menu e no dashboard, e confirmação do pagamento feito.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon icon-blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <h3 class="feature-name">Bot do Telegram</h3>
+              <p class="feature-desc">
+                Registre gastos, consulte o resumo do mês, confirme pagamentos e cadastre lojas e categorias pelo chat. Tudo aparece na hora no site.
               </p>
             </div>
           </div>
@@ -275,7 +307,7 @@ import { RouterModule } from '@angular/router';
               <div class="section-badge">NOSSA HISTÓRIA & GOVERNANÇA</div>
               <h2 class="about-main-title">A Origem do BlueFox Finance</h2>
               <p class="about-subtitle">
-                Desenvolvido internamente pelo Blue Fox Global Group para controle rigoroso de despesas e orçamentos, e agora disponível para todos.
+                Desenvolvido internamente pelo Blue Fox Global Group para controle rigoroso de despesas, faturas e contas, e agora disponível para todos.
               </p>
             </div>
 
@@ -974,7 +1006,7 @@ import { RouterModule } from '@angular/router';
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
       gap: 1.75rem;
       text-align: left;
     }

@@ -987,89 +987,92 @@ export class UpdatesComponent {
 
   completedFeatures: FeatureItem[] = [
     {
-      title: 'Lançamentos Agrupados & Múltiplos Itens',
-      badge: 'Lançado v1.0',
+      title: 'Bot do Telegram',
+      badge: 'Lançado v1.6',
       badgeClass: 'success',
-      description: 'Permite registrar uma compra com um único cabeçalho (comprador, loja, data) e múltiplos itens detalhados com valores individuais.',
+      description: 'Registre gastos, consulte o mês, confirme pagamentos e faça cadastros conversando com o bot. Tudo aparece na hora no site.',
       details: [
-        'Adição dinâmica de linhas de produtos',
-        'Cálculo automático do valor total da compra',
-        'Associação de cada item à sua categoria específica',
+        '/lancamento com os mesmos campos da tela Novo Lançamento',
+        '/resumo, /contas e /ultimos para consultas rápidas',
+        '/cadastrar lojas, compradores, meios, categorias e contas, inclusive no meio do lançamento',
       ],
     },
     {
-      title: 'Cálculo Inteligente de Faturas de Cartão',
-      badge: 'Lançado v1.0',
+      title: 'Gestão de Usuários',
+      badge: 'Lançado v1.6',
       badgeClass: 'success',
-      description: 'Determina automaticamente o mês de vencimento da fatura com base no dia de fechamento do cartão de crédito cadastrado.',
+      description: 'Administradores do Finance criam novas contas pela tela Serviços → Usuários, com acesso pelo login único da Blue Fox.',
       details: [
-        'Divisão automática de compras parceladas',
-        'Projeção de parcelas mês a mês',
-        'Precisão para compras realizadas antes ou após o fechamento',
+        'Login pelo e-mail com senha temporária',
+        'Troca de senha obrigatória no primeiro acesso',
+        'Novos usuários começam com o papel de usuário do Finance',
       ],
     },
     {
-      title: 'Controle de Múltiplos Compradores',
-      badge: 'Lançado v1.0',
+      title: 'Dashboard Interativo com Filtro Cruzado',
+      badge: 'Lançado v1.4',
       badgeClass: 'success',
-      description: 'Gestão de múltiplos responsáveis por despesas, ideal para famílias ou grupos de compras.',
+      description: 'Painel no estilo Power BI: clique em um mês, categoria, loja ou comprador e todos os gráficos se ajustam ao filtro.',
       details: [
-        'Cadastro centralizado de compradores',
-        'Filtro e agrupamento de despesas por comprador',
-        'Identificação de compras coletivas e rateio',
+        'Gastos pelo mês em que cada parcela é paga',
+        'Comparação com o ano anterior e compromissos futuros',
+        'Parcelamentos em aberto e contas do ano no mesmo painel',
       ],
     },
     {
-      title: 'Categorização Dupla: Itens & Lojas',
-      badge: 'Lançado v1.0',
+      title: 'Contas a Pagar Recorrentes',
+      badge: 'Lançado v1.3',
       badgeClass: 'success',
-      description: 'Estrutura em dois níveis para organização máxima: tipos de produtos e categorias de estabelecimentos.',
+      description: 'Controle de contas mensais, anuais e avulsas, com status de vencimento e confirmação do pagamento feito.',
       details: [
-        'Cores personalizadas por categoria',
-        'Associação de loja com segmento comercial',
-        'Filtros rápidos na lista de despesas',
+        'Status: paga, atrasada, vence hoje e próxima',
+        'Fatura do cartão calculada pela soma das parcelas do mês',
+        'Avisos no menu e no topo do dashboard',
       ],
     },
     {
-      title: 'Dashboard Analítico & Indicadores',
-      badge: 'Lançado v1.0',
+      title: 'Login Único Blue Fox (SSO) & Dados Isolados',
+      badge: 'Lançado v1.2',
       badgeClass: 'success',
-      description: 'Visão consolidada das finanças do mês com métricas, despesas por categoria e resumo de meios de pagamento.',
+      description: 'Acesso pelo provedor de identidade do Blue Fox Global Group, com os dados de cada usuário totalmente separados.',
       details: [
-        'Totalizador financeiro do mês corrente',
-        'Visualização de faturas a vencer',
-        'Navegação entre meses de competência',
+        'Autenticação OpenID Connect (Keycloak)',
+        'Rotas e API protegidas por papéis',
+        'Cada usuário vê apenas os próprios lançamentos e cadastros',
       ],
     },
     {
-      title: 'Central de Serviços & Perfil de Usuário',
-      badge: 'Lançado v1.1',
+      title: 'Lançamentos, Faturas & Cadastros',
+      badge: 'Lançado v1.0',
       badgeClass: 'success',
-      description: 'Hub de serviços com atalhos operacionais rápidos e seleção de avatares oficiais Blue Fox.',
+      description: 'A base do sistema: compras com vários itens, parcelas calculadas pelo fechamento do cartão e cadastros que agilizam cada lançamento.',
       details: [
-        'Edição de dados de perfil do usuário',
-        'Avatares temáticos do ecossistema Blue Fox',
-        'Hub visual para gerenciar lojas, compradores e categorias',
+        'Uma compra com cabeçalho único e múltiplos itens',
+        'Mês da fatura e parcelas calculados pelo dia de fechamento',
+        'Compradores, lojas, categorias e padrões de lançamento',
       ],
     },
   ];
 
   inProgressFeatures: FeatureItem[] = [
     {
-      title: 'Integração com Keycloak SSO (IAM)',
+      title: 'Avisos Automáticos de Contas',
       badge: 'Em Andamento',
       badgeClass: 'warning',
-      description: 'Estruturação do provedor de identidade do Blue Fox Global Group para login federado corporativo.',
+      description: 'Lembretes diários de contas que vencem em breve ou estão atrasadas, sem precisar abrir o site.',
       details: [
-        'Autenticação OpenID Connect e OAuth2',
-        'Proteção de rotas internas com Guards de segurança',
-        'Single Sign-On unificado para os sistemas do grupo',
+        'Aviso antes do vencimento e no dia',
+        'Envio pelo Telegram, com outros canais em estudo',
+        'Sem avisos repetidos para a mesma conta',
       ],
     },
+  ];
+
+  futureFeatures: FeatureItem[] = [
     {
       title: 'Exportação de Relatórios (PDF & Excel/CSV)',
-      badge: 'Em Andamento',
-      badgeClass: 'warning',
+      badge: 'Roadmap',
+      badgeClass: 'purple',
       description: 'Geração de extratos mensais organizados para impressão, auditoria ou conferência offline.',
       details: [
         'Exportação detalhada de faturas e parcelamentos',
@@ -1079,38 +1082,13 @@ export class UpdatesComponent {
     },
     {
       title: 'Planejamento Orçamentário (Orçado vs. Real)',
-      badge: 'Em Andamento',
-      badgeClass: 'warning',
+      badge: 'Roadmap',
+      badgeClass: 'purple',
       description: 'Definição de metas de gastos por categoria para comparação com despesas reais executadas.',
       details: [
         'Teto de gastos por categoria de despesa',
         'Barra de progresso de consumo do orçamento',
-        'Alertas visuais de proximidade do teto',
-      ],
-    },
-  ];
-
-  futureFeatures: FeatureItem[] = [
-    {
-      title: 'Leitura de Comprovantes via OCR & IA',
-      badge: 'Roadmap',
-      badgeClass: 'purple',
-      description: 'Envio de foto ou PDF de notas fiscais com preenchimento automático de itens e valores por IA.',
-      details: [
-        'Extração automática de loja, data e itens',
-        'Sugestão de categorias com base no nome do produto',
-        'Agilidade máxima para registro de compras físicas',
-      ],
-    },
-    {
-      title: 'Alertas Automáticos & Notificações',
-      badge: 'Roadmap',
-      badgeClass: 'purple',
-      description: 'Avisos preventivos de vencimento de faturas e alertas de estouro de orçamento por e-mail e webhook.',
-      details: [
-        'Notificação antes do fechamento e vencimento de cartões',
-        'Alertas configuráveis por limite de gastos',
-        'Integração via Telegram / WhatsApp / Webhook',
+        'Alertas de proximidade do teto',
       ],
     },
     {
@@ -1127,7 +1105,7 @@ export class UpdatesComponent {
       title: 'Aplicativo Mobile PWA',
       badge: 'Roadmap',
       badgeClass: 'purple',
-      description: 'Instalação nativa em smartphones Android e iOS com funcionamento offline.',
+      description: 'Instalação em smartphones Android e iOS direto pelo navegador.',
       details: [
         'Adição rápida de gastos direto na tela inicial do celular',
         'Sincronização em segundo plano',

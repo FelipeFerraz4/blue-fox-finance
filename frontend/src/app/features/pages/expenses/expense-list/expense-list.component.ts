@@ -977,7 +977,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     .view-mode-toggle {
       display: flex;
-      background: #f1f5f9;
+      background: var(--surface-3);
       border: 1px solid var(--gray-300);
       border-radius: var(--radius-md);
       padding: 2px;
@@ -1000,14 +1000,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .toggle-btn.active {
-      background: white;
-      color: var(--primary);
+      background: var(--surface);
+      color: var(--link);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .filter-card {
       padding: 1.25rem;
-      background: white;
+      background: var(--surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
@@ -1096,9 +1096,9 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .btn-clear-filters {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #ef4444;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger-text);
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
@@ -1108,7 +1108,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .btn-clear-filters:hover {
-      background: #fee2e2;
+      background: var(--danger-bg);
       border-color: #ef4444;
     }
 
@@ -1145,8 +1145,8 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .badge-light-blue {
-      background: #e0f2fe;
-      color: #0369a1;
+      background: var(--surface-brand);
+      color: var(--link);
       width: fit-content;
     }
 
@@ -1167,9 +1167,9 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1d4ed8;
+      background: var(--surface-brand);
+      border: 1px solid var(--border-brand);
+      color: var(--link);
       padding: 0.25rem 0.55rem;
       border-radius: 9999px;
       font-size: 0.78rem;
@@ -1180,9 +1180,9 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .btn-parcelas-pill:hover {
-      background: #dbeafe;
-      border-color: #93c5fd;
-      color: #1e40af;
+      background: var(--surface-brand-strong);
+      border-color: var(--border-brand);
+      color: var(--link);
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(37, 99, 235, 0.12);
     }
@@ -1224,21 +1224,21 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .btn-action-edit {
-      background: #f1f5f9;
+      background: var(--surface-3);
       border-color: var(--gray-300);
       color: var(--gray-700);
     }
 
     .btn-action-edit:hover {
-      background: #e2e8f0;
+      background: var(--border);
       color: var(--gray-900);
       border-color: var(--gray-400);
     }
 
     .btn-action-delete {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #dc2626;
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
     }
 
     .btn-action-delete:hover {
@@ -1253,7 +1253,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     /* Estilos do Modal de Edição & Detalhes */
     .modal-content {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 20px;
       border: 1.5px solid rgba(0, 74, 173, 0.18);
       box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
@@ -1308,8 +1308,8 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      background: #eff6ff;
-      color: #2563eb;
+      background: var(--surface-brand);
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1369,7 +1369,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       justify-content: space-between;
       align-items: center;
       padding: 1rem 1.25rem;
-      background: #f8fafc;
+      background: var(--surface-2);
       border-top: 1px solid var(--gray-200);
       flex-wrap: wrap;
       gap: 1rem;
@@ -1424,13 +1424,13 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      background: #ffffff;
+      background: var(--surface);
       transition: background 0.15s ease;
       user-select: none;
     }
 
     .group-header:hover {
-      background: #f8fafc;
+      background: var(--surface-2);
     }
 
     .group-info-left {
@@ -1440,9 +1440,9 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
 
     .calendar-pill {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
+      background: var(--surface-brand);
+      border: 1px solid var(--border-brand);
+      color: var(--link);
       padding: 0.4rem 0.75rem;
       border-radius: 8px;
       display: flex;
@@ -1505,7 +1505,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     .stat-val {
       font-size: 1.15rem;
-      color: #2563eb;
+      color: var(--link);
     }
 
     .chevron-icon {
@@ -1519,13 +1519,13 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     .group-details-body {
       border-top: 1px solid var(--gray-200);
-      background: #fafafa;
+      background: var(--surface-2);
     }
 
     .modal-summary-box {
       display: flex;
       justify-content: space-between;
-      background: #f8fafc;
+      background: var(--surface-2);
       padding: 0.75rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--gray-200);
@@ -1675,7 +1675,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     /* Cards Mobile de Lançamentos */
     .expense-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 1rem;
@@ -1699,7 +1699,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1.05rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       line-height: 1.3;
     }
     .expense-card-store {
@@ -1716,7 +1716,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
     .expense-card-total {
       font-size: 1.1rem;
-      color: var(--primary);
+      color: var(--link);
     }
     .expense-card-meta {
       display: flex;
@@ -1747,7 +1747,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       gap: 0.4rem;
     }
     .expense-card-obs {
-      background: #f8fafc;
+      background: var(--surface-2);
       padding: 0.5rem 0.75rem;
       border-radius: var(--radius-sm);
       font-size: 0.8rem;
@@ -1772,7 +1772,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
     /* Cards Mobile de Parcelas Modal */
     .parcela-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--gray-200);
       border-radius: var(--radius-md);
       padding: 0.75rem 1rem;
@@ -1787,7 +1787,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
     }
     .parcela-num {
       font-size: 0.9rem;
-      color: #0b132b;
+      color: var(--text-strong);
     }
     .parcela-val {
       font-size: 1rem;

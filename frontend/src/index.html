@@ -12,6 +12,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tema e acessibilidade antes do Angular, para não piscar (ver ThemeService/AccessibilityService) -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        var t = localStorage.getItem('bf-theme') || 'system';
+        var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        d.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (localStorage.getItem('bf-contrast') === 'high') d.setAttribute('data-contrast', 'high');
+        var f = parseFloat(localStorage.getItem('bf-font-scale'));
+        if (f >= 0.875 && f <= 1.5) d.style.setProperty('--a11y-font-scale', String(f));
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

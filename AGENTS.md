@@ -48,6 +48,10 @@ frontend/src/app/
 │       │   └── sidebar.service.ts                    # Estado reativo do menu lateral (collapse/mobile)
 │       ├── stores/
 │       │   └── stores.service.ts                     # CRUD de lojas (/api/stores); categoria precisa existir em CategoriaLoja
+│       ├── theme/
+│       │   └── theme.service.ts                      # Tema claro/escuro (data-theme no <html>, segue o sistema por padrão)
+│       ├── accessibility/
+│       │   └── accessibility.service.ts              # A-/A+, alto contraste e leitura em voz alta
 │       └── user/
 │           └── user.service.ts                       # Preferências de perfil e avatares do sistema
 │
@@ -90,6 +94,7 @@ frontend/src/app/
 ├── shared/                                           # Componentes reutilizáveis, tipos e mocks
 │   ├── components/
 │   │   └── general/                                  # Componentes visuais globais
+│   │       ├── a11y-toolbar/                         # Barra flutuante de acessibilidade e tema (todas as páginas)
 │   │       ├── navbar/
 │   │       │   └── navbar.component.ts               # Header da aplicação com perfil e navegação
 │   │       ├── sidebar/

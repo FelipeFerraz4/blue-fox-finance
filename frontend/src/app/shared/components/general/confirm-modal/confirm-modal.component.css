@@ -18,7 +18,7 @@
 }
 
 .confirm-modal-dialog {
-  background: white;
+  background: var(--surface);
   border-radius: 18px;
   box-shadow: 0 20px 45px rgba(0, 74, 173, 0.18);
   width: 100%;
@@ -57,27 +57,27 @@
 
 /* Cores das Variantes de Ícone */
 .badge-danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 4px solid #fef2f2;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 4px solid var(--danger-bg);
 }
 
 .badge-warning {
-  background: #fef3c7;
-  color: #d97706;
-  border: 4px solid #fffbeb;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border: 4px solid var(--warning-bg);
 }
 
 .badge-primary {
-  background: #e4f0fc;
-  color: #004aad;
-  border: 4px solid #f8fafc;
+  background: var(--surface-brand);
+  color: var(--link);
+  border: 4px solid var(--border-subtle);
 }
 
 .badge-info {
-  background: #f1f5f9;
-  color: #475569;
-  border: 4px solid #f8fafc;
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 4px solid var(--border-subtle);
 }
 
 .modal-body-content {
@@ -91,7 +91,7 @@
   font-family: var(--font-headers, 'Outfit', sans-serif);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0b132b;
+  color: var(--text-strong);
   margin: 0;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .modal-item-highlight {
-  background: #f8fafc;
+  background: var(--surface-2);
   border: 1px dashed rgba(0, 74, 173, 0.2);
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
@@ -124,7 +124,7 @@
 
 .highlight-text {
   font-size: 0.9rem;
-  color: #0b132b;
+  color: var(--text-strong);
   font-weight: 700;
   word-break: break-word;
 }

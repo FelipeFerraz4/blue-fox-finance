@@ -297,7 +297,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       padding: 0.15rem 0.55rem;
       border-radius: 50px;
       background: rgba(245, 158, 11, 0.12);
-      color: #b45309;
+      color: var(--warning-text);
       border: 1px solid rgba(245, 158, 11, 0.35);
       margin-left: 0.5rem;
       vertical-align: middle;
@@ -321,10 +321,10 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       flex-direction: row !important;
       align-items: center !important;
       gap: 0.85rem !important;
-      background: #f8fafc !important;
+      background: var(--surface-2) !important;
       padding: 0.85rem 1rem !important;
       border-radius: 12px !important;
-      border: 1px solid var(--gray-200, #e2e8f0) !important;
+      border: 1px solid var(--gray-200, var(--border)) !important;
       margin-top: 1rem !important;
       margin-bottom: 0.5rem !important;
       width: 100% !important;
@@ -351,7 +351,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #cbd5e1;
+      background-color: var(--border-strong);
       transition: 0.25s;
       border-radius: 24px;
     }
@@ -389,7 +389,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       display: block !important;
       font-size: 0.88rem !important;
       font-weight: 600 !important;
-      color: #0b132b !important;
+      color: var(--text-strong) !important;
       line-height: 1.3 !important;
     }
 
@@ -398,7 +398,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     .switch-label-text .text-muted {
       display: block !important;
       font-size: 0.75rem !important;
-      color: var(--gray-500, #64748b) !important;
+      color: var(--gray-500, var(--text-muted)) !important;
       line-height: 1.35 !important;
     }
 
@@ -435,8 +435,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     }
 
     .badge-brand {
-      background: #e4f0fc;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(0, 74, 173, 0.15);
       font-weight: 600;
       font-size: 0.72rem;
@@ -482,7 +482,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       display: block;
       margin-top: 0.35rem;
       font-size: 0.8rem;
-      color: var(--danger, #dc2626);
+      color: var(--danger, var(--danger-text));
     }
 
     .category-filter-bar {
@@ -504,8 +504,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     }
 
     .badge-filter {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      background: var(--surface-3);
+      border: 1px solid var(--border-strong);
       color: var(--gray-700);
       padding: 0.4rem 0.85rem;
       border-radius: 9999px;
@@ -518,8 +518,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     }
 
     .badge-filter:hover {
-      background: #e2e8f0;
-      color: #0b132b;
+      background: var(--border);
+      color: var(--text-strong);
     }
 
     .badge-filter.active {
@@ -531,7 +531,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
     }
 
     .modal-content {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 20px;
       border: 1.5px solid rgba(0, 74, 173, 0.18);
       box-shadow: 0 25px 60px rgba(11, 19, 43, 0.24), 0 4px 16px rgba(0, 74, 173, 0.08);
@@ -567,7 +567,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1.2rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
     }
 
@@ -625,7 +625,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
 
     /* Cards Mobile de Lojas */
     .store-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 1rem;
@@ -646,7 +646,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       font-family: var(--font-headers, 'Outfit', sans-serif);
       font-size: 1.05rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
     }
 
     .store-card-body {

@@ -18,7 +18,7 @@
   font-family: var(--font-outfit), 'Outfit', sans-serif;
   font-size: 1.6rem;
   font-weight: 700;
-  color: #0b132b;
+  color: var(--text-strong);
   margin: 0;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .card {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 16px;
   border: 1px solid rgba(0, 74, 173, 0.08);
   box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
@@ -48,7 +48,7 @@
   font-family: var(--font-outfit), 'Outfit', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #0b132b;
+  color: var(--text-strong);
   margin: 0;
 }
 
@@ -88,12 +88,12 @@ form {
 .form-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--gray-700, #334155);
+  color: var(--gray-700, var(--text));
 }
 
 .field-error {
   font-size: 0.78rem;
-  color: #b42318;
+  color: var(--danger-text);
 }
 
 .password-row {
@@ -120,12 +120,12 @@ form {
 
 .notice-warning {
   background: var(--warning-light);
-  color: #b54708;
+  color: var(--warning-text);
 }
 
 .notice-danger {
   background: var(--danger-light);
-  color: #b42318;
+  color: var(--danger-text);
   margin-bottom: 1rem;
 }
 
@@ -140,7 +140,7 @@ form {
 .created-title {
   margin: 0 0 0.6rem;
   font-weight: 600;
-  color: #047857;
+  color: var(--success-text);
   font-size: 0.9rem;
 }
 
@@ -162,7 +162,7 @@ form {
 }
 
 .credentials code {
-  background: #ffffff;
+  background: var(--surface);
   font-size: 0.85rem;
 }
 
@@ -210,7 +210,7 @@ form {
   align-items: center;
   justify-content: center;
   background: var(--primary-light);
-  color: var(--primary);
+  color: var(--link);
   font-weight: 700;
   font-family: var(--font-outfit), 'Outfit', sans-serif;
 }
@@ -224,7 +224,7 @@ form {
 
 .user-info strong {
   font-size: 0.9rem;
-  color: #0b132b;
+  color: var(--text-strong);
 }
 
 .user-info .muted {

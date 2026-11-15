@@ -112,14 +112,31 @@ export class TelegramAdapter implements OnApplicationBootstrap, OnModuleDestroy 
       ...payload,
     };
 
-    if (payload.callbackData) {
-      await ctx.answerCallbackQuery().catch(() => undefined);
-      // Tira os botões da mensagem clicada para não serem usados de novo
-      await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }).catch(() => undefined);
-    }
+    if (payload.callbackData) await ctx.answerCallbackQuery().catch(() => undefined);
 
     const replies = await this.engine.handle(incoming);
-    for (const reply of replies) {
+    let start = 0;
+    if (payload.callbackData) {
+      const first = replies[0];
+      const replaced =
+        first?.replace &&
+        (await ctx
+          .editMessageText(first.text, {
+            parse_mode: 'HTML',
+            link_preview_options: { is_disabled: true },
+            reply_markup: this.keyboard(first) ?? { inline_keyboard: [] },
+          })
+          .then(() => true)
+          .catch(() => false));
+      if (replaced) {
+        start = 1;
+      } else {
+        // Tira os botões da mensagem clicada para não serem usados de novo
+        await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }).catch(() => undefined);
+      }
+    }
+
+    for (const reply of replies.slice(start)) {
       await ctx.reply(reply.text, {
         parse_mode: 'HTML',
         link_preview_options: { is_disabled: true },

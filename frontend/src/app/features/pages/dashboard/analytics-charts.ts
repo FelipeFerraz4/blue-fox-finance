@@ -7,14 +7,37 @@ import {
 import { MONTH_LABELS, MONTH_NAMES } from './analytics.store';
 
 // Paleta: uma série = azul da marca; selecionado cheio, demais esmaecidos.
-export const BRAND = '#004aad';
-export const BRAND_MUTED = '#b9cbe8';
-const GHOST = '#d9dee6'; // "Outros" e séries agregadas
-const INK = '#0b132b';
-const INK_SECONDARY = '#475569';
-const MUTED = '#898781';
-const GRID = '#eef0f3';
-const AXIS = '#cbd5e1';
+// Uma versão por tema; setChartTheme() é chamado pelo dashboard quando o tema muda.
+const LIGHT = {
+  brand: '#004aad',
+  brandMuted: '#b9cbe8',
+  ghost: '#d9dee6', // "Outros" e séries agregadas
+  ink: '#0b132b',
+  inkSecondary: '#475569',
+  muted: '#898781',
+  grid: '#eef0f3',
+  axis: '#cbd5e1',
+  surface: '#ffffff',
+  border: '#e2e8f0',
+  emphasis: '#003780',
+};
+const DARK: typeof LIGHT = {
+  brand: '#38b6ff',
+  brandMuted: '#2b4f80',
+  ghost: '#3a4668',
+  ink: '#f1f5f9',
+  inkSecondary: '#b4c0d4',
+  muted: '#8b97b0',
+  grid: '#1f2a4d',
+  axis: '#34426e',
+  surface: '#141d3a',
+  border: '#26335a',
+  emphasis: '#6cc6ff',
+};
+let P = LIGHT;
+export function setChartTheme(theme: 'light' | 'dark'): void {
+  P = theme === 'dark' ? DARK : LIGHT;
+}
 const STATUS_GOOD = '#0ca30c';
 const STATUS_WARNING = '#fab219';
 
@@ -38,30 +61,30 @@ export function escapeHtml(text: string): string {
 const tooltipRow = (color: string, name: string, value: number) =>
   `<div style="display:flex;align-items:center;gap:8px;margin-top:4px">` +
   `<span style="display:inline-block;width:12px;height:3px;border-radius:2px;background:${color}"></span>` +
-  `<strong style="color:${INK}">${formatBRL(value)}</strong>` +
-  `<span style="color:${INK_SECONDARY}">${escapeHtml(name)}</span></div>`;
+  `<strong style="color:${P.ink}">${formatBRL(value)}</strong>` +
+  `<span style="color:${P.inkSecondary}">${escapeHtml(name)}</span></div>`;
 
-const BASE: EChartsCoreOption = {
+const base = (): EChartsCoreOption => ({
   animationDuration: 400,
   animationDurationUpdate: 300,
-  textStyle: { fontFamily: 'Inter, -apple-system, "Segoe UI", sans-serif', color: INK_SECONDARY },
+  textStyle: { fontFamily: 'Inter, -apple-system, "Segoe UI", sans-serif', color: P.inkSecondary },
   tooltip: {
-    backgroundColor: '#ffffff',
-    borderColor: '#e2e8f0',
+    backgroundColor: P.surface,
+    borderColor: P.border,
     borderWidth: 1,
     padding: [8, 12],
-    textStyle: { color: INK, fontSize: 12 },
+    textStyle: { color: P.ink, fontSize: 12 },
     extraCssText: 'box-shadow:0 8px 24px rgba(11,19,43,0.12);border-radius:10px;',
   },
-};
+});
 
-const valueAxis = {
+const valueAxis = () => ({
   type: 'value',
-  axisLabel: { color: MUTED, fontSize: 11, formatter: axisBRL },
-  splitLine: { lineStyle: { color: GRID, width: 1 } },
+  axisLabel: { color: P.muted, fontSize: 11, formatter: axisBRL },
+  splitLine: { lineStyle: { color: P.grid, width: 1 } },
   axisLine: { show: false },
   axisTick: { show: false },
-};
+});
 
 /**
  * Gastos por mês (barras horizontais, janeiro no topo). A comparação com o ano anterior
@@ -74,10 +97,10 @@ export function monthlyChartOptions(
   selected: number | undefined,
 ): EChartsCoreOption {
   return {
-    ...BASE,
+    ...base(),
     grid: { left: 4, right: 72, top: 4, bottom: 4, containLabel: true },
     tooltip: {
-      ...(BASE['tooltip'] as object),
+      ...(base()['tooltip'] as object),
       trigger: 'item',
       formatter: (p: any) => {
         const i = p.dataIndex;
@@ -87,9 +110,9 @@ export function monthlyChartOptions(
             ? `${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1}`
             : `${year - 1}: sem gastos`;
         return (
-          `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[i]} de ${year}</div>` +
+          `<div style="font-weight:600;color:${P.ink}">${MONTH_NAMES[i]} de ${year}</div>` +
           `<div style="margin-top:4px"><strong>${formatBRL(current[i])}</strong></div>` +
-          `<div style="color:${INK_SECONDARY};margin-top:2px">${comparison}</div>`
+          `<div style="color:${P.inkSecondary};margin-top:2px">${comparison}</div>`
         );
       },
     },
@@ -100,7 +123,7 @@ export function monthlyChartOptions(
       data: MONTH_LABELS,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: INK_SECONDARY, fontSize: 12 },
+      axisLabel: { color: P.inkSecondary, fontSize: 12 },
     },
     series: [
       {
@@ -112,18 +135,18 @@ export function monthlyChartOptions(
           const dimmed = selected !== undefined && !isSelected;
           return {
             value,
-            itemStyle: { color: dimmed ? BRAND_MUTED : BRAND, borderRadius: [0, 4, 4, 0] },
+            itemStyle: { color: dimmed ? P.brandMuted : P.brand, borderRadius: [0, 4, 4, 0] },
             label: {
               show: value > 0,
               position: 'right',
-              color: dimmed ? MUTED : INK,
+              color: dimmed ? P.muted : P.ink,
               fontWeight: isSelected ? 700 : 600,
               fontSize: 11,
               formatter: () => axisBRL(value),
             },
           };
         }),
-        emphasis: { itemStyle: { color: '#003780' } },
+        emphasis: { itemStyle: { color: P.emphasis } },
       },
     ],
   };
@@ -148,17 +171,17 @@ export function topSlices(slices: DimensionSlice[], topN: number): DimensionSlic
 export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string | undefined): EChartsCoreOption {
   const total = slices.reduce((acc, s) => acc + s.total, 0);
   return {
-    ...BASE,
+    ...base(),
     grid: { left: 4, right: 72, top: 4, bottom: 4, containLabel: true },
     tooltip: {
-      ...(BASE['tooltip'] as object),
+      ...(base()['tooltip'] as object),
       trigger: 'item',
       formatter: (p: any) => {
         const s = slices[p.dataIndex];
         const pct = total > 0 ? ((s.total / total) * 100).toFixed(1) : '0';
         return (
-          `<div style="font-weight:600;color:${INK}">${escapeHtml(s.label)}</div>` +
-          `<div style="margin-top:4px"><strong>${formatBRL(s.total)}</strong> <span style="color:${MUTED}">· ${pct}%</span></div>`
+          `<div style="font-weight:600;color:${P.ink}">${escapeHtml(s.label)}</div>` +
+          `<div style="margin-top:4px"><strong>${formatBRL(s.total)}</strong> <span style="color:${P.muted}">· ${pct}%</span></div>`
         );
       },
     },
@@ -170,7 +193,7 @@ export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string |
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: INK_SECONDARY,
+        color: P.inkSecondary,
         fontSize: 12,
         width: 130,
         overflow: 'truncate',
@@ -188,20 +211,20 @@ export function rankedBarOptions(slices: DimensionSlice[], selectedKey: string |
           return {
             value: s.total,
             itemStyle: {
-              color: isOthers ? GHOST : dimmed ? BRAND_MUTED : BRAND,
+              color: isOthers ? P.ghost : dimmed ? P.brandMuted : P.brand,
               borderRadius: [0, 4, 4, 0],
             },
             label: {
               show: s.total > 0,
               position: 'right',
-              color: dimmed || isOthers ? MUTED : INK,
+              color: dimmed || isOthers ? P.muted : P.ink,
               fontWeight: isSelected ? 700 : 600,
               fontSize: 11,
               formatter: () => axisBRL(s.total),
             },
           };
         }),
-        emphasis: { itemStyle: { color: '#003780' } },
+        emphasis: { itemStyle: { color: P.emphasis } },
       },
     ],
   };
@@ -225,7 +248,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
     type: 'bar',
     stack: 'total',
     barMaxWidth: 28,
-    itemStyle: { color: CATEGORICAL[idx], borderColor: '#ffffff', borderWidth: 1 },
+    itemStyle: { color: CATEGORICAL[idx], borderColor: P.surface, borderWidth: 1 },
     data: fc.meses.map((m) => m.porMeio[meio.id] ?? 0),
   }));
   if (othersIds.length) {
@@ -234,7 +257,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
       type: 'bar',
       stack: 'total',
       barMaxWidth: 28,
-      itemStyle: { color: GHOST, borderColor: '#ffffff', borderWidth: 1 },
+      itemStyle: { color: P.ghost, borderColor: P.surface, borderWidth: 1 },
       data: fc.meses.map((m) => othersIds.reduce((acc, id) => acc + (m.porMeio[id] ?? 0), 0)),
     });
   }
@@ -242,7 +265,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
   if (series.length) series[series.length - 1].itemStyle.borderRadius = [4, 4, 0, 0];
 
   return {
-    ...BASE,
+    ...base(),
     grid: { left: 8, right: 8, top: 40, bottom: 4, containLabel: true },
     legend: {
       top: 0,
@@ -251,10 +274,10 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
       itemWidth: 12,
       itemHeight: 12,
       icon: 'roundRect',
-      textStyle: { color: INK_SECONDARY, fontSize: 12 },
+      textStyle: { color: P.inkSecondary, fontSize: 12 },
     },
     tooltip: {
-      ...(BASE['tooltip'] as object),
+      ...(base()['tooltip'] as object),
       trigger: 'axis',
       axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,74,173,0.05)' } },
       formatter: (params: any[]) => {
@@ -263,17 +286,17 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
           .filter((p) => p.value > 0)
           .map((p) => tooltipRow(p.color, p.seriesName, p.value))
           .join('');
-        return `<div style="font-weight:600;color:${INK}">${labels[i]} · ${formatBRL(fc.meses[i].total)}</div>${rows}`;
+        return `<div style="font-weight:600;color:${P.ink}">${labels[i]} · ${formatBRL(fc.meses[i].total)}</div>${rows}`;
       },
     },
     xAxis: {
       type: 'category',
       data: labels,
-      axisLine: { lineStyle: { color: AXIS } },
+      axisLine: { lineStyle: { color: P.axis } },
       axisTick: { show: false },
-      axisLabel: { color: INK_SECONDARY, fontSize: 11 },
+      axisLabel: { color: P.inkSecondary, fontSize: 11 },
     },
-    yAxis: valueAxis,
+    yAxis: valueAxis(),
     series,
   };
 }
@@ -282,7 +305,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
 export function billsOptions(contas: BillsMonthSummary[], selected: number | undefined): EChartsCoreOption {
   const dim = (i: number) => selected !== undefined && selected !== i + 1;
   return {
-    ...BASE,
+    ...base(),
     grid: { left: 8, right: 8, top: 36, bottom: 4, containLabel: true },
     legend: {
       top: 0,
@@ -290,17 +313,17 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
       itemWidth: 12,
       itemHeight: 12,
       icon: 'roundRect',
-      textStyle: { color: INK_SECONDARY, fontSize: 12 },
+      textStyle: { color: P.inkSecondary, fontSize: 12 },
       data: ['Pago', 'Pendente'],
     },
     tooltip: {
-      ...(BASE['tooltip'] as object),
+      ...(base()['tooltip'] as object),
       trigger: 'axis',
       axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,74,173,0.05)' } },
       formatter: (params: any[]) => {
         const c = contas[params[0].dataIndex];
         return (
-          `<div style="font-weight:600;color:${INK}">${MONTH_NAMES[c.mes - 1]}</div>` +
+          `<div style="font-weight:600;color:${P.ink}">${MONTH_NAMES[c.mes - 1]}</div>` +
           tooltipRow(STATUS_GOOD, 'Pago', c.pago) +
           tooltipRow(STATUS_WARNING, 'Pendente', c.pendente)
         );
@@ -309,11 +332,11 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
     xAxis: {
       type: 'category',
       data: MONTH_LABELS,
-      axisLine: { lineStyle: { color: AXIS } },
+      axisLine: { lineStyle: { color: P.axis } },
       axisTick: { show: false },
-      axisLabel: { color: INK_SECONDARY, fontSize: 11 },
+      axisLabel: { color: P.inkSecondary, fontSize: 11 },
     },
-    yAxis: valueAxis,
+    yAxis: valueAxis(),
     series: [
       {
         name: 'Pago',
@@ -325,7 +348,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
         cursor: 'pointer',
         data: contas.map((c, i) => ({
           value: c.pago,
-          itemStyle: { color: STATUS_GOOD, opacity: dim(i) ? 0.3 : 1, borderColor: '#ffffff', borderWidth: 1 },
+          itemStyle: { color: STATUS_GOOD, opacity: dim(i) ? 0.3 : 1, borderColor: P.surface, borderWidth: 1 },
         })),
       },
       {
@@ -340,7 +363,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
           itemStyle: {
             color: STATUS_WARNING,
             opacity: dim(i) ? 0.3 : 1,
-            borderColor: '#ffffff',
+            borderColor: P.surface,
             borderWidth: 1,
             borderRadius: [4, 4, 0, 0],
           },

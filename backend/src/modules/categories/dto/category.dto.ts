@@ -1,4 +1,5 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, ValidateIf } from 'class-validator';
+import { HEX_COLOR } from '../../../common/constants/category-colors';
 
 export class CreateItemCategoryDto {
   @IsString({ message: 'O nome da categoria deve ser um texto.' })
@@ -7,6 +8,8 @@ export class CreateItemCategoryDto {
 
   @IsOptional()
   @IsString({ message: 'A cor deve ser um texto hexadecimal (ex: #38b6ff).' })
+  @ValidateIf((o) => !!o.cor)
+  @Matches(HEX_COLOR, { message: 'A cor deve ser um código hexadecimal (ex: #ff8800).' })
   cor?: string;
 
   @IsOptional()
@@ -26,6 +29,8 @@ export class UpdateItemCategoryDto {
 
   @IsOptional()
   @IsString({ message: 'A cor deve ser um texto hexadecimal.' })
+  @ValidateIf((o) => !!o.cor)
+  @Matches(HEX_COLOR, { message: 'A cor deve ser um código hexadecimal (ex: #ff8800).' })
   cor?: string;
 
   @IsOptional()

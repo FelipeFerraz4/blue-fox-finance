@@ -353,7 +353,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      color: #004aad;
+      color: var(--link);
       text-decoration: none;
       font-weight: 600;
       transition: color 0.15s ease;
@@ -364,11 +364,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .breadcrumb-separator {
-      color: #94a3b8;
+      color: var(--text-faint);
     }
 
     .breadcrumb-current {
-      color: #64748b;
+      color: var(--text-muted);
       font-weight: 500;
     }
 
@@ -391,7 +391,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
       letter-spacing: -0.02em;
       line-height: 1.25;
@@ -490,8 +490,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border: 1px solid rgba(56, 182, 255, 0.4);
       padding: 0.2rem 0.65rem;
       border-radius: 50px;
@@ -502,13 +502,13 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     .page-subtitle {
       font-family: var(--font-inter), sans-serif;
       font-size: 0.88rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.15rem 0 0 0;
     }
 
     /* Card de Filtros */
     .filter-card {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 14px;
       padding: 1rem 1.25rem;
       border: 1px solid rgba(0, 74, 173, 0.08);
@@ -532,25 +532,25 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
+      color: var(--text-faint);
       pointer-events: none;
     }
 
     .search-input {
       width: 100%;
       padding: 0.65rem 2.2rem 0.65rem 2.5rem;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 10px;
       font-size: 0.9rem;
       font-family: var(--font-inter), sans-serif;
       transition: all 0.2s ease;
-      background: #f8fafc;
+      background: var(--surface-2);
       box-sizing: border-box;
     }
 
     .search-input:focus {
       outline: none;
-      background: #ffffff;
+      background: var(--surface);
       border-color: #38b6ff;
       box-shadow: 0 0 0 3px rgba(56, 182, 255, 0.15);
     }
@@ -562,7 +562,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: #94a3b8;
+      color: var(--text-faint);
       cursor: pointer;
       font-size: 0.9rem;
     }
@@ -574,19 +574,19 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .stat-pill {
-      background: #f1f5f9;
+      background: var(--surface-3);
       padding: 0.4rem 0.85rem;
       border-radius: 8px;
       font-size: 0.82rem;
-      color: #475569;
+      color: var(--text-2);
       display: flex;
       gap: 0.4rem;
       font-weight: 500;
     }
 
     .stat-pill.active {
-      background: #dcfce7;
-      color: #15803d;
+      background: var(--success-bg);
+      color: var(--success-text);
       font-weight: 600;
     }
 
@@ -607,20 +607,20 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .feedback-alert.success {
-      background: #dcfce7;
-      color: #15803d;
+      background: var(--success-bg);
+      color: var(--success-text);
       border: 1px solid rgba(21, 128, 61, 0.2);
     }
 
     .feedback-alert.error {
-      background: #fee2e2;
-      color: #b91c1c;
+      background: var(--danger-bg);
+      color: var(--danger-text);
       border: 1px solid rgba(185, 28, 28, 0.2);
     }
 
     /* Tabela */
     .table-card {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 14px;
       border: 1px solid rgba(0, 74, 173, 0.08);
       box-shadow: 0 4px 16px rgba(0, 74, 173, 0.04);
@@ -638,26 +638,26 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .custom-table th {
-      background: #f8fafc;
+      background: var(--surface-2);
       padding: 0.95rem 1.25rem;
       font-family: var(--font-outfit), sans-serif;
       font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #475569;
-      border-bottom: 1px solid #e2e8f0;
+      color: var(--text-2);
+      border-bottom: 1px solid var(--border);
     }
 
     .custom-table td {
       padding: 1rem 1.25rem;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-subtle);
       vertical-align: middle;
       font-size: 0.9rem;
     }
 
     .table-row:hover td {
-      background: #f8fafc;
+      background: var(--surface-2);
     }
 
     .store-cat-name-box {
@@ -670,8 +670,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -680,11 +680,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
     .category-title {
       font-weight: 600;
-      color: #0b132b;
+      color: var(--text-strong);
     }
 
     .category-desc {
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 0.86rem;
     }
 
@@ -697,15 +697,15 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .badge-active {
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
     }
 
     .badge-inactive {
-      background: #f1f5f9;
-      color: #64748b;
-      border: 1px solid #e2e8f0;
+      background: var(--surface-3);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
 
     .action-buttons {
@@ -723,20 +723,20 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      background: #f8fafc;
-      color: #64748b;
+      background: var(--surface-2);
+      color: var(--text-muted);
       transition: all 0.15s ease;
     }
 
     .btn-edit:hover {
-      background: #eff6ff;
-      color: #004aad;
+      background: var(--surface-brand);
+      color: var(--link);
       border-color: rgba(0, 74, 173, 0.2);
     }
 
     .btn-delete:hover {
-      background: #fee2e2;
-      color: #dc2626;
+      background: var(--danger-bg);
+      color: var(--danger-text);
       border-color: rgba(220, 38, 38, 0.2);
     }
 
@@ -746,13 +746,13 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       flex-direction: column;
       align-items: center;
       gap: 0.75rem;
-      color: #94a3b8;
+      color: var(--text-faint);
     }
 
     .empty-text {
       margin: 0;
       font-size: 0.95rem;
-      color: #64748b;
+      color: var(--text-muted);
     }
 
     /* Modal */
@@ -775,7 +775,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
     }
 
     .modal-card {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 20px;
       border: 1.5px solid rgba(0, 74, 173, 0.18);
       width: 100%;
@@ -796,7 +796,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       display: flex;
       align-items: center;
       gap: 0.85rem;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-subtle);
       position: relative;
       flex-shrink: 0;
     }
@@ -806,7 +806,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       height: 42px;
       border-radius: 10px;
       background: linear-gradient(135deg, rgba(56, 182, 255, 0.2) 0%, rgba(0, 74, 173, 0.2) 100%);
-      color: #004aad;
+      color: var(--link);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -817,13 +817,13 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       font-family: var(--font-outfit), sans-serif;
       font-size: 1.15rem;
       font-weight: 700;
-      color: #0b132b;
+      color: var(--text-strong);
       margin: 0;
     }
 
     .modal-subtitle {
       font-size: 0.8rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin: 0.2rem 0 0 0;
     }
 
@@ -833,7 +833,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       top: 1.25rem;
       background: none;
       border: none;
-      color: #94a3b8;
+      color: var(--text-faint);
       font-size: 1.1rem;
       cursor: pointer;
     }
@@ -860,17 +860,17 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       font-family: var(--font-inter), sans-serif;
       font-size: 0.84rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--text);
     }
 
     .required {
-      color: #ef4444;
+      color: var(--danger-text);
     }
 
     .form-control {
       width: 100%;
       padding: 0.65rem 0.85rem;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-strong);
       border-radius: 8px;
       font-size: 0.9rem;
       box-sizing: border-box;
@@ -893,7 +893,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       align-items: center;
       gap: 0.6rem;
       font-size: 0.88rem;
-      color: #334155;
+      color: var(--text);
       font-weight: 500;
       cursor: pointer;
     }
@@ -910,8 +910,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
-      border-top: 1px solid #f1f5f9;
-      background: #f8fafc;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-2);
       flex-shrink: 0;
       margin-top: auto;
     }
@@ -922,7 +922,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-      color: #64748b;
+      color: var(--text-muted);
     }
 
     .spinner {
@@ -980,7 +980,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
     /* Cards Mobile de Categorias */
     .cat-mobile-card {
-      background: #ffffff;
+      background: var(--surface);
       border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 1rem;

@@ -1,7 +1,7 @@
 /* Sidebar Interna com cor de fundo #f8fafc (igual à página) */
 .internal-sidebar {
   width: 250px;
-  background-color: #f8fafc;
+  background-color: var(--surface-2);
   border-right: 1px solid rgba(0, 74, 173, 0.09);
   display: flex;
   flex-direction: column;
@@ -27,7 +27,7 @@
   justify-content: space-between;
   padding: 0 0.85rem;
   border-bottom: 1px solid rgba(0, 74, 173, 0.07);
-  background-color: #f1f5f9;
+  background-color: var(--surface-3);
   flex-shrink: 0;
 }
 
@@ -42,7 +42,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #004aad;
+  color: var(--link);
 }
 
 /* Botão Toggle no Topo */
@@ -50,9 +50,9 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid rgba(0, 74, 173, 0.15);
-  color: #004aad;
+  color: var(--link);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,7 +63,7 @@
 }
 
 .btn-toggle-top:hover {
-  background: #eff6ff;
+  background: var(--surface-brand);
   border-color: #004aad;
   transform: scale(1.05);
 }
@@ -103,7 +103,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #94a3b8;
+  color: var(--text-faint);
   padding: 0 0.65rem;
   margin-bottom: 0.25rem;
   white-space: nowrap;
@@ -123,7 +123,7 @@
   gap: 0.75rem;
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
-  color: #475569;
+  color: var(--text-2);
   text-decoration: none;
   font-family: var(--font-inter), sans-serif;
   font-size: 0.86rem;
@@ -133,19 +133,19 @@
 }
 
 .nav-link:hover {
-  background: #eff6ff;
-  color: #004aad;
+  background: var(--surface-brand);
+  color: var(--link);
 }
 
 .nav-link.active {
-  background: #eff6ff;
-  color: #004aad;
+  background: var(--surface-brand);
+  color: var(--link);
   font-weight: 700;
   box-shadow: inset 3px 0 0 #004aad, 0 2px 8px rgba(0, 74, 173, 0.06);
 }
 
 .nav-link.active .link-icon {
-  color: #004aad;
+  color: var(--link);
 }
 
 .link-icon {
@@ -154,7 +154,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: var(--text-muted);
   flex-shrink: 0;
   transition: color 0.15s ease;
 }
@@ -169,16 +169,16 @@
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  background: #eff6ff;
-  color: #004aad;
+  background: var(--surface-brand);
+  color: var(--link);
   border: 1px solid rgba(0, 74, 173, 0.2);
   padding: 0.1rem 0.4rem;
   border-radius: 50px;
 }
 
 .highlight-action {
-  background: #eff6ff;
-  color: #004aad;
+  background: var(--surface-brand);
+  color: var(--link);
   border: 1px dashed rgba(0, 74, 173, 0.25);
 }
 
@@ -250,7 +250,7 @@
   height: 9px;
   border-radius: 50%;
   background: #f59e0b;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--surface);
 }
 
 .alert-count.alert-danger,
