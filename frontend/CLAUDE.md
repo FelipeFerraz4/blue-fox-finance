@@ -7,13 +7,13 @@ Este documento serve como guia de arquitetura e convenções do frontend do **Bl
 O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e manutenção:
 
 ### 1. `src/app/core` (Singletons e Lógica Global)
-- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`accessibility/`, `admin-users/`, `auth/`, `bot/`, `buyers/`, `categories/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `seo/`, `sidebar/`, `stores/`, `theme/`, `user/`); conteúdo estático em `core/content/` (`seo.ts`).
+- **Serviços Globais (`core/services/`):** Serviços de API e provedores compartilhados entre toda a aplicação (`accessibility/`, `admin-users/`, `auth/`, `bot/`, `buyers/`, `categories/`, `analytics/`, `expenses/`, `bills/`, `payment-methods/`, `seo/`, `sidebar/`, `stores/`, `theme/`, `translation/`, `user/`); textos das páginas públicas em `core/content/{pt,en}/` (`common`, `home`, `about`, `updates`).
 - **Guards (`core/guards/`):** Proteção de rotas com base em autenticação e papéis (`auth.guard.ts`).
 - **Interceptors (`core/interceptors/`):** Interceptação HTTP global como injeção de tokens JWT (`auth.interceptor.ts`).
 - **CoreModule (`core/core-module.ts`):** Módulo central de registro.
 
 ### 2. `src/app/features` (Páginas e Módulos de Domínio)
-- **Páginas Principais (`features/pages/main/`):** Rotas públicas da aplicação (`home/`, `about/`, `updates/`).
+- **Páginas Principais (`features/pages/main/`):** Rotas públicas da aplicação (`home/`, `about/`, `updates/`), montadas em `/pt` e `/en` (seção Idiomas).
 - **Módulos de Domínio (`features/pages/`):**
   - `dashboard/`: Dashboard único estilo Power BI com filtro cruzado (`analytics.store.ts`), opções dos gráficos em `analytics-charts.ts` (paleta categórica validada para daltonismo, uma série = azul da marca) e `chart-card/` como moldura dos painéis. ECharts é registrado em `echarts.setup.ts` e fornecido só no componente (`provideEchartsCore`), mantendo-o fora do bundle inicial.
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação/edição (`expense-form/`). Comprador, loja e categoria só cadastrados: o "+ Cadastrar …" dos dropdowns cria o item pela API e já seleciona (com `[createOnBlur]="false"`, para não cadastrar ao sair do campo); categorias vêm só de `CategoriaItem`, sem lista fixa.
@@ -24,7 +24,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
   - `bills/`: Contas a pagar (vencimentos do mês, marcar como paga, cadastro) e `bill-alerts-card/` (avisos no dashboard). O `BillsService` expõe o signal `alerts`, usado pelo selo da sidebar.
 
 ### 3. `src/app/shared` (Componentes Reutilizáveis e Tipos)
-- **Componentes Gerais (`shared/components/general/`):** Componentes comuns de layout e UI (`navbar/`, `sidebar/`, `confirm-modal/`, `notice-modal/`, `searchable-dropdown/`, `a11y-toolbar/`).
+- **Componentes Gerais (`shared/components/general/`):** Componentes comuns de layout e UI (`navbar/`, `sidebar/`, `confirm-modal/`, `notice-modal/`, `searchable-dropdown/`, `a11y-toolbar/`). Cabeçalho e rodapé das páginas públicas em `shared/components/public/` (`public-header/` com o seletor PT | EN, `public-footer/`).
 - **Modelos e Tipos (`shared/model/types/`):** Interfaces e tipos TypeScript de todas as entidades do domínio financeiro (`admin-user.model.ts`, `analytics.model.ts`, `bill.model.ts`, `bot.model.ts`, `buyer.model.ts`, `category.model.ts`, `lancamento.model.ts`, `payment-method.model.ts`, `store.model.ts`).
 - **Mocks (`shared/model/mocks/`):** Mocks e dados estáticos de teste.
 
@@ -37,14 +37,21 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 - Guias para outros projetos: skills `bluefox-theming` e `bluefox-accessibility` (`.agents/skills/` na raiz do workspace).
 
 ## 🔎 SEO
-- **`SeoService`** (`core/services/seo/`, mesmo modelo do Blue Fox Global Group) é iniciado no `AppComponent` e age por rota: rota com `data: { seo: 'home' | 'about' | 'updates' }` recebe title, description, Open Graph/Twitter, canonical absoluto (`https://finance.bluefoxglobalgroup.com`) e, na home, JSON-LD `WebApplication`; **qualquer outra rota** recebe `robots: noindex, nofollow` e fica sem canonical. Textos em `core/content/seo.ts`.
+- **`SeoService`** (`core/services/seo/`, mesmo modelo do Blue Fox Global Group) é iniciado no `AppComponent` e age por rota: rota com `data: { seo: 'home' | 'about' | 'updates' }` recebe, no idioma da URL, title, description, Open Graph/Twitter (`og:locale` + `og:locale:alternate`), canonical absoluto (`https://finance.bluefoxglobalgroup.com/pt/...`), hreflang `pt`/`en`/`x-default` (= pt) e, na home, JSON-LD `WebApplication`; **qualquer outra rota** recebe `robots: noindex, nofollow` e fica sem canonical nem hreflang. Textos no `seo` de cada página em `core/content/{pt,en}`.
 - **nginx** também manda `X-Robots-Tag: noindex, nofollow` nas rotas internas e em `/api/` (`map $request_uri`, porque o `try_files` troca o `$uri`). Rota interna nova = incluir no `map` do `nginx.conf`.
-- `public/robots.txt` (não bloqueia as internas de propósito: o Google precisa vê-las para ler o noindex), `public/sitemap.xml` (só públicas) e `public/og-default.jpg` (1200x630, < 100 KB). O `index.html` tem description e OG padrão para robôs que não executam JS.
-- **Página pública nova:** `data.seo` na rota + texto em `core/content/seo.ts` + entrada no `sitemap.xml`.
+- `public/robots.txt` (não bloqueia as internas de propósito: o Google precisa vê-las para ler o noindex), `public/sitemap.xml` (só públicas, as 6 URLs com `xhtml:link` de cada idioma) e `public/og-default.jpg` (1200x630, < 100 KB). O `index.html` tem description e OG padrão para robôs que não executam JS.
+- **Página pública nova:** rota em `publicPages` (`app.routes.ts`) com `data.seo` + redirecionamento da URL sem idioma + textos em `core/content/pt` e `en` (com `seo`) + `PublicPage` no `TranslationService` + regex do `isPublicPage` no `AppComponent` + entradas no `sitemap.xml`.
+
+## 🌐 Idiomas (páginas públicas)
+- **URL define o idioma** (como no Global Group): `/pt`, `/pt/about`, `/pt/updates` e `/en/...`. `/`, `/home`, `/about` e `/updates` redirecionam (`redirectTo` com `preferredLanguage()`) para a escolha salva em `bf-lang`; sem escolha, navegador em português → `/pt`, outro idioma → `/en`.
+- **`TranslationService`** (`core/services/translation/`): signals `lang`, `page` e `content` (dicionário de `core/content/{pt,en}`), `path(page)` para links no idioma atual, `pathIn(lang)` para o seletor e `remember(lang)`. Mantém o `lang` do `<html>` (`pt-BR`/`en`; rotas internas ficam `pt-BR`), usado também pela leitura em voz alta para escolher a voz.
+- **Textos:** o arquivo PT define o tipo (`typeof`), e o EN é tipado por ele: campo faltando no inglês quebra o build. Campos `html` (só `<strong>`) vão para `[innerHTML]`; o CSS deles usa `:host ::ng-deep` porque o conteúdo injetado fica fora do encapsulamento.
+- **Seletor PT | EN** no cabeçalho (e na gaveta do celular): links reais para a mesma página no outro idioma (o Google segue), com `hreflang`/`lang` e `aria-current`.
+- Sistema interno, API e bot continuam em português até as etapas 4 e 5.
 
 ## 🗺️ Roadmap: SEO e internacionalização (referência: blue-fox-global-group)
 1. ✅ **SEO básico** (acima).
-2. **Páginas públicas em `/pt` e `/en`** (como o Global Group): textos em `core/content/{pt,en}`, `TranslationService` com o idioma vindo da URL, hreflang, sitemap com os dois idiomas; `/`, `/home`, `/about`, `/updates` redirecionam para `/pt/...`.
+2. ✅ **Páginas públicas em `/pt` e `/en`** (seção Idiomas acima).
 3. **Prerender das públicas** (`@angular/ssr` com `outputMode: 'static'`: públicas `Prerender`, internas `Client`; continua só nginx, sem Node). Exige `isPlatformBrowser` em Keycloak, `ThemeService`, `AccessibilityService` e `localStorage`.
 4. **Sistema interno traduzido:** sem idioma na URL; preferência do usuário. **Idioma e país são separados:** o idioma escolhe os textos; o **país/região** define moeda e formatação de data e número (ex.: Brasil → BRL, `dd/MM/yyyy`, `1.234,56`; EUA → USD, `MM/dd/yyyy`, `1,234.56`; Portugal → EUR). Preferências em `localStorage` (`bf-lang`, `bf-region`) e no backend (preferências do usuário, para o bot e outros aparelhos). Pipes próprios com `Intl` (o `LOCALE_ID` do Angular é fixo), meses do ECharts por `Intl`, login do Keycloak com `locale`. A moeda é só de exibição (os valores não são convertidos): é a moeda em que o usuário registra os gastos.
 5. **API e bot:** `Accept-Language` nas mensagens de erro; o bot usa a preferência salva (ou o `language_code` do Telegram) e formata valores pela região (hoje `BotFormat.brl`).

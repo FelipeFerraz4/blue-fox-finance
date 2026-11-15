@@ -9,6 +9,7 @@ import { A11yToolbarComponent } from './shared/components/general/a11y-toolbar/a
 import { ThemeService } from './core/services/theme/theme.service';
 import { AccessibilityService } from './core/services/accessibility/accessibility.service';
 import { SeoService } from './core/services/seo/seo.service';
+import { TranslationService } from './core/services/translation/translation.service';
 
 @Component({
   selector: 'app-root',
@@ -89,6 +90,8 @@ export class AppComponent implements OnInit {
     _theme: ThemeService,
     _a11y: AccessibilityService,
     seo: SeoService,
+    // Idioma das páginas públicas (pela URL) e o lang do <html>
+    _translation: TranslationService,
   ) {
     this.updateLayoutState(this.router.url);
     // Meta tags por rota: públicas indexadas, internas com noindex
@@ -115,11 +118,7 @@ export class AppComponent implements OnInit {
       return;
     }
     const cleanUrl = url.split('?')[0].split('#')[0];
-    this.isPublicPage =
-      cleanUrl === '' ||
-      cleanUrl === '/' ||
-      cleanUrl === '/home' ||
-      cleanUrl === '/about' ||
-      cleanUrl === '/updates';
+    // Páginas públicas em /pt e /en, e as URLs antigas sem idioma (redirecionam)
+    this.isPublicPage = /^\/?((pt|en)(\/(about|updates))?|home|about|updates)?\/?$/.test(cleanUrl);
   }
 }

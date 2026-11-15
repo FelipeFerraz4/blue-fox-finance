@@ -1,0 +1,274 @@
+@let c = i18n.content().home;
+@let common = i18n.content().common;
+<div class="home-wrapper" id="inicio">
+  <app-public-header />
+
+  <!-- 2. Hero Section com Degradê Refinado e Título Nítido -->
+  <section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>{{ c.hero.badge }}</span>
+      </div>
+
+      <h1 class="hero-title">
+        {{ c.hero.title }}
+        <span class="title-highlight">{{ c.hero.highlight }}</span>
+      </h1>
+
+      <p class="hero-subtitle">{{ c.hero.subtitle }}</p>
+
+      <!-- Apenas o botão de Login conforme solicitado -->
+      <div class="hero-buttons">
+        <a routerLink="/dashboard" class="hero-btn-login">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>{{ common.loginLong }}</span>
+        </a>
+
+        <a [routerLink]="i18n.path('about')" class="hero-btn-secondary">
+          <span>{{ c.hero.secondary }}</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Mockup Fiel do Dashboard (Apenas dados reais já implementados) -->
+      <div class="preview-card-wrap" role="img" [attr.aria-label]="c.mockup.previewLabel">
+        <div class="preview-card-glow"></div>
+        <div class="preview-card">
+          <div class="mockup-header">
+            <div class="window-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="mockup-url-bar">
+              <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span>bluefox-finance/dashboard</span>
+            </div>
+            <div class="mockup-badge">{{ c.mockup.badge }}</div>
+          </div>
+
+          <div class="mockup-body">
+            <div class="mockup-stats-grid">
+              <div class="mstat-card blue">
+                <div class="mstat-label">{{ c.mockup.stats[0].label }}</div>
+                <div class="mstat-val">{{ c.mockup.stats[0].value }}</div>
+                <div class="mstat-sub">{{ c.mockup.stats[0].sub }}</div>
+              </div>
+              <div class="mstat-card cyan">
+                <div class="mstat-label">{{ c.mockup.stats[1].label }}</div>
+                <div class="mstat-val">{{ c.mockup.stats[1].value }}</div>
+                <div class="mstat-sub">{{ c.mockup.stats[1].sub }}</div>
+              </div>
+              <div class="mstat-card green">
+                <div class="mstat-label">{{ c.mockup.stats[2].label }}</div>
+                <div class="mstat-val">{{ c.mockup.stats[2].value }}</div>
+                <div class="mstat-sub">{{ c.mockup.stats[2].sub }}</div>
+              </div>
+              <div class="mstat-card purple">
+                <div class="mstat-label">{{ c.mockup.stats[3].label }}</div>
+                <div class="mstat-val">{{ c.mockup.stats[3].value }}</div>
+                <div class="mstat-sub">{{ c.mockup.stats[3].sub }}</div>
+              </div>
+            </div>
+
+            <div class="mockup-features-strip">
+              <div class="mstrip-item">
+                <span class="badge-mini-dot"></span>
+                <span>{{ c.mockup.strip[0] }}</span>
+              </div>
+              <div class="mstrip-item">
+                <span class="badge-mini-dot"></span>
+                <span>{{ c.mockup.strip[1] }}</span>
+              </div>
+              <div class="mstrip-item">
+                <span class="badge-mini-dot"></span>
+                <span>{{ c.mockup.strip[2] }}</span>
+              </div>
+              <div class="mstrip-item">
+                <span class="badge-mini-dot"></span>
+                <span>{{ c.mockup.strip[3] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Recursos Já Implementados no Sistema -->
+  <section class="features-section">
+    <div class="section-container">
+      <div class="section-badge">{{ c.features.badge }}</div>
+      <h2 class="section-title">{{ c.features.title }}</h2>
+      <p class="section-subtitle">{{ c.features.subtitle }}</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[0].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[0].desc }}</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-cyan">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[1].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[1].desc }}</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-teal">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[2].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[2].desc }}</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9"/>
+              <rect x="14" y="3" width="7" height="5"/>
+              <rect x="14" y="12" width="7" height="9"/>
+              <rect x="3" y="16" width="7" height="5"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[3].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[3].desc }}</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-teal">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <polyline points="9 16 11 18 15 14"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[4].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[4].desc }}</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3 class="feature-name">{{ c.features.items[5].name }}</h3>
+          <p class="feature-desc">{{ c.features.items[5].desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Resumo da Seção SOBRE na Home com Link para a Página Completa /about -->
+  <section class="about-section">
+    <div class="section-container">
+      <div class="about-card">
+        <div class="about-header">
+          <div class="section-badge">{{ c.about.badge }}</div>
+          <h2 class="about-main-title">{{ c.about.title }}</h2>
+          <p class="about-subtitle">{{ c.about.subtitle }}</p>
+        </div>
+
+        <div class="about-summary-grid">
+          <!-- Item 1: Fundação -->
+          <div class="about-summary-box">
+            <div class="summary-box-icon icon-blue">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div class="summary-box-content">
+              <h3 class="summary-box-title">{{ c.about.boxes[0].title }}</h3>
+              <p class="summary-box-text" [innerHTML]="c.about.boxes[0].html"></p>
+            </div>
+          </div>
+
+          <!-- Item 2: Abertura ao Público -->
+          <div class="about-summary-box">
+            <div class="summary-box-icon icon-teal">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div class="summary-box-content">
+              <h3 class="summary-box-title">{{ c.about.boxes[1].title }}</h3>
+              <p class="summary-box-text" [innerHTML]="c.about.boxes[1].html"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão de Acesso à Página Completa de Sobre -->
+        <div class="about-cta-center">
+          <a [routerLink]="i18n.path('about')" class="btn-read-full-story">
+            <span>{{ c.about.cta }}</span>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Chamada Final Discreta (Apenas botão de Login) -->
+  <section class="cta-section">
+    <div class="section-container">
+      <div class="cta-box">
+        <h2 class="cta-title">{{ c.cta.title }}</h2>
+        <p class="cta-subtitle">{{ c.cta.subtitle }}</p>
+        <div class="cta-actions">
+          <a routerLink="/dashboard" class="hero-btn-login">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>{{ common.loginLong }}</span>
+          </a>
+
+          <a [routerLink]="i18n.path('updates')" class="btn-ghost-link">
+            <span>{{ c.cta.updates }}</span>
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <app-public-footer />
+</div>

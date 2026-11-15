@@ -1,0 +1,109 @@
+@let c = i18n.content().common;
+<header class="public-header">
+  <div class="header-container">
+    <a [routerLink]="i18n.path('home')" class="brand" (click)="closeMobileMenu()">
+      <div class="logo-box">
+        <img src="assets/logo.png" [alt]="c.logoAlt" class="brand-logo" />
+      </div>
+      <div class="brand-info">
+        <span class="brand-title">BlueFox</span>
+        <span class="brand-tag">Finance</span>
+      </div>
+    </a>
+
+    <nav class="public-nav" [attr.aria-label]="c.mainNav">
+      <a [routerLink]="i18n.path('home')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page" class="nav-link">{{ c.nav.home }}</a>
+      <a [routerLink]="i18n.path('about')" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">{{ c.nav.about }}</a>
+      <a [routerLink]="i18n.path('updates')" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">{{ c.nav.updates }}</a>
+    </nav>
+
+    <div class="header-actions">
+      <ng-container *ngTemplateOutlet="langSwitch" />
+
+      <a routerLink="/dashboard" class="btn-login-header" [title]="c.loginTitle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>{{ c.login }}</span>
+      </a>
+
+      <button
+        type="button"
+        class="hamburger-btn"
+        [class.open]="mobileMenuOpen"
+        (click)="toggleMobileMenu()"
+        [attr.aria-label]="c.menuOpen"
+        [attr.aria-expanded]="mobileMenuOpen"
+        aria-controls="public-mobile-drawer"
+      >
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Gaveta Mobile -->
+@if (mobileMenuOpen) {
+  <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+}
+<div id="public-mobile-drawer" class="mobile-drawer" [class.open]="mobileMenuOpen" [attr.aria-hidden]="!mobileMenuOpen" [attr.inert]="mobileMenuOpen ? null : ''">
+  <div class="mobile-drawer-header">
+    <div class="brand">
+      <div class="logo-box-sm">
+        <img src="assets/logo.png" alt="" class="brand-logo" />
+      </div>
+      <div class="brand-info">
+        <span class="brand-title-sm">BlueFox Finance</span>
+        <span class="brand-tag-sm">{{ c.menuTitle }}</span>
+      </div>
+    </div>
+    <button type="button" class="btn-drawer-close" (click)="closeMobileMenu()" [attr.aria-label]="c.menuClose">✕</button>
+  </div>
+
+  <nav class="mobile-nav-links" [attr.aria-label]="c.mainNav">
+    <a [routerLink]="i18n.path('home')" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page" (click)="closeMobileMenu()" class="mobile-nav-item">
+      <span>{{ c.nav.home }}</span>
+    </a>
+    <a [routerLink]="i18n.path('about')" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="closeMobileMenu()" class="mobile-nav-item">
+      <span>{{ c.nav.about }}</span>
+    </a>
+    <a [routerLink]="i18n.path('updates')" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="closeMobileMenu()" class="mobile-nav-item">
+      <span>{{ c.nav.updates }}</span>
+    </a>
+  </nav>
+
+  <div class="mobile-lang">
+    <ng-container *ngTemplateOutlet="langSwitch" />
+  </div>
+
+  <div class="mobile-drawer-footer">
+    <a routerLink="/dashboard" (click)="closeMobileMenu()" class="btn-login-drawer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+      <span>{{ c.loginLong }}</span>
+    </a>
+  </div>
+</div>
+
+<!-- PT | EN: links para a mesma página no outro idioma -->
+<ng-template #langSwitch>
+  <div class="lang-switch" role="group" [attr.aria-label]="c.language">
+    @for (lang of languages; track lang) {
+      <a
+        [routerLink]="i18n.pathIn(lang)"
+        class="lang-btn"
+        [class.active]="i18n.lang() === lang"
+        [attr.aria-current]="i18n.lang() === lang ? 'true' : null"
+        [attr.hreflang]="lang"
+        [attr.lang]="lang"
+        [attr.aria-label]="c.languageNames[lang]"
+        (click)="chooseLanguage(lang)"
+      >{{ lang.toUpperCase() }}</a>
+    }
+  </div>
+</ng-template>

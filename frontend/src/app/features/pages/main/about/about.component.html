@@ -1,0 +1,154 @@
+@let c = i18n.content().about;
+@let common = i18n.content().common;
+<div class="about-page-wrapper">
+  <app-public-header />
+
+  <!-- Conteúdo Principal da Página Sobre -->
+  <main class="about-main">
+    <!-- Hero Institucional -->
+    <section class="about-hero">
+      <div class="section-badge">{{ c.hero.badge }}</div>
+      <h1 class="page-title">{{ c.hero.title }}</h1>
+      <p class="page-subtitle" [innerHTML]="c.hero.html"></p>
+    </section>
+
+    <!-- Grade de Conteúdo Aprofundado -->
+    <div class="story-grid">
+      <!-- 1. A Fundação e o Desafio Original -->
+      <article class="story-card">
+        <div class="card-icon-wrap icon-blue">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">{{ c.foundation.tag }}</div>
+          <h2 class="card-title">{{ c.foundation.title }}</h2>
+          @for (p of c.foundation.paragraphs; track $index) {
+            <p class="card-text" [innerHTML]="p"></p>
+          }
+          <div class="card-highlight-box">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2.2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ c.foundation.highlight }}</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2. A Decisão de Abertura ao Público -->
+      <article class="story-card">
+        <div class="card-icon-wrap icon-teal">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">{{ c.opening.tag }}</div>
+          <h2 class="card-title">{{ c.opening.title }}</h2>
+          @for (p of c.opening.paragraphs; track $index) {
+            <p class="card-text" [innerHTML]="p"></p>
+          }
+          <div class="card-highlight-box">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ c.opening.highlight }}</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3. O que é o Blue Fox Global Group -->
+      <article class="story-card full-width-card">
+        <div class="card-icon-wrap icon-purple">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">{{ c.holding.tag }}</div>
+          <h2 class="card-title">{{ c.holding.title }}</h2>
+          <p class="card-text" [innerHTML]="c.holding.html"></p>
+          <div class="pillars-row">
+            @for (pillar of c.holding.pillars; track pillar.label) {
+              <div class="pillar-mini-card">
+                <div class="pillar-label">{{ pillar.label }}</div>
+                <div class="pillar-desc">{{ pillar.desc }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </article>
+
+      <!-- 4. O Papel do Grupo e a Arquitetura Keycloak SSO -->
+      <article class="story-card full-width-card keycloak-role-card">
+        <div class="card-icon-wrap icon-cyan">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">{{ c.identity.tag }}</div>
+          <h2 class="card-title">{{ c.identity.title }}</h2>
+          <p class="card-text" [innerHTML]="c.identity.html"></p>
+          
+          <div class="keycloak-explanation-panel">
+            <div class="panel-header">
+              <span class="panel-badge">{{ c.identity.panelBadge }}</span>
+              <h3 class="panel-title">{{ c.identity.panelTitle }}</h3>
+            </div>
+            <p class="panel-text" [innerHTML]="c.identity.panelHtml"></p>
+            <div class="keycloak-points-grid">
+              @for (point of c.identity.points; track point.title) {
+                <div class="kpoint">
+                  <div class="kpoint-dot"></div>
+                  <div class="kpoint-info">
+                    <strong>{{ point.title }}</strong>
+                    <span>{{ point.text }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="panel-footnote">
+              <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38b6ff" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span>{{ c.identity.footnote }}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Seção CTA Final -->
+    <section class="bottom-cta-section">
+      <div class="cta-box">
+        <h2 class="cta-title">{{ c.cta.title }}</h2>
+        <p class="cta-subtitle">{{ c.cta.subtitle }}</p>
+        <div class="cta-buttons">
+          <a routerLink="/dashboard" class="btn-primary-action">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>{{ common.loginLong }}</span>
+          </a>
+
+          <a [routerLink]="i18n.path('updates')" class="btn-ghost-action">
+            <span>{{ c.cta.updates }}</span>
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <app-public-footer />
+</div>

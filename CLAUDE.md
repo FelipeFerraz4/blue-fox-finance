@@ -13,7 +13,7 @@ A **Blue Fox Finance** é o sistema central de controle financeiro do ecossistem
 O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `src/app/core`: Singletons e lógica global (`AuthService`, interceptors, guards e serviços globais de API em `core/services/<nome>/`).
 - `src/app/features`: Módulos de página e fluxos da aplicação em `features/pages/`:
-  - `main/`: Rotas públicas (`home/`, `about/`, `updates/`).
+  - `main/`: Rotas públicas (`home/`, `about/`, `updates/`) em `/pt/...` e `/en/...`, com cabeçalho e rodapé em `shared/components/public/`.
   - `expenses/`: Fluxo de listagem (`expense-list/`) e criação (`expense-form/`).
   - `admin/`: Painel administrativo com categorias de itens/lojas e perfil de usuário.
   - `dashboard/`: o **Dashboard** (tela única) estilo Power BI (ECharts via `ngx-echarts`, registrado só no componente para ficar no chunk lazy). O backend devolve as linhas do ano numa chamada e o filtro cruzado roda no cliente (`analytics.store.ts`, Signals): cada painel agrega com todos os filtros exceto o da própria dimensão. A coluna/linha inteira de cada barra é clicável (`bindCategoryClick`).
@@ -21,7 +21,7 @@ O frontend segue o padrão arquitetural modular unificado da Blue Fox:
 - `src/app/shared`:
   - `components/general/`: Componentes reutilizáveis de layout (`navbar`, `sidebar`, `confirm-modal`, `notice-modal`, `searchable-dropdown`, `a11y-toolbar`).
 - **Tema claro/escuro e acessibilidade:** barra flutuante em todas as páginas (A-/A+, restaurar, alto contraste, leitura em voz alta, tema), com `ThemeService`/`AccessibilityService` e tokens de cor em `styles.css`. Código novo usa só os tokens (detalhes em `frontend/CLAUDE.md`, seção Tema e acessibilidade).
-- **SEO:** `SeoService` por rota (públicas com `data.seo` indexadas; internas `noindex`, também via `X-Robots-Tag` no nginx), `robots.txt`, `sitemap.xml`, `og-default.jpg`. Roadmap de idiomas e país (moeda/data/número por região) em `frontend/CLAUDE.md`.
+- **SEO e idiomas:** páginas públicas em português e inglês (`/pt`, `/en`, textos em `core/content/{pt,en}`, `TranslationService` pela URL, seletor PT | EN). `SeoService` por rota (públicas com `data.seo` indexadas com hreflang; internas `noindex`, também via `X-Robots-Tag` no nginx), `robots.txt`, `sitemap.xml` (com os dois idiomas), `og-default.jpg`. Roadmap de idiomas e país (moeda/data/número por região) em `frontend/CLAUDE.md`.
   - `model/types/`: Interfaces e tipos TypeScript de domínio.
   - `model/mocks/`: Dados de teste.
 

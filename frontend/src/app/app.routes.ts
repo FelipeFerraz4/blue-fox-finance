@@ -1,17 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { FINANCE_ACCESS_ROLES, KeycloakRole } from './core/services/auth/roles.constants';
+import { preferredLanguage } from './core/services/translation/translation.service';
 
-export const routes: Routes = [
-  // 1. Rota Pública Inicial (Home Landing Page)
+/** Páginas públicas, montadas em /pt e /en (como no Blue Fox Global Group). */
+const publicPages: Routes = [
   {
     path: '',
-    data: { seo: 'home' },
-    loadComponent: () =>
-      import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
-  },
-  {
-    path: 'home',
     data: { seo: 'home' },
     loadComponent: () =>
       import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
@@ -28,6 +23,16 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/pages/main/updates/updates.component').then((m) => m.UpdatesComponent),
   },
+];
+
+export const routes: Routes = [
+  // 1. Páginas públicas por idioma. Sem idioma na URL, vai para o salvo ou o do navegador
+  { path: 'pt', children: publicPages },
+  { path: 'en', children: publicPages },
+  { path: '', pathMatch: 'full', redirectTo: () => `/${preferredLanguage()}` },
+  { path: 'home', pathMatch: 'full', redirectTo: () => `/${preferredLanguage()}` },
+  { path: 'about', pathMatch: 'full', redirectTo: () => `/${preferredLanguage()}/about` },
+  { path: 'updates', pathMatch: 'full', redirectTo: () => `/${preferredLanguage()}/updates` },
 
   // 2. Plataforma Interna (Gestão Financeira & IAM Protegidos)
   {

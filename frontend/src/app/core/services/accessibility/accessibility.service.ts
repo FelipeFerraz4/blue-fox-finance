@@ -66,8 +66,11 @@ export class AccessibilityService {
     const synth = window.speechSynthesis;
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text.slice(0, 8000));
-    utterance.lang = 'pt-BR';
-    const voice = synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith('pt'));
+    // Idioma da página (o TranslationService mantém o lang do <html>: pt-BR ou en)
+    const lang = document.documentElement.lang || 'pt-BR';
+    utterance.lang = lang;
+    const prefix = lang.slice(0, 2).toLowerCase();
+    const voice = synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith(prefix));
     if (voice) utterance.voice = voice;
     const done = () => this.zone.run(() => this.speaking.set(false));
     utterance.onend = done;

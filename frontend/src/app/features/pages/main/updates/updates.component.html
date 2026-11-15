@@ -1,0 +1,172 @@
+@let c = i18n.content().updates;
+<div class="updates-wrapper">
+  <app-public-header />
+
+  <!-- Conteúdo da Página de Atualizações -->
+  <main class="updates-main">
+    <div class="updates-hero">
+      <div class="section-badge">{{ c.hero.badge }}</div>
+      <h1 class="page-title">{{ c.hero.title }}</h1>
+      <p class="page-subtitle">{{ c.hero.subtitle }}</p>
+    </div>
+
+    <!-- Seletor de visualização rápida -->
+    <div class="category-tabs" role="group" [attr.aria-label]="c.tabs.label">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTab === 'all'"
+        (click)="selectedTab = 'all'"
+        [attr.aria-pressed]="selectedTab === 'all'"
+      >
+        {{ c.tabs.all }}
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTab === 'completed'"
+        (click)="selectedTab = 'completed'"
+        [attr.aria-pressed]="selectedTab === 'completed'"
+      >
+        <span class="tab-dot dot-green"></span>
+        {{ c.tabs.completed }} ({{ c.completed.length }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTab === 'progress'"
+        (click)="selectedTab = 'progress'"
+        [attr.aria-pressed]="selectedTab === 'progress'"
+      >
+        <span class="tab-dot dot-amber"></span>
+        {{ c.tabs.progress }} ({{ c.progress.length }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTab === 'future'"
+        (click)="selectedTab = 'future'"
+        [attr.aria-pressed]="selectedTab === 'future'"
+      >
+        <span class="tab-dot dot-purple"></span>
+        {{ c.tabs.future }} ({{ c.future.length }})
+      </button>
+    </div>
+
+    <div class="columns-grid">
+      <!-- Coluna 1: Implementadas -->
+      <section
+        *ngIf="selectedTab === 'all' || selectedTab === 'completed'"
+        class="status-column"
+      >
+        <div class="column-header">
+          <div class="col-title-wrap">
+            <span class="status-indicator ind-green"></span>
+            <h2 class="col-title">{{ c.columns.completed.title }}</h2>
+          </div>
+          <span class="col-counter green">{{ c.completed.length }} {{ c.columns.completed.counter }}</span>
+        </div>
+        <p class="column-desc">{{ c.columns.completed.desc }}</p>
+
+        <div class="cards-list">
+          <div *ngFor="let item of c.completed" class="update-card completed">
+            <div class="card-header">
+              <h3 class="item-title">{{ item.title }}</h3>
+              <span class="badge" [ngClass]="item.badgeClass">{{ item.badge }}</span>
+            </div>
+            <p class="item-desc">{{ item.description }}</p>
+            <ul class="item-details">
+              <li *ngFor="let det of item.details">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>{{ det }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coluna 2: Em Desenvolvimento -->
+      <section
+        *ngIf="selectedTab === 'all' || selectedTab === 'progress'"
+        class="status-column"
+      >
+        <div class="column-header">
+          <div class="col-title-wrap">
+            <span class="status-indicator ind-amber"></span>
+            <h2 class="col-title">{{ c.columns.progress.title }}</h2>
+          </div>
+          <span class="col-counter amber">{{ c.progress.length }} {{ c.columns.progress.counter }}</span>
+        </div>
+        <p class="column-desc">{{ c.columns.progress.desc }}</p>
+
+        <div class="cards-list">
+          <div *ngFor="let item of c.progress" class="update-card in-progress">
+            <div class="card-header">
+              <h3 class="item-title">{{ item.title }}</h3>
+              <span class="badge" [ngClass]="item.badgeClass">{{ item.badge }}</span>
+            </div>
+            <p class="item-desc">{{ item.description }}</p>
+            <ul class="item-details">
+              <li *ngFor="let det of item.details">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>{{ det }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coluna 3: Futuro / Roadmap -->
+      <section
+        *ngIf="selectedTab === 'all' || selectedTab === 'future'"
+        class="status-column"
+      >
+        <div class="column-header">
+          <div class="col-title-wrap">
+            <span class="status-indicator ind-purple"></span>
+            <h2 class="col-title">{{ c.columns.future.title }}</h2>
+          </div>
+          <span class="col-counter purple">{{ c.future.length }} {{ c.columns.future.counter }}</span>
+        </div>
+        <p class="column-desc">{{ c.columns.future.desc }}</p>
+
+        <div class="cards-list">
+          <div *ngFor="let item of c.future" class="update-card future">
+            <div class="card-header">
+              <h3 class="item-title">{{ item.title }}</h3>
+              <span class="badge" [ngClass]="item.badgeClass">{{ item.badge }}</span>
+            </div>
+            <p class="item-desc">{{ item.description }}</p>
+            <ul class="item-details">
+              <li *ngFor="let det of item.details">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <span>{{ det }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Call to action discreto no final -->
+    <div class="bottom-cta">
+      <h3 class="bottom-cta-title">{{ c.bottomCta.title }}</h3>
+      <p class="bottom-cta-subtitle">{{ c.bottomCta.subtitle }}</p>
+      <a routerLink="/dashboard" class="btn-login-hero">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span>{{ c.bottomCta.button }}</span>
+      </a>
+    </div>
+  </main>
+  <app-public-footer />
+</div>
