@@ -1106,8 +1106,9 @@ export class UserProfileComponent implements OnInit {
       'Vestuário',
       'Outros',
     ];
+    // Sugestões no idioma do usuário (o nome escolhido é o que fica salvo).
     const registered = this.categories.map((c) => c.nome);
-    const unique = Array.from(new Set([...registered, ...defaults])).filter(Boolean);
+    const unique = Array.from(new Set([...registered, ...defaults.map((d) => t(d))])).filter(Boolean);
     return unique.map((cat) => ({
       value: cat,
       label: cat,

@@ -656,4 +656,13 @@ export const EN: Record<string, string> = {
   "← Anterior": "← Previous",
   "★ Padrão": "★ Default",
   "✕ Limpar Todos os Filtros": "✕ Clear All Filters",
+  "Alimentação": "Food",
+  "Supermercado": "Groceries",
+  "Moradia": "Housing",
+  "Transporte": "Transportation",
+  "Tecnologia": "Technology",
+  "Saúde": "Health",
+  "Lazer": "Leisure",
+  "Educação": "Education",
+  "Vestuário": "Clothing",
 };
