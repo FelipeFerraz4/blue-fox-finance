@@ -2,6 +2,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { storageGet, storageSet } from '../../utils/browser-storage';
 
 import { commonContent as commonPt } from '../../content/pt/common';
 import { homeContent as homePt } from '../../content/pt/home';
@@ -46,12 +47,8 @@ export function publicPath(lang: Language, page: PublicPage): string {
  */
 export function preferredLanguage(): Language {
   if (!isPlatformBrowser(inject(PLATFORM_ID))) return 'pt';
-  try {
-    const saved = localStorage.getItem(LANG_STORAGE_KEY);
-    if (isLanguage(saved)) return saved;
-  } catch {
-    // localStorage bloqueado: segue pelo navegador
-  }
+  const saved = storageGet(LANG_STORAGE_KEY);
+  if (isLanguage(saved)) return saved;
   return (navigator.language || 'pt').toLowerCase().startsWith('pt') ? 'pt' : 'en';
 }
 
@@ -75,7 +72,6 @@ export function routeLanguage(router: Router): { lang: Language; page: PublicPag
 export class TranslationService {
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
-  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** Idioma da página atual (pt fora das páginas públicas). */
   readonly lang = signal<Language>('pt');
@@ -104,12 +100,7 @@ export class TranslationService {
 
   /** Guarda a escolha, usada pelas URLs sem idioma (`/`, links antigos). */
   remember(lang: Language): void {
-    if (!this.isBrowser) return;
-    try {
-      localStorage.setItem(LANG_STORAGE_KEY, lang);
-    } catch {
-      // sem localStorage: a escolha vale só pela URL
-    }
+    storageSet(LANG_STORAGE_KEY, lang);
   }
 
   private sync(): void {

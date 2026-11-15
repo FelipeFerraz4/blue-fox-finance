@@ -148,7 +148,9 @@ export const routes: Routes = [
 
   // 4. Wildcard Catch-all
   {
+    // 404 no idioma da URL (o nginx já responde com status 404)
     path: '**',
-    redirectTo: '',
+    loadComponent: () =>
+      import('./features/pages/main/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 ];

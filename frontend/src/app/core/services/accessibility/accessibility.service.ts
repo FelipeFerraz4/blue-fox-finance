@@ -1,4 +1,5 @@
 import { Injectable, NgZone, computed, signal } from '@angular/core';
+import { isBrowserEnv, storageGet, storageSet } from '../../utils/browser-storage';
 
 const SCALE_KEY = 'bf-font-scale';
 const CONTRAST_KEY = 'bf-contrast';
@@ -19,7 +20,9 @@ export class AccessibilityService {
   readonly fontScale = signal<number>(this.readScale());
   readonly highContrast = signal<boolean>(this.readContrast());
   readonly speaking = signal(false);
-  readonly speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  // false no prerender: a barra esconde o botão de leitura até o navegador assumir
+  private readonly browser = isBrowserEnv();
+  readonly speechSupported = this.browser && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 
   readonly canDecrease = computed(() => this.fontScale() > FONT_SCALE_MIN);
   readonly canIncrease = computed(() => this.fontScale() < FONT_SCALE_MAX);
@@ -92,38 +95,27 @@ export class AccessibilityService {
   }
 
   private applyScale(): void {
+    if (!this.browser) return;
     document.documentElement.style.setProperty('--a11y-font-scale', String(this.fontScale()));
   }
 
   private applyContrast(): void {
+    if (!this.browser) return;
     const html = document.documentElement;
     if (this.highContrast()) html.setAttribute('data-contrast', 'high');
     else html.removeAttribute('data-contrast');
   }
 
   private readScale(): number {
-    try {
-      const v = parseFloat(localStorage.getItem(SCALE_KEY) ?? '');
-      return v >= FONT_SCALE_MIN && v <= FONT_SCALE_MAX ? v : 1;
-    } catch {
-      return 1;
-    }
+    const v = parseFloat(storageGet(SCALE_KEY) ?? '');
+    return v >= FONT_SCALE_MIN && v <= FONT_SCALE_MAX ? v : 1;
   }
 
   private readContrast(): boolean {
-    try {
-      return localStorage.getItem(CONTRAST_KEY) === 'high';
-    } catch {
-      return false;
-    }
+    return storageGet(CONTRAST_KEY) === 'high';
   }
 
   private store(key: string, value: string | null): void {
-    try {
-      if (value === null) localStorage.removeItem(key);
-      else localStorage.setItem(key, value);
-    } catch {
-      /* navegação privada: vale só nesta aba */
-    }
+    storageSet(key, value);
   }
 }

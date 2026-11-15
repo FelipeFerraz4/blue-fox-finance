@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import Keycloak from 'keycloak-js';
+import { isBrowserEnv } from '../../utils/browser-storage';
 import { environment } from '../../../../environments/environment';
 
 export interface UserAuthProfile {
@@ -24,6 +25,8 @@ export class AuthService {
   public readonly currentUser = signal<UserAuthProfile | null>(null);
 
   constructor() {
+    // Prerender das páginas públicas: sem navegador não há sessão nem Keycloak
+    if (!isBrowserEnv()) return;
     this.keycloak = new Keycloak({
       url: this.config.url,
       realm: this.config.realm,

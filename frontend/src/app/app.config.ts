@@ -9,7 +9,8 @@ import {
   withComponentInputBinding,
   withInMemoryScrolling,
 } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { routes } from './app.routes';
@@ -29,7 +30,9 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
     ),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    // Páginas públicas chegam prontas do prerender; o navegador reaproveita o HTML
+    provideClientHydration(withEventReplay()),
     {
       provide: APP_INITIALIZER,
       useFactory: (authService: AuthService) => () => authService.init(),

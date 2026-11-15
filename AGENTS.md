@@ -64,7 +64,7 @@ frontend/src/app/
 │
 ├── features/                                         # Módulos de páginas e fluxos funcionais
 │   └── pages/
-│       ├── main/                                     # Páginas públicas em /pt e /en (textos em core/content)
+│       ├── main/                                     # Páginas públicas em /pt e /en (textos em core/content), geradas em HTML no build (prerender) + not-found/ (404)
 │       │   ├── home/
 │       │   │   └── home.component.{ts,html,css}      # Landing page com apresentação do ecossistema
 │       │   ├── about/

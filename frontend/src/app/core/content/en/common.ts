@@ -15,4 +15,10 @@ export const commonContent: CommonContent = {
   logoAlt: 'BlueFox Finance logo',
   footerNav: 'Footer links',
   copyright: '© 2026 Blue Fox Global Group • All rights reserved.',
+  notFound: {
+    title: 'Page not found',
+    text: 'The address you opened does not exist or has moved.',
+    home: 'Back to home',
+    app: 'Go to the app',
+  },
 };

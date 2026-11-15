@@ -104,12 +104,18 @@ export class AppComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.updateLayoutState(event.urlAfterRedirects || event.url);
         // Reseta o scroll para o início da página ao navegar para uma nova rota
+        if (typeof window === 'undefined') return;
         if (!event.urlAfterRedirects?.includes('#') && !event.url?.includes('#')) {
           window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           document.body.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         }
       });
+  }
+
+  /** Rotas do sistema interno; fora delas (404) vale o layout público. */
+  private isAppRoute(url: string): boolean {
+    return /^\/(dashboard|expenses|bills|payment-methods|stores|buyers|admin|lancamentos|analytics|analises|contas|meios-pagamento|lojas|compradores)(\/|$)/.test(url);
   }
 
   private updateLayoutState(url: string): void {
@@ -119,6 +125,6 @@ export class AppComponent implements OnInit {
     }
     const cleanUrl = url.split('?')[0].split('#')[0];
     // Páginas públicas em /pt e /en, e as URLs antigas sem idioma (redirecionam)
-    this.isPublicPage = /^\/?((pt|en)(\/(about|updates))?|home|about|updates)?\/?$/.test(cleanUrl);
+    this.isPublicPage = /^\/?((pt|en)(\/(about|updates))?|home|about|updates)?\/?$/.test(cleanUrl) || !this.isAppRoute(cleanUrl);
   }
 }

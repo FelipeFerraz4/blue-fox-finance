@@ -13,6 +13,12 @@ export const commonContent = {
   logoAlt: 'Logo do BlueFox Finance',
   footerNav: 'Links do rodapé',
   copyright: '© 2026 Blue Fox Global Group • Todos os direitos reservados.',
+  notFound: {
+    title: 'Página não encontrada',
+    text: 'O endereço que você abriu não existe ou mudou de lugar.',
+    home: 'Voltar ao início',
+    app: 'Ir para o sistema',
+  },
 };
 
 export type CommonContent = typeof commonContent;
