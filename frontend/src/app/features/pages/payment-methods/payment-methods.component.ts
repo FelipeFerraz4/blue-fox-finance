@@ -6,11 +6,13 @@ import { ExpensePreferencesService } from '../../../core/services/expense-prefer
 import { PaymentMethod, CreatePaymentMethodDto, ModalidadePagamento } from '../../../shared/model/types/payment-method.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
+import { I18N } from '../../../core/i18n/i18n.pipes';
+import { t } from '../../../core/i18n/i18n';
 
 @Component({
   selector: 'app-payment-methods',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
+  imports: [...I18N, CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="payment-methods-page">
       <div class="page-header">
@@ -22,11 +24,11 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 <line x1="2" y1="10" x2="22" y2="10"/>
               </svg>
             </div>
-            <h1 class="page-title">Meios de Pagamento</h1>
-            <span class="badge badge-brand">Cartões & Contas</span>
+            <h1 class="page-title">{{ 'Meios de Pagamento' | t }}</h1>
+            <span class="badge badge-brand">{{ 'Cartões & Contas' | t }}</span>
           </div>
           <p class="page-subtitle">
-            Cadastre seus cartões de crédito com dias de fechamento e vencimento para projeção exata das faturas futuras
+            {{ 'Cadastre seus cartões de crédito com dias de fechamento e vencimento para projeção exata das faturas futuras' | t }}
           </p>
         </div>
 
@@ -35,20 +37,20 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>Adicionar Meio de Pagamento</span>
+          <span>{{ 'Adicionar Meio de Pagamento' | t }}</span>
         </button>
       </div>
 
       <!-- Tabela Principal de Meios de Pagamento -->
       <div class="card">
         <div class="card-title">
-          <span>Meios de Pagamento Cadastrados</span>
-          <span class="badge badge-primary">{{ methods.length }} configurados</span>
+          <span>{{ 'Meios de Pagamento Cadastrados' | t }}</span>
+          <span class="badge badge-primary">{{ '{n} configurados' | t: { n: methods.length } }}</span>
         </div>
 
         <div *ngIf="loading" class="loading-state">
           <div class="spinner"></div>
-          <p>Carregando meios de pagamento...</p>
+          <p>{{ 'Carregando meios de pagamento...' | t }}</p>
         </div>
 
         <div *ngIf="!loading && methods.length > 0">
@@ -57,13 +59,13 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Meio de Pagamento</th>
-                    <th>Modalidade</th>
-                    <th class="text-center">Dia de Fechamento</th>
-                    <th class="text-center">Dia de Vencimento</th>
-                    <th>Banco</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Ações</th>
+                    <th>{{ 'Meio de Pagamento' | t }}</th>
+                    <th>{{ 'Modalidade' | t }}</th>
+                    <th class="text-center">{{ 'Dia de Fechamento' | t }}</th>
+                    <th class="text-center">{{ 'Dia de Vencimento' | t }}</th>
+                    <th>{{ 'Banco' | t }}</th>
+                    <th class="text-center">{{ 'Status' | t }}</th>
+                    <th class="text-center">{{ 'Ações' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -71,7 +73,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     <td>
                       <div class="method-name-col">
                         <strong class="text-gray-900">{{ m.nome }}</strong>
-                        <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">★ Padrão</span>
+                        <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                       </div>
                     </td>
                     <td>
@@ -80,11 +82,11 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                       </span>
                     </td>
                     <td class="text-center font-medium">
-                      <span *ngIf="m.diaFechamento" class="day-badge">Dia {{ m.diaFechamento }}</span>
+                      <span *ngIf="m.diaFechamento" class="day-badge">{{ 'Dia {n}' | t: { n: m.diaFechamento } }}</span>
                       <span *ngIf="!m.diaFechamento" class="text-muted">-</span>
                     </td>
                     <td class="text-center font-medium">
-                      <span *ngIf="m.diaVencimento" class="day-badge highlight-due">Dia {{ m.diaVencimento }}</span>
+                      <span *ngIf="m.diaVencimento" class="day-badge highlight-due">{{ 'Dia {n}' | t: { n: m.diaVencimento } }}</span>
                       <span *ngIf="!m.diaVencimento" class="text-muted">-</span>
                     </td>
                     <td>
@@ -92,7 +94,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     </td>
                     <td class="text-center">
                       <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
-                        {{ m.ativo ? 'Ativo' : 'Inativo' }}
+                        {{ m.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
                       </span>
                     </td>
                     <td class="text-center">
@@ -100,31 +102,31 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                         <button
                           (click)="openEditModal(m)"
                           class="btn btn-outline btn-sm"
-                          title="Editar meio de pagamento"
+                          [title]="'Editar meio de pagamento' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
-                          Editar
+                          {{ 'Editar' | t }}
                         </button>
                         <button
                           (click)="toggleStatus(m)"
                           class="btn btn-secondary btn-sm"
-                          [title]="m.ativo ? 'Desativar meio' : 'Ativar meio'"
+                          [title]="m.ativo ? ('Desativar meio' | t) : ('Ativar meio' | t)"
                         >
-                          {{ m.ativo ? 'Desativar' : 'Ativar' }}
+                          {{ m.ativo ? ('Desativar' | t) : ('Ativar' | t) }}
                         </button>
                         <button
                           (click)="promptDeleteMethod(m)"
                           class="btn btn-danger btn-sm"
-                          title="Excluir meio de pagamento"
+                          [title]="'Excluir meio de pagamento' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
-                          Excluir
+                          {{ 'Excluir' | t }}
                         </button>
                       </div>
                     </td>
@@ -141,26 +143,26 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               <div class="method-card-header">
                 <div class="method-card-title-wrap">
                   <span class="method-card-name">{{ m.nome }}</span>
-                  <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">★ Padrão</span>
+                  <span *ngIf="isMethodDefault(m.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                   <span class="banco-tag" *ngIf="m.instituicaoBanco">{{ m.instituicaoBanco }}</span>
                 </div>
                 <span class="badge" [ngClass]="m.ativo ? 'badge-success' : 'badge-danger'">
-                  {{ m.ativo ? 'Ativo' : 'Inativo' }}
+                  {{ m.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
                 </span>
               </div>
 
               <!-- Metadados: Modalidade, Fechamento e Vencimento -->
               <div class="method-card-body">
                 <div class="meta-item">
-                  <span class="meta-label">Modalidade:</span>
+                  <span class="meta-label">{{ 'Modalidade:' | t }}</span>
                   <span class="badge" [ngClass]="getModalidadeClass(m.modalidade)">
                     {{ getModalidadeLabel(m.modalidade) }}
                   </span>
                 </div>
                 <div class="meta-item" *ngIf="m.diaFechamento || m.diaVencimento">
-                  <span class="meta-label">Fatura:</span>
-                  <span class="day-badge" *ngIf="m.diaFechamento">Fecha {{ m.diaFechamento }}</span>
-                  <span class="day-badge highlight-due" *ngIf="m.diaVencimento">Vence {{ m.diaVencimento }}</span>
+                  <span class="meta-label">{{ 'Fatura:' | t }}</span>
+                  <span class="day-badge" *ngIf="m.diaFechamento">{{ 'Fecha {n}' | t: { n: m.diaFechamento } }}</span>
+                  <span class="day-badge highlight-due" *ngIf="m.diaVencimento">{{ 'Vence {n}' | t: { n: m.diaVencimento } }}</span>
                 </div>
               </div>
 
@@ -169,31 +171,31 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 <button
                   (click)="openEditModal(m)"
                   class="btn btn-outline btn-sm mobile-action-btn"
-                  title="Editar meio de pagamento"
+                  [title]="'Editar meio de pagamento' | t"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
-                  <span>Editar</span>
+                  <span>{{ 'Editar' | t }}</span>
                 </button>
                 <button
                   (click)="toggleStatus(m)"
                   class="btn btn-secondary btn-sm mobile-action-btn"
-                  [title]="m.ativo ? 'Desativar meio' : 'Ativar meio'"
+                  [title]="m.ativo ? ('Desativar meio' | t) : ('Ativar meio' | t)"
                 >
-                  {{ m.ativo ? 'Desativar' : 'Ativar' }}
+                  {{ m.ativo ? ('Desativar' | t) : ('Ativar' | t) }}
                 </button>
                 <button
                   (click)="promptDeleteMethod(m)"
                   class="btn btn-danger btn-sm mobile-action-btn"
-                  title="Excluir meio de pagamento"
+                  [title]="'Excluir meio de pagamento' | t"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
-                  <span>Excluir</span>
+                  <span>{{ 'Excluir' | t }}</span>
                 </button>
               </div>
             </div>
@@ -201,7 +203,7 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
         </div>
 
         <div *ngIf="!loading && methods.length === 0" class="empty-state">
-          <p>Nenhum meio de pagamento cadastrado.</p>
+          <p>{{ 'Nenhum meio de pagamento cadastrado.' | t }}</p>
         </div>
       </div>
 
@@ -217,8 +219,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 </svg>
               </div>
               <div>
-                <h3>{{ editingId ? 'Editar Meio de Pagamento' : 'Novo Meio de Pagamento' }}</h3>
-                <p class="modal-subtitle">Preencha as informações do cartão, conta ou modalidade</p>
+                <h3>{{ editingId ? ('Editar Meio de Pagamento' | t) : ('Novo Meio de Pagamento' | t) }}</h3>
+                <p class="modal-subtitle">{{ 'Preencha as informações do cartão, conta ou modalidade' | t }}</p>
               </div>
             </div>
             <button class="btn-close" (click)="closeModal()">✕</button>
@@ -227,19 +229,19 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
           <form (ngSubmit)="saveMethod()" #modalForm="ngForm">
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Meio de Pagamento (Nome) *</label>
+                <label class="form-label">{{ 'Meio de Pagamento (Nome) *' | t }}</label>
                 <input
                   type="text"
                   name="nome"
                   [(ngModel)]="newMethod.nome"
                   required
                   class="form-control"
-                  placeholder="ex: Nubank Ultravioleta, Itaú Click, etc."
+                  [placeholder]="'ex: Nubank Ultravioleta, Itaú Click, etc.' | t"
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">Modalidade *</label>
+                <label class="form-label">{{ 'Modalidade *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="modalidadeOptions"
                   valueField="value"
@@ -249,13 +251,13 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   name="modalidade"
                   [showSearch]="false"
                   [clearable]="false"
-                  placeholder="Selecione a modalidade..."
+                  [placeholder]="'Selecione a modalidade...' | t"
                 ></app-searchable-dropdown>
               </div>
 
               <div class="form-row" *ngIf="newMethod.modalidade === 'CREDITO'">
                 <div class="form-group">
-                  <label class="form-label">Dia de Fechamento da Fatura (1 a 31) *</label>
+                  <label class="form-label">{{ 'Dia de Fechamento da Fatura (1 a 31) *' | t }}</label>
                   <input
                     type="number"
                     name="diaFechamento"
@@ -264,15 +266,15 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     [(ngModel)]="newMethod.diaFechamento"
                     required
                     class="form-control"
-                    placeholder="ex: 25"
+                    [placeholder]="'ex: 25' | t"
                   />
                   <small class="text-muted text-xs">
-                    Compras feitas a partir deste dia vão para a fatura do próximo mês.
+                    {{ 'Compras feitas a partir deste dia vão para a fatura do próximo mês.' | t }}
                   </small>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Dia de Vencimento da Fatura (1 a 31) *</label>
+                  <label class="form-label">{{ 'Dia de Vencimento da Fatura (1 a 31) *' | t }}</label>
                   <input
                     type="number"
                     name="diaVencimento"
@@ -281,21 +283,21 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     [(ngModel)]="newMethod.diaVencimento"
                     required
                     class="form-control"
-                    placeholder="ex: 5"
+                    [placeholder]="'ex: 5' | t"
                   />
                   <small class="text-muted text-xs">
-                    Dia em que o valor vence para pagamento.
+                    {{ 'Dia em que o valor vence para pagamento.' | t }}
                   </small>
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Banco *</label>
+                <label class="form-label">{{ 'Banco *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="bankOptions"
                   [(ngModel)]="newMethod.instituicaoBanco"
                   name="instituicaoBanco"
-                  placeholder="Selecione ou digite o banco..."
+                  [placeholder]="'Selecione ou digite o banco...' | t"
                   searchPlaceholder="Pesquisar instituição financeira..."
                   [allowCreate]="true"
                   createOptionText="+ Inserir outro banco:"
@@ -314,23 +316,23 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   <span class="switch-slider"></span>
                 </label>
                 <div class="switch-label-text">
-                  <strong>Definir como meio de pagamento padrão</strong>
-                  <span class="text-xs text-muted block">Será pré-selecionado automaticamente ao abrir novos lançamentos</span>
+                  <strong>{{ 'Definir como meio de pagamento padrão' | t }}</strong>
+                  <span class="text-xs text-muted block">{{ 'Será pré-selecionado automaticamente ao abrir novos lançamentos' | t }}</span>
                 </div>
               </div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'Cancelar' | t }}</button>
               <button
                 type="submit"
                 [disabled]="!modalForm.valid || saving"
                 class="btn btn-primary btn-pill"
               >
-                <span *ngIf="!saving">{{ editingId ? 'Salvar Alterações' : 'Salvar Meio de Pagamento' }}</span>
+                <span *ngIf="!saving">{{ editingId ? ('Salvar Alterações' | t) : ('Salvar Meio de Pagamento' | t) }}</span>
                 <span *ngIf="saving" class="btn-spinner-wrap">
                   <span class="mini-spinner"></span>
-                  Salvando...
+                  {{ 'Salvando...' | t }}
                 </span>
               </button>
             </div>
@@ -341,11 +343,11 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <!-- Modal de Confirmação Reutilizável para Exclusão de Meio de Pagamento -->
       <app-confirm-modal
         [isOpen]="showDeleteModal"
-        [title]="'Excluir Meio de Pagamento'"
-        [message]="'Tem certeza que deseja excluir este meio de pagamento? Todas as compras e parcelas vinculadas a este meio serão excluídas do sistema.'"
+        [title]="('Excluir Meio de Pagamento' | t)"
+        [message]="('Tem certeza que deseja excluir este meio de pagamento? Todas as compras e parcelas vinculadas a este meio serão excluídas do sistema.' | t)"
         [itemName]="methodToDelete ? (methodToDelete.nome + ' (' + methodToDelete.instituicaoBanco + ')') : ''"
-        [confirmText]="'Sim, Excluir'"
-        [cancelText]="'Cancelar'"
+        [confirmText]="('Sim, Excluir' | t)"
+        [cancelText]="('Cancelar' | t)"
         [variant]="'danger'"
         [loading]="deleting"
         (confirm)="confirmDeleteMethod()"
@@ -749,10 +751,10 @@ export class PaymentMethodsComponent implements OnInit {
   };
 
   modalidadeOptions = [
-    { value: 'CREDITO', label: 'Cartão de Crédito', sublabel: 'Fatura mensal com fechamento e vencimento' },
-    { value: 'DEBITO', label: 'Cartão de Débito', sublabel: 'Débito imediato em conta corrente' },
-    { value: 'DINHEIRO_CONTA', label: 'Dinheiro / Saldo em Conta', sublabel: 'Dinheiro em espécie ou Pix' },
-    { value: 'OUTRO', label: 'Outro / Boleto / Financiamento', sublabel: 'Outras formas de pagamento' },
+    { value: 'CREDITO', label: t('Cartão de Crédito'), sublabel: t('Fatura mensal com fechamento e vencimento') },
+    { value: 'DEBITO', label: t('Cartão de Débito'), sublabel: t('Débito imediato em conta corrente') },
+    { value: 'DINHEIRO_CONTA', label: t('Dinheiro / Saldo em Conta'), sublabel: t('Dinheiro em espécie ou Pix') },
+    { value: 'OUTRO', label: t('Outro / Boleto / Financiamento'), sublabel: t('Outras formas de pagamento') },
   ];
 
   bankOptions: string[] = [
@@ -811,10 +813,10 @@ export class PaymentMethodsComponent implements OnInit {
 
   getModalidadeLabel(modalidade: string): string {
     switch (modalidade) {
-      case 'CREDITO': return 'Cartão de Crédito';
-      case 'DEBITO': return 'Cartão de Débito';
-      case 'DINHEIRO_CONTA': return 'Dinheiro / Conta';
-      default: return 'Outro / Boleto';
+      case 'CREDITO': return t('Cartão de Crédito');
+      case 'DEBITO': return t('Cartão de Débito');
+      case 'DINHEIRO_CONTA': return t('Dinheiro / Conta');
+      default: return t('Outro / Boleto');
     }
   }
 

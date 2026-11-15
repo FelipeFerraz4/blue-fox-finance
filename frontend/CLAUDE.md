@@ -50,13 +50,21 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 - **`TranslationService`** (`core/services/translation/`): signals `lang`, `page` e `content` (dicionário de `core/content/{pt,en}`), `path(page)` para links no idioma atual, `pathIn(lang)` para o seletor e `remember(lang)`. Mantém o `lang` do `<html>` (`pt-BR`/`en`; rotas internas ficam `pt-BR`), usado também pela leitura em voz alta para escolher a voz.
 - **Textos:** o arquivo PT define o tipo (`typeof`), e o EN é tipado por ele: campo faltando no inglês quebra o build. Campos `html` (só `<strong>`) vão para `[innerHTML]`; o CSS deles usa `:host ::ng-deep` porque o conteúdo injetado fica fora do encapsulamento.
 - **Seletor PT | EN** no cabeçalho (e na gaveta do celular): links reais para a mesma página no outro idioma (o Google segue), com `hreflang`/`lang` e `aria-current`.
-- Sistema interno, API e bot continuam em português até as etapas 4 e 5.
+- O sistema interno segue o idioma preferido (seção abaixo); API e bot, a etapa 5.
+
+## 🌍 Sistema interno: idioma e país (`core/i18n/`)
+- **Chave = texto em português.** No template: `{{ 'Salvar' | t }}`, `[title]="'Excluir' | t"`, com parâmetros `{{ '{n} itens' | t: { n: total } }}`; no código: `t('Erro ao salvar: {erro}', { erro })`. O inglês fica em `core/i18n/en.ts` (PT → EN); texto sem tradução aparece em português. **Texto novo = chave em português no código + entrada em `en.ts`** (mesmos `{parâmetros}`).
+- O pipe `t` é impuro de propósito: o idioma em uso (`activeLanguage`) é o da URL nas páginas públicas e o preferido no sistema interno, e o `TranslationService` troca no `ResolveEnd` (antes de criar os componentes, então `t()` em construtor já sai certo). Listas fixas exibidas no template (cartões do Admin, status) ficam em português no TS e são traduzidas na exibição (`{{ card.title | t }}`).
+- **Componentes compartilhados traduzem os próprios inputs** (`confirm-modal`, `notice-modal`, `chart-card`, placeholders do `searchable-dropdown`): passe o texto em português. O `label` das opções do dropdown não é traduzido (são dados do usuário); listas fixas de opções usam `t()` no componente pai.
+- **Idioma e país** (`bf-lang`, `bf-region`, lidos uma vez ao carregar em `core/i18n/i18n.ts`; sem escolha, os do navegador) também ficam na conta (`GET/PUT /api/preferences/locale`, `LocaleService`): depois do login, a escolha da conta vale (recarrega uma vez) ou a do navegador é gravada para o bot. Perfil → **Idioma e país** (`locale-card/`) salva e recarrega a página. O seletor PT | EN das páginas públicas grava o mesmo `bf-lang`. O login do Keycloak abre no idioma preferido (`locale`).
+- **Formatos pelo país** (`core/i18n/format.ts`, Intl): pipes `money`, `appDate` (presets `short`, `dayMonth`, `monthYear`...; UTC por padrão, `appDate: 'short' : false` para timestamps), `appNumber`, `appPercent`; funções `formatMoney`, `formatDate`, `monthName`, `currencySymbol`, `parseDecimal` (lê "1.234,56" ou "1,234.56" conforme o país). **Nunca** `currency:'BRL'`, `'pt-BR'` ou meses fixos em código novo. Países em `core/i18n/locale.ts` (espelho de `backend/src/common/constants/locale.ts`); a moeda é só de exibição.
+- `I18N` (de `core/i18n/i18n.pipes.ts`) entra no `imports` de todo componente com texto.
 
 ## 🗺️ Roadmap: SEO e internacionalização (referência: blue-fox-global-group)
 1. ✅ **SEO básico** (acima).
 2. ✅ **Páginas públicas em `/pt` e `/en`** (seção Idiomas acima).
 3. ✅ **Prerender das públicas** (seção Prerender acima).
-4. **Sistema interno traduzido:** sem idioma na URL; preferência do usuário. **Idioma e país são separados:** o idioma escolhe os textos; o **país/região** define moeda e formatação de data e número (ex.: Brasil → BRL, `dd/MM/yyyy`, `1.234,56`; EUA → USD, `MM/dd/yyyy`, `1,234.56`; Portugal → EUR). Preferências em `localStorage` (`bf-lang`, `bf-region`) e no backend (preferências do usuário, para o bot e outros aparelhos). Pipes próprios com `Intl` (o `LOCALE_ID` do Angular é fixo), meses do ECharts por `Intl`, login do Keycloak com `locale`. A moeda é só de exibição (os valores não são convertidos): é a moeda em que o usuário registra os gastos.
+4. ✅ **Sistema interno traduzido, com idioma e país separados** (seção acima).
 5. **API e bot:** `Accept-Language` nas mensagens de erro; o bot usa a preferência salva (ou o `language_code` do Telegram) e formata valores pela região (hoje `BotFormat.brl`).
 
 ## 📅 Datas

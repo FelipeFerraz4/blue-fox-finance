@@ -1,0 +1,50 @@
+<section class="lc-card" aria-labelledby="lc-card-title">
+  <header class="lc-header">
+    <span class="lc-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="2" y1="12" x2="22" y2="12" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      </svg>
+    </span>
+    <div class="lc-header-text">
+      <h3 id="lc-card-title">{{ 'Idioma e país' | t }}</h3>
+      <p>{{ 'O idioma vale para o site e o bot; o país define moeda, datas e números' | t }}</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="lc-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="lc-grid">
+    <label class="lc-field">
+      <span class="lc-label">{{ 'Idioma' | t }}</span>
+      <select class="form-control" [ngModel]="lang()" (ngModelChange)="lang.set($event)" name="lang">
+        @for (l of languages; track l) {
+          <option [value]="l" [attr.lang]="l">{{ languageNames[l] }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="lc-field">
+      <span class="lc-label">{{ 'País / região' | t }}</span>
+      <select class="form-control" [ngModel]="region()" (ngModelChange)="region.set($event)" name="region">
+        @for (r of regions; track r) {
+          <option [value]="r">{{ regionName(r) }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <p class="lc-preview" aria-live="polite">
+    {{ 'Exemplo: {valor} · {data} (moeda {moeda})' | t: { valor: preview().money, data: preview().date, moeda: preview().currency } }}
+  </p>
+  <p class="lc-muted">{{ 'A moeda é só de exibição: os valores já lançados não são convertidos.' | t }}</p>
+
+  <div class="lc-actions">
+    <button type="button" class="btn btn-primary btn-sm" (click)="save()" [disabled]="!changed() || saving()">
+      {{ (saving() ? 'Salvando...' : 'Salvar idioma e país') | t }}
+    </button>
+  </div>
+</section>

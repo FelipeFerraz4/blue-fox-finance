@@ -5,7 +5,7 @@
         <img
           *ngIf="type === 'keycloak'"
           src="assets/logo.png"
-          alt="BlueFox Finance"
+          [alt]="'BlueFox Finance' | t"
           class="notice-fox-img"
         />
         <svg *ngIf="type === 'info'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -24,17 +24,17 @@
       </div>
       <div class="header-titles">
         <div class="title-row">
-          <h2 class="notice-title">{{ title }}</h2>
-          <span *ngIf="badge" class="notice-badge">{{ badge }}</span>
+          <h2 class="notice-title">{{ title | t }}</h2>
+          <span *ngIf="badge" class="notice-badge">{{ badge | t }}</span>
         </div>
       </div>
-      <button class="btn-close" (click)="onClose()" aria-label="Fechar modal">✕</button>
+      <button class="btn-close" (click)="onClose()" [attr.aria-label]="'Fechar modal' | t">✕</button>
     </div>
 
     <div class="notice-modal-body">
-      <p class="notice-message">{{ message }}</p>
+      <p class="notice-message">{{ message | t }}</p>
       <div *ngIf="details" class="notice-details-box">
-        <p>{{ details }}</p>
+        <p>{{ details | t }}</p>
       </div>
     </div>
 
@@ -44,7 +44,7 @@
         (click)="onConfirm()"
         class="btn btn-primary btn-pill btn-confirm"
       >
-        {{ confirmText || 'Entendi' }}
+        {{ (confirmText || 'Entendi') | t }}
       </button>
     </div>
   </div>

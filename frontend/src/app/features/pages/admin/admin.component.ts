@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { UserService, UserProfile, SystemAvatar } from '../../../core/services/user/user.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { KeycloakRole } from '../../../core/services/auth/roles.constants';
+import { I18N } from '../../../core/i18n/i18n.pipes';
 
 interface AdminModuleCard {
   title: string;
@@ -21,18 +22,18 @@ interface AdminModuleCard {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [...I18N, CommonModule, RouterModule],
   template: `
     <div class="admin-page">
       <!-- Cabeçalho Principal do Hub -->
       <div class="admin-header">
         <div class="header-titles">
           <div class="title-with-pill">
-            <h1 class="page-title">Central de Serviços</h1>
-            <span class="hub-pill">Hub Geral de Serviços</span>
+            <h1 class="page-title">{{ 'Central de Serviços' | t }}</h1>
+            <span class="hub-pill">{{ 'Hub Geral de Serviços' | t }}</span>
           </div>
           <p class="page-subtitle">
-            Gerencie módulos, categorias de despesas, lojas, cadastros essenciais e credenciais de acesso.
+            {{ 'Gerencie módulos, categorias de despesas, lojas, cadastros essenciais e credenciais de acesso.' | t }}
           </p>
         </div>
       </div>
@@ -48,7 +49,7 @@ interface AdminModuleCard {
               <img
                 *ngIf="currentAvatar.iconType === 'fox-blue'"
                 src="assets/logo.png"
-                alt="Blue Fox Oficial"
+                [alt]="'Blue Fox Oficial' | t"
                 class="avatar-fox-img-lg"
               />
               <svg *ngIf="currentAvatar.iconType === 'fox-cyan'" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
@@ -104,15 +105,15 @@ interface AdminModuleCard {
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            <span>Configurar Usuário & Avatar</span>
+            <span>{{ 'Configurar Usuário & Avatar' | t }}</span>
           </a>
         </div>
       </section>
 
       <!-- SEÇÃO DE MÓDULOS E CARDS DE NAVEGAÇÃO -->
       <div class="section-divider">
-        <h3 class="section-title">Módulos do Sistema</h3>
-        <p class="section-desc">Acesso direto a todas as telas operacionais, relatórios e configurações</p>
+        <h3 class="section-title">{{ 'Módulos do Sistema' | t }}</h3>
+        <p class="section-desc">{{ 'Acesso direto a todas as telas operacionais, relatórios e configurações' | t }}</p>
       </div>
 
       <div class="modules-grid">
@@ -169,18 +170,18 @@ interface AdminModuleCard {
             </div>
 
             <span *ngIf="card.badge" class="card-badge" [ngClass]="card.badgeType || 'primary'">
-              {{ card.badge }}
+              {{ card.badge | t }}
             </span>
           </div>
 
           <div class="card-content">
-            <span class="card-category">{{ card.category }}</span>
-            <h4 class="card-heading">{{ card.title }}</h4>
-            <p class="card-description">{{ card.description }}</p>
+            <span class="card-category">{{ card.category | t }}</span>
+            <h4 class="card-heading">{{ card.title | t }}</h4>
+            <p class="card-description">{{ card.description | t }}</p>
           </div>
 
           <div class="card-bottom">
-            <span class="card-action-text">Acessar página</span>
+            <span class="card-action-text">{{ 'Acessar página' | t }}</span>
             <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>

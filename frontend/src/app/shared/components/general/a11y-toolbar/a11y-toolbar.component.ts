@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { AccessibilityService } from '../../../../core/services/accessibility/accessibility.service';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 /**
  * Barra de acessibilidade flutuante (todas as páginas): A-, A+, restaurar, alto contraste,
@@ -9,6 +10,7 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
 @Component({
   selector: 'app-a11y-toolbar',
   standalone: true,
+  imports: [...I18N],
   templateUrl: './a11y-toolbar.component.html',
   styleUrl: './a11y-toolbar.component.css',
 })

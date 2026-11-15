@@ -22,6 +22,12 @@ O frontend segue estritamente o padrão arquitetural **Core-Feature-Shared** ado
 ```text
 frontend/src/app/
 ├── core/                                             # Singletons, lógica global, auth, interceptors e guards
+│   ├── i18n/                                         # Idioma e país do sistema interno
+│   │   ├── i18n.ts                                   # t(), idioma/país lidos ao carregar, activeLanguage
+│   │   ├── en.ts                                     # Inglês (chave = texto em português)
+│   │   ├── format.ts                                 # Moeda, data e número pelo país (Intl), parseDecimal
+│   │   ├── i18n.pipes.ts                             # Pipes t, money, appDate, appNumber, appPercent (I18N)
+│   │   └── locale.ts                                 # Idiomas e países suportados
 │   ├── content/                                      # Textos das páginas públicas por idioma
 │   │   ├── pt/{common,home,about,updates}.ts         # Português (define os tipos)
 │   │   └── en/{common,home,about,updates}.ts         # Inglês (mesma forma, tipado pelo PT)
@@ -53,6 +59,8 @@ frontend/src/app/
 │       │   └── sidebar.service.ts                    # Estado reativo do menu lateral (collapse/mobile)
 │       ├── stores/
 │       │   └── stores.service.ts                     # CRUD de lojas (/api/stores); categoria precisa existir em CategoriaLoja
+│       ├── locale/
+│       │   └── locale.service.ts                     # Idioma e país na conta (/api/preferences/locale)
 │       ├── translation/
 │       │   └── translation.service.ts                # Idioma das páginas públicas pela URL (/pt, /en), textos e lang do <html>
 │       ├── theme/
@@ -97,6 +105,7 @@ frontend/src/app/
 │           │   └── store-categories.component.ts     # Gestão de segmentos de lojas
 │           └── user-profile/
 │               └── user-profile.component.ts         # Visualização de perfil e dados Keycloak
+│                   (+ locale-card/: idioma e país; telegram-link-card/: vínculo do bot)
 │
 ├── shared/                                           # Componentes reutilizáveis, tipos e mocks
 │   ├── components/

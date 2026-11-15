@@ -1,12 +1,13 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 export type ModalVariant = 'danger' | 'warning' | 'primary' | 'info';
 
 @Component({
   selector: 'app-confirm-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [...I18N, CommonModule],
   templateUrl: './confirm-modal.component.html',
   styleUrl: './confirm-modal.component.css'
 })

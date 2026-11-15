@@ -69,7 +69,7 @@ export class AccessibilityService {
     const synth = window.speechSynthesis;
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text.slice(0, 8000));
-    // Idioma da página (o TranslationService mantém o lang do <html>: pt-BR ou en)
+    // Idioma da página (o TranslationService mantém o lang do <html>: pt-BR ou en; em uso: público = URL, interno = preferido)
     const lang = document.documentElement.lang || 'pt-BR';
     utterance.lang = lang;
     const prefix = lang.slice(0, 2).toLowerCase();

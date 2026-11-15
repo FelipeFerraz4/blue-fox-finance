@@ -5,11 +5,13 @@ import { BuyersService } from '../../../core/services/buyers/buyers.service';
 import { ExpensePreferencesService } from '../../../core/services/expense-preferences/expense-preferences.service';
 import { Buyer, CreateBuyerDto, UpdateBuyerDto } from '../../../shared/model/types/buyer.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { I18N } from '../../../core/i18n/i18n.pipes';
+import { t } from '../../../core/i18n/i18n';
 
 @Component({
   selector: 'app-buyers',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
+  imports: [...I18N, CommonModule, FormsModule, ConfirmModalComponent],
   template: `
     <div class="buyers-page">
       <!-- Cabeçalho da Página no Padrão Blue Fox -->
@@ -22,11 +24,11 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
-            <h1 class="page-title">Compradores</h1>
-            <span class="badge badge-brand">Gestão de Pessoas</span>
+            <h1 class="page-title">{{ 'Compradores' | t }}</h1>
+            <span class="badge badge-brand">{{ 'Gestão de Pessoas' | t }}</span>
           </div>
           <p class="page-subtitle">
-            Cadastre as pessoas e compradores das compras para agilizar novos lançamentos e habilitar filtros avançados
+            {{ 'Cadastre as pessoas e compradores das compras para agilizar novos lançamentos e habilitar filtros avançados' | t }}
           </p>
         </div>
 
@@ -35,7 +37,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>Adicionar Comprador</span>
+          <span>{{ 'Adicionar Comprador' | t }}</span>
         </button>
       </div>
 
@@ -51,7 +53,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             </svg>
           </div>
           <div class="kpi-info">
-            <span class="kpi-label">Total de Compradores</span>
+            <span class="kpi-label">{{ 'Total de Compradores' | t }}</span>
             <strong class="kpi-value">{{ buyers.length }}</strong>
           </div>
         </div>
@@ -64,7 +66,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             </svg>
           </div>
           <div class="kpi-info">
-            <span class="kpi-label">Compradores Ativos</span>
+            <span class="kpi-label">{{ 'Compradores Ativos' | t }}</span>
             <strong class="kpi-value text-green">{{ countActive }}</strong>
           </div>
         </div>
@@ -77,7 +79,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             </svg>
           </div>
           <div class="kpi-info">
-            <span class="kpi-label">Compradores Inativos</span>
+            <span class="kpi-label">{{ 'Compradores Inativos' | t }}</span>
             <strong class="kpi-value text-muted">{{ countInactive }}</strong>
           </div>
         </div>
@@ -94,24 +96,24 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             <input
               type="text"
               [(ngModel)]="searchTerm"
-              placeholder="Buscar por nome ou e-mail..."
+              [placeholder]="'Buscar por nome ou e-mail...' | t"
               class="form-control search-input"
             />
-            <button *ngIf="searchTerm" (click)="searchTerm = ''" class="btn-clear-search" title="Limpar busca">
+            <button *ngIf="searchTerm" (click)="searchTerm = ''" class="btn-clear-search" [title]="'Limpar busca' | t">
               ✕
             </button>
           </div>
         </div>
 
         <div class="filter-pills-wrap">
-          <span class="filter-pills-label">Filtrar por:</span>
+          <span class="filter-pills-label">{{ 'Filtrar por:' | t }}</span>
           <div class="pills-scroll-container">
             <button
               (click)="setStatusFilter('ALL')"
               class="badge-filter"
               [class.active]="statusFilter === 'ALL'"
             >
-              Todos ({{ buyers.length }})
+              {{ 'Todos ({n})' | t: { n: buyers.length } }}
             </button>
             <button
               (click)="setStatusFilter('ACTIVE')"
@@ -119,7 +121,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
               [class.active]="statusFilter === 'ACTIVE'"
             >
               <span class="dot-status dot-active"></span>
-              Ativos ({{ countActive }})
+              {{ 'Ativos ({n})' | t: { n: countActive } }}
             </button>
             <button
               (click)="setStatusFilter('INACTIVE')"
@@ -127,7 +129,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
               [class.active]="statusFilter === 'INACTIVE'"
             >
               <span class="dot-status dot-inactive"></span>
-              Inativos ({{ countInactive }})
+              {{ 'Inativos ({n})' | t: { n: countInactive } }}
             </button>
           </div>
         </div>
@@ -137,19 +139,19 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       <div class="card buyers-list-card">
         <div class="card-title">
           <div class="card-title-left">
-            <span>Lista de Compradores</span>
-            <span class="badge badge-brand count-badge">{{ filteredBuyers.length }} cadastrados</span>
+            <span>{{ 'Lista de Compradores' | t }}</span>
+            <span class="badge badge-brand count-badge">{{ '{n} cadastrados' | t: { n: filteredBuyers.length } }}</span>
           </div>
 
           <div class="view-help-text" *ngIf="filteredBuyers.length > 0">
-            <span class="text-xs text-muted">Toque no status para alternar entre ativo e inativo</span>
+            <span class="text-xs text-muted">{{ 'Toque no status para alternar entre ativo e inativo' | t }}</span>
           </div>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-state">
           <div class="spinner"></div>
-          <p>Carregando compradores...</p>
+          <p>{{ 'Carregando compradores...' | t }}</p>
         </div>
 
         <!-- 1. VISÃO EM TABELA (DESKTOP: Telas >= 640px) -->
@@ -158,11 +160,11 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Comprador</th>
-                  <th>E-mail</th>
-                  <th class="text-center">Status</th>
-                  <th>Data de Cadastro</th>
-                  <th class="text-center">Ações</th>
+                  <th>{{ 'Comprador' | t }}</th>
+                  <th>{{ 'E-mail' | t }}</th>
+                  <th class="text-center">{{ 'Status' | t }}</th>
+                  <th>{{ 'Data de Cadastro' | t }}</th>
+                  <th class="text-center">{{ 'Ações' | t }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -172,7 +174,7 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                       <div class="buyer-avatar">{{ getInitials(b.nome) }}</div>
                       <div>
                         <strong class="text-gray-900 font-semibold">{{ b.nome }}</strong>
-                        <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">★ Padrão</span>
+                        <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                       </div>
                     </div>
                   </td>
@@ -184,22 +186,22 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                       </svg>
                       <a [href]="'mailto:' + b.email" class="email-link">{{ b.email }}</a>
                     </div>
-                    <span *ngIf="!b.email" class="text-muted text-xs font-italic">Não informado</span>
+                    <span *ngIf="!b.email" class="text-muted text-xs font-italic">{{ 'Não informado' | t }}</span>
                   </td>
                   <td class="text-center">
                     <button
                       (click)="toggleStatus(b)"
                       class="status-toggle-pill"
                       [class.active]="b.ativo"
-                      [title]="b.ativo ? 'Clique para desativar' : 'Clique para ativar'"
+                      [title]="b.ativo ? ('Clique para desativar' | t) : ('Clique para ativar' | t)"
                     >
                       <span class="dot-indicator"></span>
-                      <span>{{ b.ativo ? 'Ativo' : 'Inativo' }}</span>
+                      <span>{{ b.ativo ? ('Ativo' | t) : ('Inativo' | t) }}</span>
                     </button>
                   </td>
                   <td>
                     <span class="text-sm text-muted">
-                      {{ b.createdAt | date:'dd/MM/yyyy' }}
+                      {{ b.createdAt | appDate: 'short' : false }}
                     </span>
                   </td>
                   <td class="text-center">
@@ -207,24 +209,24 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                       <button
                         (click)="openEditModal(b)"
                         class="btn-action-icon btn-action-edit"
-                        title="Editar Comprador"
+                        [title]="'Editar Comprador' | t"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
-                        <span>Editar</span>
+                        <span>{{ 'Editar' | t }}</span>
                       </button>
                       <button
                         (click)="promptDeleteBuyer(b)"
                         class="btn-action-icon btn-action-delete"
-                        title="Excluir Comprador"
+                        [title]="'Excluir Comprador' | t"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <polyline points="3 6 5 6 21 6"/>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
-                        <span>Excluir</span>
+                        <span>{{ 'Excluir' | t }}</span>
                       </button>
                     </div>
                   </td>
@@ -242,8 +244,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 <div class="buyer-avatar">{{ getInitials(b.nome) }}</div>
                 <div>
                   <strong class="mobile-buyer-name">{{ b.nome }}</strong>
-                  <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">★ Padrão</span>
-                  <span class="text-xs text-muted block">Cadastrado em {{ b.createdAt | date:'dd/MM/yyyy' }}</span>
+                  <span *ngIf="isBuyerDefault(b.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
+                  <span class="text-xs text-muted block">{{ 'Cadastrado em {data}' | t: { data: (b.createdAt | appDate: 'short' : false) } }}</span>
                 </div>
               </div>
 
@@ -251,10 +253,10 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 (click)="toggleStatus(b)"
                 class="status-toggle-pill"
                 [class.active]="b.ativo"
-                [title]="b.ativo ? 'Clique para desativar' : 'Clique para ativar'"
+                [title]="b.ativo ? ('Clique para desativar' | t) : ('Clique para ativar' | t)"
               >
                 <span class="dot-indicator"></span>
-                <span>{{ b.ativo ? 'Ativo' : 'Inativo' }}</span>
+                <span>{{ b.ativo ? ('Ativo' | t) : ('Inativo' | t) }}</span>
               </button>
             </div>
 
@@ -274,14 +276,14 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
-                Editar
+                {{ 'Editar' | t }}
               </button>
               <button (click)="promptDeleteBuyer(b)" class="btn btn-danger btn-sm mobile-btn-action">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                Excluir
+                {{ 'Excluir' | t }}
               </button>
             </div>
           </div>
@@ -296,14 +298,14 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
               <line x1="23" y1="11" x2="17" y2="11"/>
             </svg>
           </div>
-          <h3>Nenhum comprador encontrado</h3>
-          <p class="text-muted text-sm mt-1">Não foram encontrados compradores para os filtros ou busca aplicados.</p>
+          <h3>{{ 'Nenhum comprador encontrado' | t }}</h3>
+          <p class="text-muted text-sm mt-1">{{ 'Não foram encontrados compradores para os filtros ou busca aplicados.' | t }}</p>
           <div class="empty-state-actions mt-3">
             <button *ngIf="searchTerm || statusFilter !== 'ALL'" (click)="searchTerm = ''; setStatusFilter('ALL')" class="btn btn-secondary btn-sm">
-              Limpar Filtros
+              {{ 'Limpar Filtros' | t }}
             </button>
             <button (click)="openAddModal()" class="btn btn-primary btn-sm btn-pill">
-              + Cadastrar Novo Comprador
+              {{ '+ Cadastrar Novo Comprador' | t }}
             </button>
           </div>
         </div>
@@ -321,8 +323,8 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                 </svg>
               </div>
               <div>
-                <h3>{{ editingId ? 'Editar Comprador' : 'Novo Comprador' }}</h3>
-                <p class="modal-subtitle">Preencha as informações para registro do comprador</p>
+                <h3>{{ editingId ? ('Editar Comprador' | t) : ('Novo Comprador' | t) }}</h3>
+                <p class="modal-subtitle">{{ 'Preencha as informações para registro do comprador' | t }}</p>
               </div>
             </div>
             <button class="btn-close" (click)="closeModal()">✕</button>
@@ -340,28 +342,28 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
               </div>
 
               <div class="form-group">
-                <label class="form-label">Nome Completo do Comprador *</label>
+                <label class="form-label">{{ 'Nome Completo do Comprador *' | t }}</label>
                 <input
                   type="text"
                   name="nome"
                   [(ngModel)]="formData.nome"
                   required
                   class="form-control"
-                  placeholder="ex: João Silva, Maria Oliveira..."
+                  [placeholder]="'ex: João Silva, Maria Oliveira...' | t"
                   autofocus
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">E-mail (opcional)</label>
+                <label class="form-label">{{ 'E-mail (opcional)' | t }}</label>
                 <input
                   type="email"
                   name="email"
                   [(ngModel)]="formData.email"
                   class="form-control"
-                  placeholder="ex: felipe@exemplo.com"
+                  [placeholder]="'ex: felipe@exemplo.com' | t"
                 />
-                <small class="text-muted text-xs">Utilizado para identificação e notificações futuras.</small>
+                <small class="text-muted text-xs">{{ 'Utilizado para identificação e notificações futuras.' | t }}</small>
               </div>
 
               <div class="status-switch-box">
@@ -374,25 +376,25 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
                   <span class="switch-slider"></span>
                 </label>
                 <div class="switch-label-text">
-                  <strong>Definir como comprador padrão</strong>
-                  <span class="text-xs text-muted block">Será pré-selecionado automaticamente ao abrir novos lançamentos</span>
+                  <strong>{{ 'Definir como comprador padrão' | t }}</strong>
+                  <span class="text-xs text-muted block">{{ 'Será pré-selecionado automaticamente ao abrir novos lançamentos' | t }}</span>
                 </div>
               </div>
             </div>
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" (click)="closeModal()">
-                Cancelar
+                {{ 'Cancelar' | t }}
               </button>
               <button
                 type="submit"
                 [disabled]="!modalForm.valid || saving"
                 class="btn btn-primary btn-pill"
               >
-                <span *ngIf="!saving">{{ editingId ? 'Salvar Alterações' : 'Cadastrar Comprador' }}</span>
+                <span *ngIf="!saving">{{ editingId ? ('Salvar Alterações' | t) : ('Cadastrar Comprador' | t) }}</span>
                 <span *ngIf="saving" class="btn-spinner-wrap">
                   <span class="mini-spinner"></span>
-                  Salvando...
+                  {{ 'Salvando...' | t }}
                 </span>
               </button>
             </div>
@@ -403,11 +405,11 @@ import { ConfirmModalComponent } from '../../../shared/components/general/confir
       <!-- Modal de Confirmação Reutilizável para Exclusão de Comprador -->
       <app-confirm-modal
         [isOpen]="showDeleteModal"
-        [title]="'Excluir Comprador'"
-        [message]="'Tem certeza que deseja excluir este comprador? Se houver despesas vinculadas, o nome textual será mantido nos relatórios históricos.'"
+        [title]="('Excluir Comprador' | t)"
+        [message]="('Tem certeza que deseja excluir este comprador? Se houver despesas vinculadas, o nome textual será mantido nos relatórios históricos.' | t)"
         [itemName]="buyerToDelete?.nome"
-        [confirmText]="'Sim, Excluir'"
-        [cancelText]="'Cancelar'"
+        [confirmText]="('Sim, Excluir' | t)"
+        [cancelText]="('Cancelar' | t)"
         [variant]="'danger'"
         [loading]="deleting"
         (confirm)="confirmDeleteBuyer()"
@@ -1358,7 +1360,7 @@ export class BuyersComponent implements OnInit {
 
   saveBuyer() {
     if (!this.formData.nome?.trim()) {
-      this.errorMessage = 'O nome do comprador é obrigatório.';
+      this.errorMessage = t('O nome do comprador é obrigatório.');
       return;
     }
 
@@ -1386,7 +1388,7 @@ export class BuyersComponent implements OnInit {
         },
         error: (err) => {
           this.saving = false;
-          this.errorMessage = err.error?.message || err.message || 'Erro ao atualizar comprador.';
+          this.errorMessage = err.error?.message || err.message || t('Erro ao atualizar comprador.');
         },
       });
     } else {
@@ -1401,7 +1403,7 @@ export class BuyersComponent implements OnInit {
         },
         error: (err) => {
           this.saving = false;
-          this.errorMessage = err.error?.message || err.message || 'Erro ao cadastrar comprador.';
+          this.errorMessage = err.error?.message || err.message || t('Erro ao cadastrar comprador.');
         },
       });
     }

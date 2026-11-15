@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { BotService } from '../../../../../core/services/bot/bot.service';
 import { BotLinkCode, BotLinkStatus } from '../../../../../shared/model/types/bot.model';
+import { I18N } from '../../../../../core/i18n/i18n.pipes';
 
 const POLL_MS = 3000;
 
@@ -12,7 +12,7 @@ const POLL_MS = 3000;
 @Component({
   selector: 'app-telegram-link-card',
   standalone: true,
-  imports: [DatePipe],
+  imports: [...I18N],
   templateUrl: './telegram-link-card.component.html',
   styleUrl: './telegram-link-card.component.css',
 })

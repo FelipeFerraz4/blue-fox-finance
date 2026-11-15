@@ -4,7 +4,9 @@ import {
   DimensionSlice,
   FutureCommitments,
 } from '../../../shared/model/types/analytics.model';
-import { MONTH_LABELS, MONTH_NAMES } from './analytics.store';
+import { monthLabels, monthNames } from './analytics.store';
+import { t } from '../../../core/i18n/i18n';
+import { currencySymbol, formatMoney, formatMoneyCompact } from '../../../core/i18n/format';
 
 // Paleta: uma série = azul da marca; selecionado cheio, demais esmaecidos.
 // Uma versão por tema; setChartTheme() é chamado pelo dashboard quando o tema muda.
@@ -47,11 +49,9 @@ export const CATEGORICAL = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4
 
 export const OTHERS_KEY = '__outros__';
 
-const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-const compact = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
-
-export const formatBRL = (v: number) => currency.format(v);
-const axisBRL = (v: number) => (v === 0 ? '0' : v < 1000 ? `R$ ${Math.round(v)}` : `R$ ${compact.format(v)}`);
+/** Moeda do país escolhido (o nome ficou formatBRL por histórico). */
+export const formatBRL = (v: number) => formatMoney(v);
+const axisBRL = (v: number) => (v === 0 ? '0' : v < 1000 ? `${currencySymbol()} ${Math.round(v)}` : formatMoneyCompact(v));
 
 /** O tooltip do ECharts renderiza HTML: rótulos vindos do usuário precisam de escape. */
 export function escapeHtml(text: string): string {
@@ -108,9 +108,9 @@ export function monthlyChartOptions(
         const comparison =
           prev > 0
             ? `${current[i] >= prev ? '▲' : '▼'} ${Math.abs(((current[i] - prev) / prev) * 100).toFixed(0)}% vs ${year - 1}`
-            : `${year - 1}: sem gastos`;
+            : t('{ano}: sem gastos', { ano: year - 1 });
         return (
-          `<div style="font-weight:600;color:${P.ink}">${MONTH_NAMES[i]} de ${year}</div>` +
+          `<div style="font-weight:600;color:${P.ink}">${t('{mes} de {ano}', { mes: monthNames()[i], ano: year })}</div>` +
           `<div style="margin-top:4px"><strong>${formatBRL(current[i])}</strong></div>` +
           `<div style="color:${P.inkSecondary};margin-top:2px">${comparison}</div>`
         );
@@ -120,7 +120,7 @@ export function monthlyChartOptions(
     yAxis: {
       type: 'category',
       inverse: true,
-      data: MONTH_LABELS,
+      data: monthLabels(),
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: P.inkSecondary, fontSize: 12 },
@@ -160,7 +160,7 @@ export function topSlices(slices: DimensionSlice[], topN: number): DimensionSlic
     ...slices.slice(0, topN),
     {
       key: OTHERS_KEY,
-      label: `Outros (${rest.length})`,
+      label: t('Outros ({n})', { n: rest.length }),
       total: Number(rest.reduce((acc, s) => acc + s.total, 0).toFixed(2)),
       count: rest.reduce((acc, s) => acc + s.count, 0),
     },
@@ -240,7 +240,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
   const othersIds = ordered.slice(7).map((m) => m.id);
   const labels = fc.meses.map((m) => {
     const [y, mo] = m.mes.split('-').map(Number);
-    return `${MONTH_LABELS[mo - 1]}/${String(y).slice(2)}`;
+    return `${monthLabels()[mo - 1]}/${String(y).slice(2)}`;
   });
 
   const series: any[] = visible.map((meio, idx) => ({
@@ -253,7 +253,7 @@ export function commitmentsOptions(fc: FutureCommitments): EChartsCoreOption {
   }));
   if (othersIds.length) {
     series.push({
-      name: 'Outros',
+      name: t('Outros'),
       type: 'bar',
       stack: 'total',
       barMaxWidth: 28,
@@ -314,7 +314,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
       itemHeight: 12,
       icon: 'roundRect',
       textStyle: { color: P.inkSecondary, fontSize: 12 },
-      data: ['Pago', 'Pendente'],
+      data: [t('Pago'), t('Pendente')],
     },
     tooltip: {
       ...(base()['tooltip'] as object),
@@ -323,15 +323,15 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
       formatter: (params: any[]) => {
         const c = contas[params[0].dataIndex];
         return (
-          `<div style="font-weight:600;color:${P.ink}">${MONTH_NAMES[c.mes - 1]}</div>` +
-          tooltipRow(STATUS_GOOD, 'Pago', c.pago) +
-          tooltipRow(STATUS_WARNING, 'Pendente', c.pendente)
+          `<div style="font-weight:600;color:${P.ink}">${monthNames()[c.mes - 1]}</div>` +
+          tooltipRow(STATUS_GOOD, t('Pago'), c.pago) +
+          tooltipRow(STATUS_WARNING, t('Pendente'), c.pendente)
         );
       },
     },
     xAxis: {
       type: 'category',
-      data: MONTH_LABELS,
+      data: monthLabels(),
       axisLine: { lineStyle: { color: P.axis } },
       axisTick: { show: false },
       axisLabel: { color: P.inkSecondary, fontSize: 11 },
@@ -339,7 +339,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
     yAxis: valueAxis(),
     series: [
       {
-        name: 'Pago',
+        name: t('Pago'),
         type: 'bar',
         stack: 'contas',
         // Cor na série (legenda) e por barra (esmaecer meses não selecionados)
@@ -352,7 +352,7 @@ export function billsOptions(contas: BillsMonthSummary[], selected: number | und
         })),
       },
       {
-        name: 'Pendente',
+        name: t('Pendente'),
         type: 'bar',
         stack: 'contas',
         itemStyle: { color: STATUS_WARNING },

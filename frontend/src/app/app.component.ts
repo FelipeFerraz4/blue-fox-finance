@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -9,6 +9,8 @@ import { A11yToolbarComponent } from './shared/components/general/a11y-toolbar/a
 import { ThemeService } from './core/services/theme/theme.service';
 import { AccessibilityService } from './core/services/accessibility/accessibility.service';
 import { SeoService } from './core/services/seo/seo.service';
+import { AuthService } from './core/services/auth/auth.service';
+import { LocaleService } from './core/services/locale/locale.service';
 import { TranslationService } from './core/services/translation/translation.service';
 
 @Component({
@@ -96,6 +98,12 @@ export class AppComponent implements OnInit {
     this.updateLayoutState(this.router.url);
     // Meta tags por rota: públicas indexadas, internas com noindex
     seo.init();
+    // Logado: idioma e país da conta (outros aparelhos) ou grava os deste navegador
+    const auth = inject(AuthService);
+    const locale = inject(LocaleService);
+    effect(() => {
+      if (auth.isAuthenticated()) void locale.syncWithAccount();
+    });
   }
 
   ngOnInit(): void {

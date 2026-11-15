@@ -7,11 +7,11 @@
       </svg>
     </span>
     <div class="tg-header-text">
-      <h3 id="tg-card-title">Telegram</h3>
-      <p>Lance gastos e consulte contas pelo chat</p>
+      <h3 id="tg-card-title">{{ 'Telegram' | t }}</h3>
+      <p>{{ 'Lance gastos e consulte contas pelo chat' | t }}</p>
     </div>
     @if (status()?.vinculo) {
-      <span class="tg-badge">Conectado</span>
+      <span class="tg-badge">{{ 'Conectado' | t }}</span>
     }
   </header>
 
@@ -22,48 +22,48 @@
   @if (status(); as s) {
     @if (s.vinculo) {
       @if (justConnected()) {
-        <p class="tg-success" role="status">Conta conectada! Já pode lançar pelo Telegram.</p>
+        <p class="tg-success" role="status">{{ 'Conta conectada! Já pode lançar pelo Telegram.' | t }}</p>
       }
       <p class="tg-line">
-        Conectado como <strong>{{ s.vinculo.username ? '@' + s.vinculo.username : 'usuário do Telegram' }}</strong>
-        desde {{ s.vinculo.createdAt | date: 'dd/MM/yyyy' }}.
+        {{ 'Conectado como' | t }} <strong>{{ s.vinculo.username ? '@' + s.vinculo.username : 'usuário do Telegram' }}</strong>
+        {{ 'desde {data}.' | t: { data: (s.vinculo.createdAt | appDate: 'short' : false) } }}
       </p>
       <ul class="tg-tips">
-        <li><code>/lancamento</code> e responda às perguntas</li>
-        <li>ou direto: <code>45,90 pão &#64; padaria</code></li>
-        <li><code>/resumo</code>, <code>/contas</code>, <code>/ultimos</code></li>
+        <li><code>{{ '/lancamento' | t }}</code> {{ 'e responda às perguntas' | t }}</li>
+        <li>{{ 'ou direto:' | t }} <code>{{ '45,90 pão @ padaria' | t }}</code></li>
+        <li><code>{{ '/resumo' | t }}</code>, <code>{{ '/contas' | t }}</code>, <code>{{ '/ultimos' | t }}</code></li>
       </ul>
       <div class="tg-actions">
         @if (s.botUsername) {
-          <a class="btn btn-secondary btn-sm" [href]="'https://t.me/' + s.botUsername" target="_blank" rel="noopener">Abrir chat</a>
+          <a class="btn btn-secondary btn-sm" [href]="'https://t.me/' + s.botUsername" target="_blank" rel="noopener">{{ 'Abrir chat' | t }}</a>
         }
         <button type="button" class="btn btn-danger btn-sm" (click)="unlink()" [disabled]="busy()">
-          {{ confirmingUnlink() ? 'Confirmar' : 'Desconectar' }}
+          {{ confirmingUnlink() ? ('Confirmar' | t) : ('Desconectar' | t) }}
         </button>
         @if (confirmingUnlink()) {
-          <button type="button" class="btn btn-secondary btn-sm" (click)="confirmingUnlink.set(false)">Voltar</button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="confirmingUnlink.set(false)">{{ 'Voltar' | t }}</button>
         }
       </div>
     } @else if (!s.enabled) {
-      <p class="tg-muted">O bot ainda não está configurado neste ambiente.</p>
+      <p class="tg-muted">{{ 'O bot ainda não está configurado neste ambiente.' | t }}</p>
     } @else if (pending()) {
       <ol class="tg-steps">
-        <li>Toque em <strong>Abrir no Telegram</strong></li>
-        <li>No chat, toque em <strong>Iniciar</strong></li>
+        <li>{{ 'Toque em' | t }} <strong>{{ 'Abrir no Telegram' | t }}</strong></li>
+        <li>{{ 'No chat, toque em' | t }} <strong>{{ 'Iniciar' | t }}</strong></li>
       </ol>
       <div class="tg-actions">
-        <a class="btn btn-primary btn-sm" [href]="pending()!.url" target="_blank" rel="noopener">Abrir no Telegram</a>
-        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelPending()">Cancelar</button>
-        <span class="tg-wait" aria-live="polite">Aguardando · {{ countdown() }}</span>
+        <a class="btn btn-primary btn-sm" [href]="pending()!.url" target="_blank" rel="noopener">{{ 'Abrir no Telegram' | t }}</a>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelPending()">{{ 'Cancelar' | t }}</button>
+        <span class="tg-wait" aria-live="polite">{{ 'Aguardando · {tempo}' | t: { tempo: countdown() } }}</span>
       </div>
     } @else {
       <div class="tg-actions">
         <button type="button" class="btn btn-primary btn-sm" (click)="connect()" [disabled]="busy()">
-          Conectar Telegram
+          {{ 'Conectar Telegram' | t }}
         </button>
       </div>
     }
   } @else {
-    <p class="tg-muted">Carregando…</p>
+    <p class="tg-muted">{{ 'Carregando…' | t }}</p>
   }
 </section>

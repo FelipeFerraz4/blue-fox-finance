@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Put } from '@nestjs/common';
 import { PreferencesService } from './preferences.service';
 import { UpdateExpensePreferenceDto } from './dto/expense-preference.dto';
+import { UpdateLocalePreferenceDto } from './dto/locale-preference.dto';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { FINANCE_ACCESS_ROLES } from '../auth/roles.constants';
@@ -21,6 +22,17 @@ export class PreferencesController {
     @Body() dto: UpdateExpensePreferenceDto,
   ) {
     return this.preferencesService.updateExpensePreferences(userId, dto);
+  }
+
+  /** Idioma e país do usuário (site em outros aparelhos e bot). */
+  @Get('locale')
+  getLocale(@CurrentUser('sub') userId: string) {
+    return this.preferencesService.getLocale(userId);
+  }
+
+  @Put('locale')
+  updateLocale(@CurrentUser('sub') userId: string, @Body() dto: UpdateLocalePreferenceDto) {
+    return this.preferencesService.updateLocale(userId, dto);
   }
 
   @Delete('expenses')

@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import Keycloak from 'keycloak-js';
 import { isBrowserEnv } from '../../utils/browser-storage';
+import { PREFERRED_LANGUAGE, languageTag } from '../../i18n/i18n';
 import { environment } from '../../../../environments/environment';
 
 export interface UserAuthProfile {
@@ -68,6 +69,8 @@ export class AuthService {
   login(redirectUri?: string): Promise<void> {
     return this.keycloak?.login({
       redirectUri: redirectUri || window.location.href,
+      // Tela de login do Keycloak no idioma do usuário
+      locale: languageTag(PREFERRED_LANGUAGE),
     }) || Promise.resolve();
   }
 

@@ -1,10 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateExpensePreferenceDto } from './dto/expense-preference.dto';
+import { UpdateLocalePreferenceDto } from './dto/locale-preference.dto';
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_REGION,
+  Language,
+  Region,
+  isLanguage,
+  isRegion,
+} from '../../common/constants/locale';
+
+export interface LocalePreference {
+  idioma: Language;
+  regiao: Region;
+  /** false enquanto o usuário nunca escolheu (o site usa a escolha do navegador) */
+  salvo: boolean;
+}
 
 @Injectable()
 export class PreferencesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Idioma e país; sem registro, os padrões (pt / BR). */
+  async getLocale(userId: string): Promise<LocalePreference> {
+    const pref = await this.prisma.preferenciaUsuario.findUnique({ where: { userId } });
+    return {
+      idioma: isLanguage(pref?.idioma) ? pref.idioma : DEFAULT_LANGUAGE,
+      regiao: isRegion(pref?.regiao) ? pref.regiao : DEFAULT_REGION,
+      salvo: !!pref,
+    };
+  }
+
+  async updateLocale(userId: string, dto: UpdateLocalePreferenceDto): Promise<LocalePreference> {
+    await this.prisma.preferenciaUsuario.upsert({
+      where: { userId },
+      create: { userId, idioma: dto.idioma ?? DEFAULT_LANGUAGE, regiao: dto.regiao ?? DEFAULT_REGION },
+      update: {
+        ...(dto.idioma !== undefined && { idioma: dto.idioma }),
+        ...(dto.regiao !== undefined && { regiao: dto.regiao }),
+      },
+    });
+    return this.getLocale(userId);
+  }
 
   async getExpensePreferences(userId: string) {
     const preferences = await this.prisma.preferenciaLancamento.findUnique({

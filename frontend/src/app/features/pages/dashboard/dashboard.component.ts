@@ -10,7 +10,7 @@ import {
   AnalyticsFact,
   DimensionSlice,
 } from '../../../shared/model/types/analytics.model';
-import { AnalyticsStore, MONTH_LABELS } from './analytics.store';
+import { AnalyticsStore, monthLabels } from './analytics.store';
 import {
   OTHERS_KEY,
   billsOptions,
@@ -24,6 +24,9 @@ import {
 import { ThemeService } from '../../../core/services/theme/theme.service';
 import { ChartCardComponent } from './chart-card/chart-card.component';
 import { BillAlertsCardComponent } from '../bills/bill-alerts-card/bill-alerts-card.component';
+import { I18N } from '../../../core/i18n/i18n.pipes';
+import { languageTag, t } from '../../../core/i18n/i18n';
+import { formatDate } from '../../../core/i18n/format';
 
 type SortKey = 'data' | 'nome' | 'loja' | 'categoria' | 'meioPagamento' | 'valor';
 
@@ -38,7 +41,7 @@ const PAGE_SIZE = 12;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxEchartsDirective, ChartCardComponent, BillAlertsCardComponent],
+  imports: [...I18N, CommonModule, RouterModule, NgxEchartsDirective, ChartCardComponent, BillAlertsCardComponent],
   providers: [AnalyticsStore, provideEchartsCore({ echarts })],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -139,7 +142,7 @@ export class DashboardComponent implements OnInit {
       const va = a[key];
       const vb = b[key];
       if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
-      return String(va).localeCompare(String(vb), 'pt-BR') * dir;
+      return String(va).localeCompare(String(vb), languageTag()) * dir;
     });
   });
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sortedRows().length / PAGE_SIZE)));
@@ -148,7 +151,7 @@ export class DashboardComponent implements OnInit {
     return this.sortedRows().slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   });
 
-  readonly monthLabels = MONTH_LABELS;
+  readonly monthLabels = monthLabels();
   readonly othersKey = OTHERS_KEY;
 
   ngOnInit(): void {
@@ -167,7 +170,7 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         this.loading.set(false);
         const message = err?.error?.message;
-        this.error.set(Array.isArray(message) ? message.join(' ') : message || 'Não foi possível carregar as análises.');
+        this.error.set(Array.isArray(message) ? message.join(' ') : message || t('Não foi possível carregar as análises.'));
       },
     });
   }
@@ -267,12 +270,12 @@ export class DashboardComponent implements OnInit {
 
   formatDate(iso: string): string {
     const d = new Date(iso);
-    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+    return formatDate(d, 'short');
   }
 
   formatMonthRef(ref: string): string {
     const [y, m] = ref.split('-').map(Number);
-    return `${MONTH_LABELS[m - 1]}/${y}`;
+    return `${monthLabels()[m - 1]}/${y}`;
   }
 
   trackFact = (_: number, f: AnalyticsFact) => f.id;

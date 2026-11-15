@@ -15,6 +15,9 @@ import { Buyer } from '../../../../shared/model/types/buyer.model';
 import { CategoriaItem } from '../../../../shared/model/types/category.model';
 import { CreateLancamentoDto, PreviewInstallmentItem, TipoLancamento } from '../../../../shared/model/types/lancamento.model';
 import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
+import { currencySymbol, decimalSeparator, formatMoney, formatNumber, parseDecimal } from '../../../../core/i18n/format';
 
 export interface ExpenseItemForm {
   id: string;
@@ -30,7 +33,7 @@ export interface ExpenseItemForm {
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent],
+  imports: [...I18N, CommonModule, FormsModule, RouterModule, SearchableDropdownComponent],
   template: `
     <div class="expense-form-page">
       <!-- Cabeçalho da Página -->
@@ -43,16 +46,16 @@ export interface ExpenseItemForm {
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
             </div>
-            <h1 class="page-title">Novo Lançamento</h1>
+            <h1 class="page-title">{{ 'Novo Lançamento' | t }}</h1>
           </div>
-          <p class="page-subtitle">Preencha os dados da compra e adicione os itens adquiridos</p>
+          <p class="page-subtitle">{{ 'Preencha os dados da compra e adicione os itens adquiridos' | t }}</p>
         </div>
 
         <a routerLink="/expenses" class="btn btn-secondary btn-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          <span>Voltar para Lançamentos</span>
+          <span>{{ 'Voltar para Lançamentos' | t }}</span>
         </a>
       </div>
 
@@ -89,8 +92,8 @@ export interface ExpenseItemForm {
                     </svg>
                   </div>
                   <div>
-                    <h2 class="section-title">Dados Gerais da Compra</h2>
-                    <p class="section-desc">Metadados compartilhados por todos os itens deste recibo ou nota fiscal</p>
+                    <h2 class="section-title">{{ 'Dados Gerais da Compra' | t }}</h2>
+                    <p class="section-desc">{{ 'Metadados compartilhados por todos os itens deste recibo ou nota fiscal' | t }}</p>
                   </div>
                 </div>
               </div>
@@ -99,13 +102,13 @@ export interface ExpenseItemForm {
               <div class="form-row">
                 <div class="form-group">
                   <div class="label-with-action">
-                    <label class="form-label">Comprador *</label>
-                    <a routerLink="/buyers" class="btn-manage-link" title="Gerenciar Compradores">
+                    <label class="form-label">{{ 'Comprador *' | t }}</label>
+                    <a routerLink="/buyers" class="btn-manage-link" [title]="'Gerenciar Compradores' | t">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                       </svg>
-                      <span>Gerenciar Compradores</span>
+                      <span>{{ 'Gerenciar Compradores' | t }}</span>
                     </a>
                   </div>
                   <!-- Campo Unificado de Comprador -->
@@ -113,7 +116,7 @@ export interface ExpenseItemForm {
                     [options]="buyerDropdownOptions"
                     [value]="selectedBuyerId"
                     (valueChange)="onBuyerOptionSelect($event)"
-                    placeholder="Selecione ou cadastre um comprador..."
+                    [placeholder]="'Selecione ou cadastre um comprador...' | t"
                     searchPlaceholder="Pesquisar comprador..."
                     [allowCreate]="true"
                     [createOnBlur]="false"
@@ -122,19 +125,19 @@ export interface ExpenseItemForm {
                     [invalid]="formSubmitted && !selectedBuyerId"
                   ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedBuyerId" class="field-error-msg">
-                    Selecione ou cadastre um comprador
+                    {{ 'Selecione ou cadastre um comprador' | t }}
                   </span>
                 </div>
 
                 <div class="form-group">
                   <div class="label-with-action">
-                    <label class="form-label">Loja *</label>
-                    <a routerLink="/stores" class="btn-manage-link" title="Gerenciar Lojas e Categorias">
+                    <label class="form-label">{{ 'Loja *' | t }}</label>
+                    <a routerLink="/stores" class="btn-manage-link" [title]="'Gerenciar Lojas e Categorias' | t">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                       </svg>
-                      <span>Gerenciar Lojas</span>
+                      <span>{{ 'Gerenciar Lojas' | t }}</span>
                     </a>
                   </div>
                   <!-- Campo Unificado de Loja -->
@@ -142,7 +145,7 @@ export interface ExpenseItemForm {
                     [options]="storeDropdownOptions"
                     [value]="selectedStoreId"
                     (valueChange)="onStoreOptionSelect($event)"
-                    placeholder="Selecione ou cadastre uma loja..."
+                    [placeholder]="'Selecione ou cadastre uma loja...' | t"
                     searchPlaceholder="Pesquisar loja..."
                     [allowCreate]="true"
                     [createOnBlur]="false"
@@ -151,7 +154,7 @@ export interface ExpenseItemForm {
                     [invalid]="formSubmitted && !selectedStoreId"
                   ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !selectedStoreId" class="field-error-msg">
-                    Selecione ou cadastre uma loja
+                    {{ 'Selecione ou cadastre uma loja' | t }}
                   </span>
                 </div>
               </div>
@@ -159,7 +162,7 @@ export interface ExpenseItemForm {
               <!-- Linha 2: Data da Compra & Meio de Pagamento -->
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Data da Compra *</label>
+                  <label class="form-label">{{ 'Data da Compra *' | t }}</label>
                   <input
                     type="date"
                     name="data"
@@ -169,19 +172,19 @@ export interface ExpenseItemForm {
                     class="form-control"
                   />
                   <span *ngIf="formSubmitted && !commonData.data" class="field-error-msg">
-                    Informe a data da compra
+                    {{ 'Informe a data da compra' | t }}
                   </span>
                 </div>
 
                 <div class="form-group">
                   <div class="label-with-action">
-                    <label class="form-label">Meio de Pagamento *</label>
-                    <a routerLink="/payment-methods" class="btn-manage-link" title="Gerenciar Meios de Pagamento">
+                    <label class="form-label">{{ 'Meio de Pagamento *' | t }}</label>
+                    <a routerLink="/payment-methods" class="btn-manage-link" [title]="'Gerenciar Meios de Pagamento' | t">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                         <line x1="1" y1="10" x2="23" y2="10"/>
                       </svg>
-                      <span>Gerenciar Meios</span>
+                      <span>{{ 'Gerenciar Meios' | t }}</span>
                     </a>
                   </div>
                   <!-- Searchable Dropdown de Meio de Pagamento -->
@@ -189,13 +192,13 @@ export interface ExpenseItemForm {
                     [options]="paymentMethodDropdownOptions"
                     [value]="commonData.meioPagamentoId"
                     (valueChange)="onPaymentMethodSelect($event)"
-                    placeholder="Selecione um meio de pagamento..."
+                    [placeholder]="'Selecione um meio de pagamento...' | t"
                     searchPlaceholder="Pesquisar cartão ou banco..."
                     [clearable]="false"
                     [invalid]="formSubmitted && !commonData.meioPagamentoId"
                   ></app-searchable-dropdown>
                   <span *ngIf="formSubmitted && !commonData.meioPagamentoId" class="field-error-msg">
-                    Selecione o meio de pagamento
+                    {{ 'Selecione o meio de pagamento' | t }}
                   </span>
                 </div>
               </div>
@@ -203,20 +206,20 @@ export interface ExpenseItemForm {
               <!-- Linha 3: Tipo e Número de Parcelas -->
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Tipo de Pagamento *</label>
+                  <label class="form-label">{{ 'Tipo de Pagamento *' | t }}</label>
                   <select
                     name="tipo"
                     [(ngModel)]="commonData.tipo"
                     (change)="onTipoChange()"
                     class="form-control"
                   >
-                    <option value="A_VISTA">À Vista</option>
-                    <option value="PARCELADO">Parcelado</option>
+                    <option value="A_VISTA">{{ 'À Vista' | t }}</option>
+                    <option value="PARCELADO">{{ 'Parcelado' | t }}</option>
                   </select>
                 </div>
 
                 <div class="form-group" *ngIf="commonData.tipo === 'PARCELADO'">
-                  <label class="form-label">Número de Parcelas *</label>
+                  <label class="form-label">{{ 'Número de Parcelas *' | t }}</label>
                   <input
                     type="number"
                     name="numeroParcelas"
@@ -234,10 +237,10 @@ export interface ExpenseItemForm {
             <div class="items-section-header mt-4">
               <div class="items-title-wrap">
                 <h2 class="items-section-title">
-                  Itens da Compra
+                  {{ 'Itens da Compra' | t }}
                   <span class="badge-count">{{ items.length }}</span>
                 </h2>
-                <p class="section-desc">Cada card abaixo será registrado como um lançamento individual mantendo os dados da compra</p>
+                <p class="section-desc">{{ 'Cada card abaixo será registrado como um lançamento individual mantendo os dados da compra' | t }}</p>
               </div>
 
               <button
@@ -249,7 +252,7 @@ export interface ExpenseItemForm {
                   <line x1="12" y1="5" x2="12" y2="19"/>
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                <span>Adicionar Item</span>
+                <span>{{ 'Adicionar Item' | t }}</span>
               </button>
             </div>
 
@@ -262,7 +265,7 @@ export interface ExpenseItemForm {
                 <!-- Topo do Card do Item -->
                 <div class="item-card-header">
                   <div class="item-header-left">
-                    <span class="item-index-badge">Item #{{ i + 1 }}</span>
+                    <span class="item-index-badge">{{ 'Item #{n}' | t: { n: i + 1 } }}</span>
                     <span *ngIf="item.nome" class="item-header-name">{{ item.nome }}</span>
                   </div>
 
@@ -271,7 +274,7 @@ export interface ExpenseItemForm {
                     type="button"
                     (click)="removeItem(i)"
                     class="btn-remove-item"
-                    title="Excluir este item da compra"
+                    [title]="'Excluir este item da compra' | t"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="3 6 5 6 21 6"/>
@@ -279,7 +282,7 @@ export interface ExpenseItemForm {
                       <line x1="10" y1="11" x2="10" y2="17"/>
                       <line x1="14" y1="11" x2="14" y2="17"/>
                     </svg>
-                    <span>Excluir Item</span>
+                    <span>{{ 'Excluir Item' | t }}</span>
                   </button>
                 </div>
 
@@ -288,36 +291,36 @@ export interface ExpenseItemForm {
                   <!-- Linha 1: Nome & Categoria -->
                   <div class="form-row">
                     <div class="form-group flex-2">
-                      <label class="form-label">Nome *</label>
+                      <label class="form-label">{{ 'Nome *' | t }}</label>
                       <input
                         type="text"
                         [name]="'item_nome_' + item.id"
                         [(ngModel)]="item.nome"
                         [class.is-invalid]="formSubmitted && (!item.nome || !item.nome.trim())"
                         class="form-control"
-                        placeholder="ex: Teclado Mecânico, Arroz 5kg, Remédio..."
+                        [placeholder]="'ex: Teclado Mecânico, Arroz 5kg, Remédio...' | t"
                       />
                       <span *ngIf="formSubmitted && (!item.nome || !item.nome.trim())" class="field-error-msg">
-                        Informe o nome do item
+                        {{ 'Informe o nome do item' | t }}
                       </span>
                     </div>
 
                     <div class="form-group flex-1">
                       <div class="label-with-action">
-                        <label class="form-label">Categoria *</label>
-                        <a routerLink="/admin/item-categories" class="btn-manage-link" title="Gerenciar Categorias de Itens">
+                        <label class="form-label">{{ 'Categoria *' | t }}</label>
+                        <a routerLink="/admin/item-categories" class="btn-manage-link" [title]="'Gerenciar Categorias de Itens' | t">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                             <line x1="7" y1="7" x2="7.01" y2="7"/>
                           </svg>
-                          <span>Gerenciar Categorias</span>
+                          <span>{{ 'Gerenciar Categorias' | t }}</span>
                         </a>
                       </div>
                       <app-searchable-dropdown
                         [options]="itemCategoryOptions"
                         [(ngModel)]="item.categoria"
                         [name]="'item_categoria_' + item.id"
-                        placeholder="Selecione ou cadastre..."
+                        [placeholder]="'Selecione ou cadastre...' | t"
                         searchPlaceholder="Pesquisar categoria..."
                         [allowCreate]="true"
                         [createOnBlur]="false"
@@ -326,7 +329,7 @@ export interface ExpenseItemForm {
                         [invalid]="formSubmitted && (!item.categoria || !item.categoria.trim())"
                       ></app-searchable-dropdown>
                       <span *ngIf="formSubmitted && (!item.categoria || !item.categoria.trim())" class="field-error-msg">
-                        Informe a categoria
+                        {{ 'Informe a categoria' | t }}
                       </span>
                     </div>
                   </div>
@@ -334,7 +337,7 @@ export interface ExpenseItemForm {
                   <!-- Linha 2: Quantidade, Valor Unitário e Valor Total -->
                   <div class="form-row price-row">
                     <div class="form-group col-qty">
-                      <label class="form-label">Quantidade *</label>
+                      <label class="form-label">{{ 'Quantidade *' | t }}</label>
                       <input
                         type="text"
                         inputmode="decimal"
@@ -343,15 +346,15 @@ export interface ExpenseItemForm {
                         (input)="recalculateItemTotal(i)"
                         [class.is-invalid]="formSubmitted && isQtyInvalid(item)"
                         class="form-control text-center font-bold"
-                        placeholder="Ex: 1 ou 0,350"
+                        [placeholder]="'Ex: 1 ou 0,350' | t"
                       />
                       <span *ngIf="formSubmitted && isQtyInvalid(item)" class="field-error-msg">
-                        Informe a quantidade
+                        {{ 'Informe a quantidade' | t }}
                       </span>
                     </div>
 
                     <div class="form-group col-unit">
-                      <label class="form-label">Valor Unitário (R$) *</label>
+                      <label class="form-label">{{ 'Valor Unitário ({moeda}) *' | t: { moeda: currency } }}</label>
                       <input
                         type="text"
                         inputmode="decimal"
@@ -361,12 +364,12 @@ export interface ExpenseItemForm {
                         (blur)="onMoneyBlur(item, 'valorUnitario', i)"
                         (input)="recalculateItemTotal(i)"
                         class="form-control"
-                        placeholder="0,00"
+                        [placeholder]="zeroAmount"
                       />
                     </div>
 
                     <div class="form-group col-total">
-                      <label class="form-label">Valor Total (R$) *</label>
+                      <label class="form-label">{{ 'Valor Total ({moeda}) *' | t: { moeda: currency } }}</label>
                       <input
                         type="text"
                         inputmode="decimal"
@@ -377,10 +380,10 @@ export interface ExpenseItemForm {
                         (input)="onItemTotalInput(i)"
                         [class.is-invalid]="formSubmitted && isTotalInvalid(item)"
                         class="form-control font-bold text-total"
-                        placeholder="Calculado automaticamente"
+                        [placeholder]="'Calculado automaticamente' | t"
                       />
                       <span *ngIf="formSubmitted && isTotalInvalid(item)" class="field-error-msg">
-                        Informe valor maior que R$ 0,00
+                        {{ 'Informe valor maior que {zero}' | t: { zero: zeroMoney } }}
                       </span>
                     </div>
                   </div>
@@ -397,17 +400,17 @@ export interface ExpenseItemForm {
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
                       </svg>
-                      <span>Adicionar observação</span>
+                      <span>{{ 'Adicionar observação' | t }}</span>
                     </button>
 
                     <div *ngIf="item.showObservacoes || item.observacoes" class="obs-expanded-group">
                       <div class="obs-header">
-                        <label class="form-label text-xs mb-0">Observações do item (opcional)</label>
+                        <label class="form-label text-xs mb-0">{{ 'Observações do item (opcional)' | t }}</label>
                         <button
                           type="button"
                           class="btn-close-obs"
                           (click)="item.showObservacoes = false; item.observacoes = ''"
-                          title="Remover / Ocultar observação"
+                          [title]="'Remover / Ocultar observação' | t"
                         >
                           ✕
                         </button>
@@ -417,7 +420,7 @@ export interface ExpenseItemForm {
                         [name]="'item_obs_' + item.id"
                         [(ngModel)]="item.observacoes"
                         class="form-control form-control-sm"
-                        placeholder="Detalhes ou anotações específicas deste item..."
+                        [placeholder]="'Detalhes ou anotações específicas deste item...' | t"
                       />
                     </div>
                   </div>
@@ -438,7 +441,7 @@ export interface ExpenseItemForm {
                     <line x1="5" y1="12" x2="19" y2="12"/>
                   </svg>
                 </div>
-                <span>Adicionar Mais Um Item a Esta Compra</span>
+                <span>{{ 'Adicionar Mais Um Item a Esta Compra' | t }}</span>
               </button>
             </div>
           </div>
@@ -447,19 +450,19 @@ export interface ExpenseItemForm {
           <div class="side-panel">
           <div class="card preview-card">
             <h3 class="card-title">
-              <span>Resumo da Compra</span>
+              <span>{{ 'Resumo da Compra' | t }}</span>
             </h3>
 
             <!-- Caixa de Totais Consolidados -->
             <div class="purchase-summary-box">
               <div class="summary-line">
-                <span class="summary-label">Itens na Compra:</span>
+                <span class="summary-label">{{ 'Itens na Compra:' | t }}</span>
                 <span class="summary-value-badge">{{ items.length }} {{ items.length === 1 ? 'item' : 'itens' }}</span>
               </div>
               <div class="summary-line total-highlight">
-                <span class="summary-label">Total Consolidado:</span>
+                <span class="summary-label">{{ 'Total Consolidado:' | t }}</span>
                 <span class="summary-total-value">
-                  {{ getTotalPurchase() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  {{ getTotalPurchase() | money }}
                 </span>
               </div>
             </div>
@@ -474,13 +477,13 @@ export interface ExpenseItemForm {
                 <span>{{ selectedPaymentMethod.nome }} ({{ selectedPaymentMethod.instituicaoBanco }})</span>
               </div>
               <div *ngIf="selectedPaymentMethod.modalidade === 'CREDITO'" class="invoice-rules-box">
-                <span class="text-xs text-muted">Regras de Fatura:</span>
+                <span class="text-xs text-muted">{{ 'Regras de Fatura:' | t }}</span>
                 <div class="rule-pills">
                   <span class="rule-pill">
-                    Fechamento: Dia <strong>{{ selectedPaymentMethod.diaFechamento || 'N/D' }}</strong>
+                    {{ 'Fechamento: Dia' | t }} <strong>{{ selectedPaymentMethod.diaFechamento || 'N/D' }}</strong>
                   </span>
                   <span class="rule-pill">
-                    Vencimento: Dia <strong>{{ selectedPaymentMethod.diaVencimento || 'N/D' }}</strong>
+                    {{ 'Vencimento: Dia' | t }} <strong>{{ selectedPaymentMethod.diaVencimento || 'N/D' }}</strong>
                   </span>
                 </div>
               </div>
@@ -488,7 +491,7 @@ export interface ExpenseItemForm {
 
             <!-- Tabela de Parcelas Calculadas sobre o Total da Compra -->
             <div class="installments-section-title mt-3">
-              <span class="text-xs font-bold text-muted uppercase">Projeção da Fatura</span>
+              <span class="text-xs font-bold text-muted uppercase">{{ 'Projeção da Fatura' | t }}</span>
             </div>
 
             <div *ngIf="previewInstallmentsList.length > 0; else noPreview" class="mt-2">
@@ -497,19 +500,19 @@ export interface ExpenseItemForm {
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Parcela</th>
-                        <th>Competência</th>
-                        <th>Vencimento</th>
-                        <th class="text-right">Valor</th>
+                        <th>{{ 'Parcela' | t }}</th>
+                        <th>{{ 'Competência' | t }}</th>
+                        <th>{{ 'Vencimento' | t }}</th>
+                        <th class="text-right">{{ 'Valor' | t }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr *ngFor="let p of previewInstallmentsList">
                         <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
                         <td>{{ p.mesReferencia }}</td>
-                        <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                        <td>{{ p.dataVencimento | appDate: 'short' : false }}</td>
                         <td class="text-right font-bold text-primary">
-                          {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                          {{ p.valor | money }}
                         </td>
                       </tr>
                     </tbody>
@@ -521,19 +524,19 @@ export interface ExpenseItemForm {
               <div class="mobile-cards-container">
                 <div *ngFor="let p of previewInstallmentsList" class="parcela-mobile-card">
                   <div class="parcela-card-header">
-                    <span class="parcela-num font-bold">Parcela {{ p.numero }} de {{ p.totalParcelas }}</span>
+                    <span class="parcela-num font-bold">{{ 'Parcela {n} de {total}' | t: { n: p.numero, total: p.totalParcelas } }}</span>
                     <span class="parcela-val font-bold text-primary">
-                      {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      {{ p.valor | money }}
                     </span>
                   </div>
                   <div class="parcela-card-body">
                     <div class="meta-item">
-                      <span class="meta-label">Competência:</span>
+                      <span class="meta-label">{{ 'Competência:' | t }}</span>
                       <span class="meta-val">{{ p.mesReferencia }}</span>
                     </div>
                     <div class="meta-item">
-                      <span class="meta-label">Vencimento:</span>
-                      <span class="meta-val">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                      <span class="meta-label">{{ 'Vencimento:' | t }}</span>
+                      <span class="meta-val">{{ p.dataVencimento | appDate: 'short' : false }}</span>
                     </div>
                   </div>
                 </div>
@@ -548,7 +551,7 @@ export interface ExpenseItemForm {
                   <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
                 <p class="text-muted text-sm mt-2">
-                  Informe o valor dos itens e selecione a data e meio de pagamento para visualizar a projeção das faturas.
+                  {{ 'Informe o valor dos itens e selecione a data e meio de pagamento para visualizar a projeção das faturas.' | t }}
                 </p>
               </div>
             </ng-template>
@@ -578,7 +581,7 @@ export interface ExpenseItemForm {
                   <polyline points="7 3 7 8 15 8"/>
                 </svg>
                 <span>
-                  Salvar {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}
+                  {{ (items.length > 1 ? 'Salvar {n} Lançamentos' : 'Salvar {n} Lançamento') | t: { n: items.length } }}
                 </span>
               </span>
               <span *ngIf="submitting" class="btn-submit-content">
@@ -586,7 +589,7 @@ export interface ExpenseItemForm {
                   <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
                   <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
                 </svg>
-                <span>Gravando {{ items.length }} Lançamento{{ items.length > 1 ? 's' : '' }}...</span>
+                <span>{{ (items.length > 1 ? 'Gravando {n} Lançamentos...' : 'Gravando {n} Lançamento...') | t: { n: items.length } }}</span>
               </span>
             </button>
           </div>
@@ -1349,6 +1352,12 @@ export interface ExpenseItemForm {
   `]
 })
 export class ExpenseFormComponent implements OnInit {
+  /** Símbolo da moeda do país (R$, $, €...) nos rótulos de valor */
+  readonly currency = currencySymbol();
+  /** "0,00" / "0.00" e "R$ 0,00" / "$0.00" no formato do país */
+  readonly zeroAmount = formatNumber(0, 2, 2);
+  readonly zeroMoney = formatMoney(0);
+
   paymentMethods: PaymentMethod[] = [];
   selectedPaymentMethod: PaymentMethod | null = null;
   previewInstallmentsList: PreviewInstallmentItem[] = [];
@@ -1480,7 +1489,7 @@ export class ExpenseFormComponent implements OnInit {
         this.selectedBuyerId = buyer.id;
         this.onBuyerSelected();
       },
-      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar o comprador.')),
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, t('Não foi possível cadastrar o comprador.'))),
     });
   }
 
@@ -1508,7 +1517,7 @@ export class ExpenseFormComponent implements OnInit {
         this.selectedStoreId = store.id;
         this.onStoreSelected();
       },
-      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar a loja.')),
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, t('Não foi possível cadastrar a loja.'))),
     });
   }
 
@@ -1521,7 +1530,7 @@ export class ExpenseFormComponent implements OnInit {
         this.itemCategoriesList = [...this.itemCategoriesList, cat];
         item.categoria = cat.nome;
       },
-      error: (err) => (this.formErrorMessage = this.apiMessage(err, 'Não foi possível cadastrar a categoria.')),
+      error: (err) => (this.formErrorMessage = this.apiMessage(err, t('Não foi possível cadastrar a categoria.'))),
     });
   }
 
@@ -1665,13 +1674,8 @@ export class ExpenseFormComponent implements OnInit {
   parseMoney(val: any): number {
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
     if (!val) return 0;
-    const str = String(val).trim().replace('R$', '').trim();
-    if (str.includes(',')) {
-      const normalized = str.replace(/\./g, '').replace(',', '.');
-      const num = parseFloat(normalized);
-      return isNaN(num) ? 0 : Number(num.toFixed(2));
-    }
-    const num = parseFloat(str);
+    // Formato do país (1.234,56 no Brasil, 1,234.56 nos EUA); ignora o símbolo da moeda
+    const num = parseDecimal(val);
     return isNaN(num) ? 0 : Number(num.toFixed(2));
   }
 
@@ -1680,30 +1684,24 @@ export class ExpenseFormComponent implements OnInit {
       return isNaN(val) || val <= 0 ? 0 : val;
     }
     if (!val) return 0;
-    const str = String(val).trim();
-    if (str.includes(',')) {
-      const normalized = str.replace(/\./g, '').replace(',', '.');
-      const num = parseFloat(normalized);
-      return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
-    }
-    const num = parseFloat(str);
+    const num = parseDecimal(val);
     return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
   }
 
   formatCurrencyString(num: number): string {
-    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return formatNumber(num, 2, 2);
   }
 
   onMoneyFocus(item: ExpenseItemForm, field: 'valorUnitario' | 'valorTotal') {
     const val = item[field];
-    if (val === null || val === undefined || val === 0 || val === '0' || val === '0,00' || val === '0.00') {
+    if (val === null || val === undefined || val === 0 || this.parseMoney(val) === 0) {
       item[field] = null;
       return;
     }
     const num = this.parseMoney(val);
     if (num > 0) {
       // Exibe formato limpo sem separadores de milhar para facilitar a edição pelo usuário
-      item[field] = num.toFixed(2).replace('.', ',');
+      item[field] = num.toFixed(2).replace('.', decimalSeparator());
     }
   }
 
@@ -1812,10 +1810,10 @@ export class ExpenseFormComponent implements OnInit {
 
   formatModalidade(modalidade: string): string {
     switch (modalidade) {
-      case 'CREDITO': return 'Crédito';
-      case 'DEBITO': return 'Débito';
-      case 'DINHEIRO_CONTA': return 'Conta/Dinheiro';
-      default: return 'Outro';
+      case 'CREDITO': return t('Crédito');
+      case 'DEBITO': return t('Débito');
+      case 'DINHEIRO_CONTA': return t('Conta/Dinheiro');
+      default: return t('Outro');
     }
   }
 
@@ -1834,24 +1832,24 @@ export class ExpenseFormComponent implements OnInit {
 
     // 1. Validação de Comprador
     if (!this.selectedBuyerId) {
-      this.formErrorMessage = 'Por favor, selecione um Comprador.';
+      this.formErrorMessage = t('Por favor, selecione um Comprador.');
       return;
     }
 
     // Comprador, loja e categoria precisam estar cadastrados
     if (!this.buyers.some((b) => b.id === this.selectedBuyerId)) {
-      this.formErrorMessage = 'Selecione ou cadastre um Comprador.';
+      this.formErrorMessage = t('Selecione ou cadastre um Comprador.');
       return;
     }
 
     // 2. Validação de Loja
     if (!this.selectedStoreId) {
-      this.formErrorMessage = 'Por favor, selecione uma Loja.';
+      this.formErrorMessage = t('Por favor, selecione uma Loja.');
       return;
     }
 
     if (!this.stores.some((s) => s.id === this.selectedStoreId)) {
-      this.formErrorMessage = 'Selecione ou cadastre uma Loja.';
+      this.formErrorMessage = t('Selecione ou cadastre uma Loja.');
       return;
     } else {
       const store = this.stores.find((s) => s.id === this.selectedStoreId);
@@ -1862,24 +1860,24 @@ export class ExpenseFormComponent implements OnInit {
     }
 
     if (!this.commonData.loja || !this.commonData.loja.trim()) {
-      this.formErrorMessage = 'Por favor, selecione ou informe o nome da Loja.';
+      this.formErrorMessage = t('Por favor, selecione ou informe o nome da Loja.');
       return;
     }
 
     // 3. Validação de Data e Meio de Pagamento
     if (!this.commonData.data) {
-      this.formErrorMessage = 'Por favor, selecione a Data da Compra.';
+      this.formErrorMessage = t('Por favor, selecione a Data da Compra.');
       return;
     }
 
     if (!this.commonData.meioPagamentoId) {
-      this.formErrorMessage = 'Por favor, selecione o Meio de Pagamento.';
+      this.formErrorMessage = t('Por favor, selecione o Meio de Pagamento.');
       return;
     }
 
     // 4. Validação da Lista de Itens
     if (this.items.length === 0) {
-      this.formErrorMessage = 'Adicione pelo menos um item à compra.';
+      this.formErrorMessage = t('Adicione pelo menos um item à compra.');
       return;
     }
 
@@ -1888,22 +1886,22 @@ export class ExpenseFormComponent implements OnInit {
       const itemNum = i + 1;
 
       if (!item.nome || !item.nome.trim()) {
-        this.formErrorMessage = `Por favor, informe o Nome do Item #${itemNum}.`;
+        this.formErrorMessage = t('Por favor, informe o Nome do Item #{n}.', { n: itemNum });
         return;
       }
 
       if (!item.categoria || !item.categoria.trim()) {
-        this.formErrorMessage = `Por favor, informe a Categoria do Item #${itemNum}.`;
+        this.formErrorMessage = t('Por favor, informe a Categoria do Item #{n}.', { n: itemNum });
         return;
       }
       if (!this.itemCategoriesList.some((c) => c.nome.toLowerCase() === item.categoria.trim().toLowerCase())) {
-        this.formErrorMessage = `A categoria "${item.categoria.trim()}" do Item #${itemNum} não está cadastrada. Selecione ou cadastre uma categoria.`;
+        this.formErrorMessage = t('A categoria "{nome}" do Item #{n} não está cadastrada. Selecione ou cadastre uma categoria.', { nome: item.categoria.trim(), n: itemNum });
         return;
       }
 
       const qty = this.parseQuantity(item.quantidade);
       if (qty <= 0) {
-        this.formErrorMessage = `A quantidade do Item #${itemNum} ("${item.nome.trim()}") deve ser informada e maior que 0.`;
+        this.formErrorMessage = t('A quantidade do Item #{n} ("{nome}") deve ser informada e maior que 0.', { n: itemNum, nome: item.nome.trim() });
         return;
       }
       let unit = this.parseMoney(item.valorUnitario);
@@ -1918,7 +1916,7 @@ export class ExpenseFormComponent implements OnInit {
       }
 
       if (total <= 0) {
-        this.formErrorMessage = `O valor total do Item #${itemNum} ("${item.nome.trim()}") deve ser maior que R$ 0,00.`;
+        this.formErrorMessage = t('O valor total do Item #{n} ("{nome}") deve ser maior que {zero}.', { n: itemNum, nome: item.nome.trim(), zero: formatMoney(0) });
         return;
       }
     }
@@ -1957,7 +1955,7 @@ export class ExpenseFormComponent implements OnInit {
       next: (results) => {
         this.submitting = false;
         const count = results.length;
-        this.formSuccessMessage = `${count} ${count === 1 ? 'lançamento salvo' : 'lançamentos salvos'} com sucesso!`;
+        this.formSuccessMessage = t(count === 1 ? '{n} lançamento salvo com sucesso!' : '{n} lançamentos salvos com sucesso!', { n: count });
         setTimeout(() => {
           this.router.navigate(['/expenses']);
         }, 700);
@@ -1969,7 +1967,7 @@ export class ExpenseFormComponent implements OnInit {
           err.error?.message ||
           (Array.isArray(err.error?.message) ? err.error.message.join(', ') : err.message);
         this.formErrorMessage =
-          'Erro ao salvar: ' + (typeof msg === 'string' ? msg : JSON.stringify(msg));
+          t('Erro ao salvar: {erro}', { erro: typeof msg === 'string' ? msg : JSON.stringify(msg) });
       },
     });
   }

@@ -1,46 +1,46 @@
 <div class="users-page">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Usuários</h1>
-      <p class="page-subtitle">Crie contas de acesso ao Blue Fox Finance</p>
+      <h1 class="page-title">{{ 'Usuários' | t }}</h1>
+      <p class="page-subtitle">{{ 'Crie contas de acesso ao Blue Fox Finance' | t }}</p>
     </div>
-    <a routerLink="/admin" class="btn btn-secondary btn-sm">Voltar para Serviços</a>
+    <a routerLink="/admin" class="btn btn-secondary btn-sm">{{ 'Voltar para Serviços' | t }}</a>
   </header>
 
   @if (!configured()) {
     <p class="notice notice-warning" role="status">
-      A criação de usuários ainda não está configurada neste ambiente (credenciais do Keycloak no backend).
+      {{ 'A criação de usuários ainda não está configurada neste ambiente (credenciais do Keycloak no backend).' | t }}
     </p>
   }
 
   <div class="users-grid">
     <!-- Formulário -->
     <section class="card" aria-labelledby="new-user-title">
-      <h2 id="new-user-title" class="card-title">Novo usuário</h2>
+      <h2 id="new-user-title" class="card-title">{{ 'Novo usuário' | t }}</h2>
       <p class="card-subtitle">
-        Recebe os papéis
+        {{ 'Recebe os papéis' | t }}
         @for (r of roles(); track r; let last = $last) {
-          <code>{{ r }}</code>{{ last ? '' : ' e ' }}
+          <code>{{ r }}</code>{{ last ? '' : (' e ' | t) }}
         }
-        e troca a senha no primeiro acesso.
+        {{ 'e troca a senha no primeiro acesso.' | t }}
       </p>
 
       @if (created(); as c) {
         <div class="created" role="status">
-          <p class="created-title">✅ {{ c.nome }} foi criado. Repasse os dados de acesso:</p>
+          <p class="created-title">✅ {{ '{nome} foi criado. Repasse os dados de acesso:' | t: { nome: c.nome } }}</p>
           <dl class="credentials">
-            <dt>Login (e-mail)</dt>
+            <dt>{{ 'Login (e-mail)' | t }}</dt>
             <dd><code>{{ c.username }}</code></dd>
-            <dt>Senha temporária</dt>
+            <dt>{{ 'Senha temporária' | t }}</dt>
             <dd><code>{{ c.senha }}</code></dd>
           </dl>
           <div class="created-actions">
             <button type="button" class="btn btn-secondary btn-sm" (click)="copyCredentials()">
-              {{ copied() ? 'Copiado!' : 'Copiar dados de acesso' }}
+              {{ copied() ? ('Copiado!' | t) : ('Copiar dados de acesso' | t) }}
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" (click)="created.set(null)">Fechar</button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="created.set(null)">{{ 'Fechar' | t }}</button>
           </div>
-          <p class="created-hint">A senha não fica salva no Finance: copie antes de fechar.</p>
+          <p class="created-hint">{{ 'A senha não fica salva no Finance: copie antes de fechar.' | t }}</p>
         </div>
       }
 
@@ -51,7 +51,7 @@
       <form #userForm="ngForm" (ngSubmit)="submit(userForm)" novalidate>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="nome">Nome *</label>
+            <label class="form-label" for="nome">{{ 'Nome *' | t }}</label>
             <input
               id="nome"
               name="nome"
@@ -64,17 +64,17 @@
               [class.is-invalid]="submitted && nome.invalid"
             />
             @if (submitted && nome.invalid) {
-              <span class="field-error">Informe o nome</span>
+              <span class="field-error">{{ 'Informe o nome' | t }}</span>
             }
           </div>
           <div class="form-group">
-            <label class="form-label" for="sobrenome">Sobrenome</label>
+            <label class="form-label" for="sobrenome">{{ 'Sobrenome' | t }}</label>
             <input id="sobrenome" name="sobrenome" class="form-control" [(ngModel)]="form.sobrenome" maxlength="80" autocomplete="off" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="email">E-mail (login) *</label>
+          <label class="form-label" for="email">{{ 'E-mail (login) *' | t }}</label>
           <input
             id="email"
             name="email"
@@ -89,13 +89,13 @@
             [class.is-invalid]="submitted && email.invalid"
           />
           @if (submitted && email.invalid) {
-            <span class="field-error">Informe um e-mail válido</span>
+            <span class="field-error">{{ 'Informe um e-mail válido' | t }}</span>
           }
         </div>
 
 
         <div class="form-group">
-          <label class="form-label" for="senha">Senha temporária *</label>
+          <label class="form-label" for="senha">{{ 'Senha temporária *' | t }}</label>
           <div class="password-row">
             <input
               id="senha"
@@ -111,18 +111,18 @@
               [class.is-invalid]="submitted && senha.invalid"
             />
             <button type="button" class="btn btn-secondary btn-sm" (click)="showPassword.set(!showPassword())">
-              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+              {{ showPassword() ? ('Ocultar' | t) : ('Mostrar' | t) }}
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" (click)="generatePassword()">Gerar</button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="generatePassword()">{{ 'Gerar' | t }}</button>
           </div>
           @if (submitted && senha.invalid) {
-            <span class="field-error">Mínimo de 8 caracteres</span>
+            <span class="field-error">{{ 'Mínimo de 8 caracteres' | t }}</span>
           }
         </div>
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary btn-pill" [disabled]="saving() || !configured()">
-            {{ saving() ? 'Criando…' : 'Criar usuário' }}
+            {{ saving() ? ('Criando…' | t) : ('Criar usuário' | t) }}
           </button>
         </div>
       </form>
@@ -130,11 +130,11 @@
 
     <!-- Lista -->
     <section class="card" aria-labelledby="users-list-title">
-      <h2 id="users-list-title" class="card-title">Criados pelo Finance</h2>
+      <h2 id="users-list-title" class="card-title">{{ 'Criados pelo Finance' | t }}</h2>
       @if (loading()) {
-        <p class="muted">Carregando…</p>
+        <p class="muted">{{ 'Carregando…' | t }}</p>
       } @else if (users().length === 0) {
-        <p class="muted">Nenhum usuário criado por aqui ainda.</p>
+        <p class="muted">{{ 'Nenhum usuário criado por aqui ainda.' | t }}</p>
       } @else {
         <ul class="user-list">
           @for (u of users(); track u.id) {
@@ -144,7 +144,7 @@
                 <strong>{{ fullName(u) }}</strong>
                 <span class="muted">{{ u.email }}</span>
               </div>
-              <span class="muted date">{{ u.createdAt | date: 'dd/MM/yyyy' }}</span>
+              <span class="muted date">{{ u.createdAt | appDate: 'short' : false }}</span>
             </li>
           }
         </ul>

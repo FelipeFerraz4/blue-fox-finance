@@ -15,3 +15,17 @@ model PreferenciaLancamento {
   @@index([userId])
   @@map("preferencias_lancamento")
 }
+
+/// Idioma (textos) e país/região (moeda e formato de data e número) do usuário,
+/// usados pelo site em outros aparelhos e pelo bot. Separado das preferências de
+/// lançamento, que podem ser apagadas por inteiro ("limpar padrões").
+model PreferenciaUsuario {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  idioma    String   @default("pt")
+  regiao    String   @default("BR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("preferencias_usuario")
+}

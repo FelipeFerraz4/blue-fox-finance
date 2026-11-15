@@ -5,11 +5,13 @@ import { RouterModule } from '@angular/router';
 import { CategoriesService } from '../../../../core/services/categories/categories.service';
 import { CategoriaLoja, CreateCategoriaLojaDto, UpdateCategoriaLojaDto } from '../../../../shared/model/types/category.model';
 import { ConfirmModalComponent } from '../../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
 
 @Component({
   selector: 'app-store-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ConfirmModalComponent],
+  imports: [...I18N, CommonModule, FormsModule, RouterModule, ConfirmModalComponent],
   template: `
     <div class="page-layout">
       <!-- Breadcrumb & Cabeçalho -->
@@ -20,20 +22,20 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Voltar para Serviços
+            {{ 'Voltar para Serviços' | t }}
           </a>
           <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">Categorias de Lojas</span>
+          <span class="breadcrumb-current">{{ 'Categorias de Lojas' | t }}</span>
         </div>
 
         <div class="header-main">
           <div class="header-text">
             <div class="title-with-badge">
-              <h1 class="page-title">Categorias de Lojas</h1>
-              <span class="category-badge">Estabelecimentos & Fornecedores</span>
+              <h1 class="page-title">{{ 'Categorias de Lojas' | t }}</h1>
+              <span class="category-badge">{{ 'Estabelecimentos & Fornecedores' | t }}</span>
             </div>
             <p class="page-subtitle">
-              Cadastre e gerencie os segmentos comerciais para classificar as lojas do sistema.
+              {{ 'Cadastre e gerencie os segmentos comerciais para classificar as lojas do sistema.' | t }}
             </p>
           </div>
 
@@ -46,7 +48,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            <span>Nova Categoria</span>
+            <span>{{ 'Nova Categoria' | t }}</span>
           </button>
         </div>
       </div>
@@ -61,7 +63,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
           <input
             type="text"
             [(ngModel)]="searchTerm"
-            placeholder="Buscar categoria por nome ou descrição..."
+            [placeholder]="'Buscar categoria por nome ou descrição...' | t"
             class="search-input"
           />
           <button *ngIf="searchTerm" (click)="searchTerm = ''" class="btn-clear-search">✕</button>
@@ -69,11 +71,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
         <div class="stats-row">
           <div class="stat-pill">
-            <span class="stat-label">Total:</span>
+            <span class="stat-label">{{ 'Total:' | t }}</span>
             <span class="stat-value">{{ categories.length }}</span>
           </div>
           <div class="stat-pill active">
-            <span class="stat-label">Ativas:</span>
+            <span class="stat-label">{{ 'Ativas:' | t }}</span>
             <span class="stat-value">{{ activeCount }}</span>
           </div>
         </div>
@@ -82,7 +84,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       <!-- Estado de Carregamento -->
       <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>Carregando categorias de lojas...</p>
+        <p>{{ 'Carregando categorias de lojas...' | t }}</p>
       </div>
 
       <!-- Mensagens de Feedback -->
@@ -110,10 +112,10 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
             <table class="custom-table">
               <thead>
                 <tr>
-                  <th style="width: 260px;">Nome da Categoria</th>
-                  <th>Descrição</th>
-                  <th style="width: 140px;">Status</th>
-                  <th style="width: 120px;" class="text-right">Ações</th>
+                  <th style="width: 260px;">{{ 'Nome da Categoria' | t }}</th>
+                  <th>{{ 'Descrição' | t }}</th>
+                  <th style="width: 140px;">{{ 'Status' | t }}</th>
+                  <th style="width: 120px;" class="text-right">{{ 'Ações' | t }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -130,7 +132,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                     </div>
                   </td>
                   <td>
-                    <span class="category-desc">{{ cat.descricao || 'Sem descrição informada' }}</span>
+                    <span class="category-desc">{{ cat.descricao || ('Sem descrição informada' | t) }}</span>
                   </td>
                   <td>
                     <span
@@ -138,7 +140,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                       [class.badge-active]="cat.ativo"
                       [class.badge-inactive]="!cat.ativo"
                     >
-                      {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                      {{ cat.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
                     </span>
                   </td>
                   <td class="text-right">
@@ -147,7 +149,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         type="button"
                         class="btn-icon btn-edit"
                         (click)="openEditModal(cat)"
-                        title="Editar Categoria"
+                        [title]="'Editar Categoria' | t"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -158,7 +160,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         type="button"
                         class="btn-icon btn-delete"
                         (click)="confirmDelete(cat)"
-                        title="Excluir Categoria"
+                        [title]="'Excluir Categoria' | t"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polyline points="3 6 5 6 21 6"/>
@@ -176,9 +178,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                       </svg>
-                      <p class="empty-text">Nenhuma categoria de loja encontrada.</p>
+                      <p class="empty-text">{{ 'Nenhuma categoria de loja encontrada.' | t }}</p>
                       <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
-                        Cadastrar Categoria
+                        {{ 'Cadastrar Categoria' | t }}
                       </button>
                     </div>
                   </td>
@@ -206,7 +208,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 [class.badge-active]="cat.ativo"
                 [class.badge-inactive]="!cat.ativo"
               >
-                {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                {{ cat.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
               </span>
             </div>
             <div class="cat-card-body" *ngIf="cat.descricao">
@@ -222,7 +224,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
-                <span>Editar</span>
+                <span>{{ 'Editar' | t }}</span>
               </button>
               <button
                 type="button"
@@ -233,7 +235,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span>Excluir</span>
+                <span>{{ 'Excluir' | t }}</span>
               </button>
             </div>
           </div>
@@ -245,9 +247,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
-            <p class="empty-text">Nenhuma categoria de loja encontrada.</p>
+            <p class="empty-text">{{ 'Nenhuma categoria de loja encontrada.' | t }}</p>
             <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
-              Cadastrar Categoria
+              {{ 'Cadastrar Categoria' | t }}
             </button>
           </div>
         </div>
@@ -264,8 +266,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               </svg>
             </div>
             <div>
-              <h3 class="modal-title">{{ isEditing ? 'Editar Categoria de Loja' : 'Nova Categoria de Loja' }}</h3>
-              <p class="modal-subtitle">Defina o nome e detalhes do segmento comercial</p>
+              <h3 class="modal-title">{{ isEditing ? ('Editar Categoria de Loja' | t) : ('Nova Categoria de Loja' | t) }}</h3>
+              <p class="modal-subtitle">{{ 'Defina o nome e detalhes do segmento comercial' | t }}</p>
             </div>
             <button class="modal-close" (click)="closeModal()">✕</button>
           </div>
@@ -274,7 +276,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
             <div class="modal-body">
               <div class="form-group">
                 <label for="storeCatNome" class="form-label">
-                  Nome da Categoria <span class="required">*</span>
+                  {{ 'Nome da Categoria' | t }} <span class="required">*</span>
                 </label>
                 <input
                   id="storeCatNome"
@@ -282,19 +284,19 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   name="nome"
                   [(ngModel)]="formData.nome"
                   required
-                  placeholder="Ex: E-commerce, Supermercado, Farmácia..."
+                  [placeholder]="'Ex: E-commerce, Supermercado, Farmácia...' | t"
                   class="form-control"
                 />
               </div>
 
               <div class="form-group">
-                <label for="storeCatDesc" class="form-label">Descrição</label>
+                <label for="storeCatDesc" class="form-label">{{ 'Descrição' | t }}</label>
                 <textarea
                   id="storeCatDesc"
                   name="descricao"
                   [(ngModel)]="formData.descricao"
                   rows="3"
-                  placeholder="Ex: Plataformas de compras online e marketplaces nacionais e internacionais"
+                  [placeholder]="'Ex: Plataformas de compras online e marketplaces nacionais e internacionais' | t"
                   class="form-control"
                 ></textarea>
               </div>
@@ -302,14 +304,14 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
             <div class="modal-footer">
               <button type="button" class="btn btn-light btn-pill" (click)="closeModal()">
-                Cancelar
+                {{ 'Cancelar' | t }}
               </button>
               <button
                 type="submit"
                 class="btn btn-primary btn-pill shadow-glow"
                 [disabled]="!formData.nome || isSaving"
               >
-                {{ isSaving ? 'Salvando...' : (isEditing ? 'Atualizar Categoria' : 'Cadastrar Categoria') }}
+                {{ isSaving ? ('Salvando...' | t) : (isEditing ? ('Atualizar Categoria' | t) : ('Cadastrar Categoria' | t)) }}
               </button>
             </div>
           </form>
@@ -319,7 +321,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       <!-- Modal de Confirmação para Exclusão -->
       <app-confirm-modal
         [isOpen]="showDeleteConfirm"
-        title="Excluir Categoria de Loja"
+        [title]="'Excluir Categoria de Loja' | t"
         [message]="deleteConfirmationMessage"
         confirmText="Sim, Excluir"
         cancelText="Cancelar"
@@ -1051,7 +1053,7 @@ export class StoreCategoriesComponent implements OnInit {
   }
 
   get deleteConfirmationMessage(): string {
-    return 'Tem certeza que deseja remover a categoria "' + (this.categoryToDelete?.nome || '') + '"?';
+    return t('Tem certeza que deseja remover a categoria "{nome}"?', { nome: this.categoryToDelete?.nome || '' });
   }
 
   get filteredCategories(): CategoriaLoja[] {
@@ -1078,7 +1080,7 @@ export class StoreCategoriesComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Erro ao carregar categorias de lojas.';
+        this.errorMessage = t('Erro ao carregar categorias de lojas.');
         this.loading = false;
       },
     });
@@ -1128,12 +1130,12 @@ export class StoreCategoriesComponent implements OnInit {
         next: () => {
           this.isSaving = false;
           this.showModal = false;
-          this.showSuccess('Categoria de loja atualizada com sucesso!');
+          this.showSuccess(t('Categoria de loja atualizada com sucesso!'));
           this.loadCategories();
         },
         error: (err) => {
           this.isSaving = false;
-          this.errorMessage = 'Erro ao atualizar categoria: ' + (err.error?.message || err.message);
+          this.errorMessage = t('Erro ao atualizar categoria: {erro}', { erro: err.error?.message || err.message });
         },
       });
     } else {
@@ -1147,12 +1149,12 @@ export class StoreCategoriesComponent implements OnInit {
         next: () => {
           this.isSaving = false;
           this.showModal = false;
-          this.showSuccess('Categoria de loja cadastrada com sucesso!');
+          this.showSuccess(t('Categoria de loja cadastrada com sucesso!'));
           this.loadCategories();
         },
         error: (err) => {
           this.isSaving = false;
-          this.errorMessage = 'Erro ao cadastrar categoria: ' + (err.error?.message || err.message);
+          this.errorMessage = t('Erro ao cadastrar categoria: {erro}', { erro: err.error?.message || err.message });
         },
       });
     }
@@ -1171,11 +1173,11 @@ export class StoreCategoriesComponent implements OnInit {
 
     this.categoriesService.deleteStoreCategory(id).subscribe({
       next: () => {
-        this.showSuccess('Categoria de loja removida com sucesso!');
+        this.showSuccess(t('Categoria de loja removida com sucesso!'));
         this.loadCategories();
       },
       error: (err) => {
-        this.errorMessage = 'Erro ao excluir categoria: ' + (err.error?.message || err.message);
+        this.errorMessage = t('Erro ao excluir categoria: {erro}', { erro: err.error?.message || err.message });
       },
     });
   }

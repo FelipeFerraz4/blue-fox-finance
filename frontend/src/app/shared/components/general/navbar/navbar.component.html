@@ -6,13 +6,13 @@
       <div class="logo-box">
         <img
           src="assets/logo.png"
-          alt="BlueFox Finance"
+          [alt]="'BlueFox Finance' | t"
           class="brand-logo-img"
         />
       </div>
       <div class="brand-text">
-        <span class="brand-title">BlueFox</span>
-        <span class="brand-subtitle">Finance</span>
+        <span class="brand-title">{{ 'BlueFox' | t }}</span>
+        <span class="brand-subtitle">{{ 'Finance' | t }}</span>
       </div>
     </a>
 
@@ -25,7 +25,7 @@
           <rect x="14" y="12" width="7" height="9"/>
           <rect x="3" y="16" width="7" height="5"/>
         </svg>
-        Dashboard
+        {{ 'Dashboard' | t }}
       </a>
 
       <a routerLink="/expenses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
@@ -33,7 +33,7 @@
           <path d="M9 11l3 3L22 4"/>
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
-        Lançamentos
+        {{ 'Lançamentos' | t }}
       </a>
 
       <a routerLink="/admin" routerLinkActive="active" class="nav-item">
@@ -43,7 +43,7 @@
           <rect x="14" y="14" width="7" height="7" rx="1.5"/>
           <rect x="3" y="14" width="7" height="7" rx="1.5"/>
         </svg>
-        Serviços
+        {{ 'Serviços' | t }}
       </a>
     </nav>
 
@@ -54,7 +54,7 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        <span>Novo Lançamento</span>
+        <span>{{ 'Novo Lançamento' | t }}</span>
       </a>
 
       <!-- Botão de Login / Sessão Keycloak no Header -->
@@ -63,13 +63,13 @@
           type="button"
           class="btn-login-header"
           (click)="login()"
-          title="Acessar com Keycloak SSO"
+          [title]="'Acessar com Keycloak SSO' | t"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
-          <span>Login</span>
+          <span>{{ 'Login' | t }}</span>
         </button>
       </ng-container>
 
@@ -82,14 +82,14 @@
             type="button"
             class="btn-logout-header"
             (click)="logout()"
-            title="Encerrar sessão Keycloak"
+            [title]="'Encerrar sessão Keycloak' | t"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
               <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-            <span>Sair</span>
+            <span>{{ 'Sair' | t }}</span>
           </button>
         </div>
       </ng-container>
@@ -99,7 +99,7 @@
         class="hamburger-btn"
         [class.open]="mobileMenuOpen"
         (click)="toggleMobileMenu()"
-        aria-label="Abrir Menu de Navegação"
+        [attr.aria-label]="'Abrir Menu de Navegação' | t"
       >
         <span class="bar"></span>
         <span class="bar"></span>
@@ -120,16 +120,16 @@
         <div class="logo-box-sm">
           <img
             src="assets/logo.png"
-            alt="BlueFox Finance"
+            [alt]="'BlueFox Finance' | t"
             class="brand-logo-img"
           />
         </div>
         <div class="brand-text">
-          <span class="brand-title-sm">BlueFox Finance</span>
-          <span class="brand-subtitle-sm">Navegação & Gestão</span>
+          <span class="brand-title-sm">{{ 'BlueFox Finance' | t }}</span>
+          <span class="brand-subtitle-sm">{{ 'Navegação & Gestão' | t }}</span>
         </div>
       </div>
-      <button class="btn-drawer-close" (click)="closeMobileMenu()" aria-label="Fechar Menu">
+      <button class="btn-drawer-close" (click)="closeMobileMenu()" [attr.aria-label]="'Fechar Menu' | t">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -139,7 +139,7 @@
 
     <!-- Card de Usuário / Perfil Rápido -->
     <div class="drawer-user-section">
-      <a routerLink="/admin/user-profile" (click)="closeMobileMenu()" class="drawer-user-card" title="Ver perfil e configurações">
+      <a routerLink="/admin/user-profile" (click)="closeMobileMenu()" class="drawer-user-card" [title]="'Ver perfil e configurações' | t">
         <div
           class="user-avatar-mini"
           [style.background]="'linear-gradient(135deg, ' + currentAvatar.color + ' 0%, #0b132b 100%)'"
@@ -147,7 +147,7 @@
           <img
             *ngIf="currentAvatar.iconType === 'fox-blue'"
             src="assets/logo.png"
-            alt="Blue Fox Oficial"
+            [alt]="'Blue Fox Oficial' | t"
             class="avatar-fox-img-mini"
           />
           <svg *ngIf="currentAvatar.iconType === 'fox-cyan'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
@@ -186,7 +186,7 @@
     <!-- Links de Navegação Agrupados -->
     <nav class="mobile-nav-links">
       <!-- SEÇÃO 1: PRINCIPAL -->
-      <div class="drawer-section-label">Principal</div>
+      <div class="drawer-section-label">{{ 'Principal' | t }}</div>
 
       <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
         <div class="icon-wrap">
@@ -197,7 +197,7 @@
             <rect x="3" y="16" width="7" height="5"/>
           </svg>
         </div>
-        <span>Dashboard</span>
+        <span>{{ 'Dashboard' | t }}</span>
       </a>
 
       <a routerLink="/expenses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -207,11 +207,11 @@
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
         </div>
-        <span>Lançamentos</span>
+        <span>{{ 'Lançamentos' | t }}</span>
       </a>
 
       <!-- SEÇÃO 2: CADASTROS BASE -->
-      <div class="drawer-section-label">Cadastros Base</div>
+      <div class="drawer-section-label">{{ 'Cadastros Base' | t }}</div>
 
       <a routerLink="/buyers" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
         <div class="icon-wrap">
@@ -220,7 +220,7 @@
             <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span>Compradores</span>
+        <span>{{ 'Compradores' | t }}</span>
       </a>
 
       <a routerLink="/stores" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -230,7 +230,7 @@
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         </div>
-        <span>Lojas & Estabelecimentos</span>
+        <span>{{ 'Lojas & Estabelecimentos' | t }}</span>
       </a>
 
       <a routerLink="/payment-methods" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -240,7 +240,7 @@
             <line x1="2" y1="10" x2="22" y2="10"/>
           </svg>
         </div>
-        <span>Meios de Pagamento</span>
+        <span>{{ 'Meios de Pagamento' | t }}</span>
       </a>
 
       <a routerLink="/admin/item-categories" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -250,7 +250,7 @@
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
         </div>
-        <span>Categorias de Itens</span>
+        <span>{{ 'Categorias de Itens' | t }}</span>
       </a>
 
       <a routerLink="/admin/store-categories" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-nav-item">
@@ -260,11 +260,11 @@
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         </div>
-        <span>Categorias de Lojas</span>
+        <span>{{ 'Categorias de Lojas' | t }}</span>
       </a>
 
       <!-- SEÇÃO 3: SERVIÇOS & HUB (DESTAQUE MOBILE) -->
-      <div class="drawer-section-label">Serviços</div>
+      <div class="drawer-section-label">{{ 'Serviços' | t }}</div>
 
       <a
         routerLink="/admin"
@@ -282,8 +282,8 @@
           </svg>
         </div>
         <div class="nav-text-container">
-          <span>Central de Serviços</span>
-          <span class="badge-hub">Hub</span>
+          <span>{{ 'Central de Serviços' | t }}</span>
+          <span class="badge-hub">{{ 'Hub' | t }}</span>
         </div>
       </a>
 
@@ -294,7 +294,7 @@
             <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span>Perfil do Usuário</span>
+        <span>{{ 'Perfil do Usuário' | t }}</span>
       </a>
     </nav>
 
@@ -305,7 +305,7 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        <span>Novo Lançamento</span>
+        <span>{{ 'Novo Lançamento' | t }}</span>
       </a>
 
       <button *ngIf="!authService.isAuthenticated()" (click)="login(); closeMobileMenu()" class="btn btn-outline-light btn-pill full-width mb-2">
@@ -313,7 +313,7 @@
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
-        <span>Login SSO (Keycloak)</span>
+        <span>{{ 'Login SSO (Keycloak)' | t }}</span>
       </button>
 
       <button *ngIf="authService.isAuthenticated()" (click)="logout(); closeMobileMenu()" class="btn btn-outline-danger btn-pill full-width mb-2">
@@ -322,11 +322,11 @@
           <polyline points="16 17 21 12 16 7"/>
           <line x1="21" y1="12" x2="9" y2="12"/>
         </svg>
-        <span>Sair da Conta (Logout)</span>
+        <span>{{ 'Sair da Conta (Logout)' | t }}</span>
       </button>
 
       <div class="mobile-drawer-brand-footnote">
-        BlueFox Finance &bull; Central de Serviços
+        {{ 'BlueFox Finance • Central de Serviços' | t }}
       </div>
     </div>
   </div>
@@ -334,7 +334,7 @@
   <!-- Reusable Notice Modal para Keycloak Login -->
   <app-notice-modal
     [isOpen]="loginModalOpen"
-    title="Autenticação BlueFox"
+    [title]="'Autenticação BlueFox' | t"
     badge="Keycloak SSO"
     message="O sistema de login corporativo com Keycloak SSO está em fase de implementação."
     details="Futuramente, o login será integrado diretamente ao Keycloak Identity Provider (IAM), com suporte a Single Sign-On (SSO) unificado e permissões por perfil."

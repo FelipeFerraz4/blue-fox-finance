@@ -1,6 +1,6 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
-import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, NavigationEnd, ResolveEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { storageGet, storageSet } from '../../utils/browser-storage';
 
@@ -13,13 +13,12 @@ import { homeContent as homeEn } from '../../content/en/home';
 import { aboutContent as aboutEn } from '../../content/en/about';
 import { updatesContent as updatesEn } from '../../content/en/updates';
 
-/** Idiomas das páginas públicas (o sistema interno ainda é só em português). */
-export const LANGUAGES = ['pt', 'en'] as const;
-export type Language = (typeof LANGUAGES)[number];
-export type PublicPage = 'home' | 'about' | 'updates';
+import { LANGUAGES, LANG_STORAGE_KEY, Language, isLanguage } from '../../i18n/locale';
+import { PREFERRED_LANGUAGE, activeLanguage } from '../../i18n/i18n';
 
-/** Chave do localStorage com a escolha do visitante (a mesma da etapa do sistema interno). */
-export const LANG_STORAGE_KEY = 'bf-lang';
+export { LANGUAGES, isLanguage };
+export type { Language };
+export type PublicPage = 'home' | 'about' | 'updates';
 
 /** Atributo `lang` do <html> e `og:locale` de cada idioma. */
 export const LANGUAGE_TAGS: Record<Language, { html: string; og: string }> = {
@@ -32,7 +31,6 @@ const DICTIONARY = {
   en: { common: commonEn, home: homeEn, about: aboutEn, updates: updatesEn },
 } satisfies Record<Language, unknown>;
 
-export const isLanguage = (value: unknown): value is Language => LANGUAGES.includes(value as Language);
 
 /** Caminho de uma página pública num idioma: `/pt`, `/en/about`... */
 export function publicPath(lang: Language, page: PublicPage): string {
@@ -52,34 +50,39 @@ export function preferredLanguage(): Language {
   return (navigator.language || 'pt').toLowerCase().startsWith('pt') ? 'pt' : 'en';
 }
 
-/** Idioma (do 1º segmento da URL; pt se não houver) e página pública (`data.seo`) da rota atual. */
-export function routeLanguage(router: Router): { lang: Language; page: PublicPage | null } {
-  let route: ActivatedRouteSnapshot = router.routerState.snapshot.root;
+/** Idioma (do 1º segmento da URL; sem ele, o preferido do usuário) e página pública (`data.seo`) da rota atual. */
+export function routeLanguage(router: Router, root?: ActivatedRouteSnapshot): { lang: Language; page: PublicPage | null } {
+  let route: ActivatedRouteSnapshot = root ?? router.routerState.snapshot.root;
   const first = route.firstChild?.url[0]?.path;
   while (route.firstChild) route = route.firstChild;
   return {
-    lang: isLanguage(first) ? first : 'pt',
+    lang: isLanguage(first) ? first : PREFERRED_LANGUAGE,
     page: (route.data['seo'] as PublicPage | undefined) ?? null,
   };
 }
 
 /**
  * Idioma das páginas públicas, sempre vindo da URL (`/pt/...`, `/en/...`), como no
- * Blue Fox Global Group. Mantém o `lang` do <html> em dia: rotas sem idioma (sistema
- * interno) ficam em pt-BR.
+ * Blue Fox Global Group; no sistema interno (sem idioma na URL), o preferido do
+ * usuário. Atualiza o `activeLanguage` do `t()` e o `lang` do <html>.
  */
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
 
-  /** Idioma da página atual (pt fora das páginas públicas). */
+  /** Idioma da página atual (o preferido fora das páginas públicas). */
   readonly lang = signal<Language>('pt');
   /** Página pública atual (`data.seo` da rota), ou null no sistema interno. */
   readonly page = signal<PublicPage | null>(null);
   readonly content = computed(() => DICTIONARY[this.lang()]);
 
   constructor() {
+    // Idioma em uso trocado antes de criar os componentes da nova rota (ResolveEnd), para
+    // textos montados no construtor (t()) já saírem no idioma certo
+    this.router.events.pipe(filter((e): e is ResolveEnd => e instanceof ResolveEnd)).subscribe((e) => {
+      activeLanguage.set(routeLanguage(this.router, e.state.root).lang);
+    });
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe(() => this.sync());
   }
 
@@ -107,6 +110,7 @@ export class TranslationService {
     const { lang, page } = routeLanguage(this.router);
     this.lang.set(lang);
     this.page.set(page);
+    activeLanguage.set(lang);
     this.document.documentElement.lang = LANGUAGE_TAGS[lang].html;
   }
 }

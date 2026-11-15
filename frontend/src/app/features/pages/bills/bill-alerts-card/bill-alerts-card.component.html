@@ -3,7 +3,7 @@
     routerLink="/bills"
     class="bill-alerts"
     [class.has-overdue]="(alerts()?.atrasadas?.length ?? 0) > 0"
-    [attr.aria-label]="'Contas a pagar: ' + items().length + ' precisando de atenção. Abrir contas.'"
+    [attr.aria-label]="'Contas a pagar: {n} precisando de atenção. Abrir contas.' | t: { n: items().length }"
   >
     <span class="bill-alerts-icon" aria-hidden="true">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -13,10 +13,10 @@
         <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     </span>
-    <strong class="bill-alerts-title">Contas</strong>
+    <strong class="bill-alerts-title">{{ 'Contas' | t }}</strong>
     <span class="bill-alerts-chips">
       @for (o of items(); track o.id) {
-        <span class="chip" [class]="'chip status-' + o.status" [attr.title]="o.valor !== null ? (o.valor | currency: 'BRL') : null">
+        <span class="chip" [class]="'chip status-' + o.status" [attr.title]="o.valor !== null ? (o.valor | money) : null">
           {{ o.nome }} · {{ label(o) }}
         </span>
       }

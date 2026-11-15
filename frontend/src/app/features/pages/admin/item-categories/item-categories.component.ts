@@ -6,11 +6,13 @@ import { CategoriesService } from '../../../../core/services/categories/categori
 import { ExpensePreferencesService } from '../../../../core/services/expense-preferences/expense-preferences.service';
 import { CategoriaItem, CreateCategoriaItemDto, UpdateCategoriaItemDto } from '../../../../shared/model/types/category.model';
 import { ConfirmModalComponent } from '../../../../shared/components/general/confirm-modal/confirm-modal.component';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
 
 @Component({
   selector: 'app-item-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ConfirmModalComponent],
+  imports: [...I18N, CommonModule, FormsModule, RouterModule, ConfirmModalComponent],
   template: `
     <div class="page-layout">
       <!-- Breadcrumb & Cabeçalho -->
@@ -21,20 +23,20 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Voltar para Serviços
+            {{ 'Voltar para Serviços' | t }}
           </a>
           <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">Categorias de Itens</span>
+          <span class="breadcrumb-current">{{ 'Categorias de Itens' | t }}</span>
         </div>
 
         <div class="header-main">
           <div class="header-text">
             <div class="title-with-badge">
-              <h1 class="page-title">Categorias de Itens</h1>
-              <span class="category-badge">Despesas & Produtos</span>
+              <h1 class="page-title">{{ 'Categorias de Itens' | t }}</h1>
+              <span class="category-badge">{{ 'Despesas & Produtos' | t }}</span>
             </div>
             <p class="page-subtitle">
-              Cadastre e personalize os tipos de despesas aplicados aos produtos em lançamentos de custos.
+              {{ 'Cadastre e personalize os tipos de despesas aplicados aos produtos em lançamentos de custos.' | t }}
             </p>
           </div>
 
@@ -47,7 +49,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            <span>Nova Categoria</span>
+            <span>{{ 'Nova Categoria' | t }}</span>
           </button>
         </div>
       </div>
@@ -62,7 +64,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
           <input
             type="text"
             [(ngModel)]="searchTerm"
-            placeholder="Buscar categoria por nome..."
+            [placeholder]="'Buscar categoria por nome...' | t"
             class="search-input"
           />
           <button *ngIf="searchTerm" (click)="searchTerm = ''" class="btn-clear-search">✕</button>
@@ -70,11 +72,11 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
 
         <div class="stats-row">
           <div class="stat-pill">
-            <span class="stat-label">Total:</span>
+            <span class="stat-label">{{ 'Total:' | t }}</span>
             <span class="stat-value">{{ categories.length }}</span>
           </div>
           <div class="stat-pill active">
-            <span class="stat-label">Ativas:</span>
+            <span class="stat-label">{{ 'Ativas:' | t }}</span>
             <span class="stat-value">{{ activeCount }}</span>
           </div>
         </div>
@@ -83,7 +85,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       <!-- Estado de Carregamento -->
       <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>Carregando categorias...</p>
+        <p>{{ 'Carregando categorias...' | t }}</p>
       </div>
 
       <!-- Mensagens de Feedback -->
@@ -111,10 +113,10 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
             <table class="custom-table">
               <thead>
                 <tr>
-                  <th style="width: 140px;">Cor</th>
-                  <th>Nome da Categoria</th>
-                  <th style="width: 140px;">Status</th>
-                  <th style="width: 120px;" class="text-right">Ações</th>
+                  <th style="width: 140px;">{{ 'Cor' | t }}</th>
+                  <th>{{ 'Nome da Categoria' | t }}</th>
+                  <th style="width: 140px;">{{ 'Status' | t }}</th>
+                  <th style="width: 120px;" class="text-right">{{ 'Ações' | t }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -131,7 +133,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <td>
                     <div class="category-name-cell">
                       <span class="category-title">{{ cat.nome }}</span>
-                      <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">★ Padrão</span>
+                      <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                     </div>
                   </td>
                   <td>
@@ -140,7 +142,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                       [class.badge-active]="cat.ativo"
                       [class.badge-inactive]="!cat.ativo"
                     >
-                      {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                      {{ cat.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
                     </span>
                   </td>
                   <td class="text-right">
@@ -149,7 +151,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         type="button"
                         class="btn-icon btn-edit"
                         (click)="openEditModal(cat)"
-                        title="Editar Categoria"
+                        [title]="'Editar Categoria' | t"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -160,7 +162,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         type="button"
                         class="btn-icon btn-delete"
                         (click)="confirmDelete(cat)"
-                        title="Excluir Categoria"
+                        [title]="'Excluir Categoria' | t"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polyline points="3 6 5 6 21 6"/>
@@ -180,9 +182,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                         <rect x="14" y="12" width="7" height="9"/>
                         <rect x="3" y="16" width="7" height="5"/>
                       </svg>
-                      <p class="empty-text">Nenhuma categoria encontrada.</p>
+                      <p class="empty-text">{{ 'Nenhuma categoria encontrada.' | t }}</p>
                       <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
-                        Cadastrar Categoria
+                        {{ 'Cadastrar Categoria' | t }}
                       </button>
                     </div>
                   </td>
@@ -202,18 +204,18 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   [style.backgroundColor]="cat.cor || '#004aad'"
                 ></span>
                 <span class="category-title font-bold">{{ cat.nome }}</span>
-                <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">★ Padrão</span>
+                <span *ngIf="isCategoryDefault(cat.nome)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
               </div>
               <span
                 class="badge"
                 [class.badge-active]="cat.ativo"
                 [class.badge-inactive]="!cat.ativo"
               >
-                {{ cat.ativo ? 'Ativo' : 'Inativo' }}
+                {{ cat.ativo ? ('Ativo' | t) : ('Inativo' | t) }}
               </span>
             </div>
             <div class="cat-card-body" *ngIf="cat.cor">
-              <span class="text-muted text-xs">Código HEX:</span>
+              <span class="text-muted text-xs">{{ 'Código HEX:' | t }}</span>
               <span class="color-hex font-medium">{{ cat.cor }}</span>
             </div>
             <div class="cat-card-actions">
@@ -226,7 +228,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
-                <span>Editar</span>
+                <span>{{ 'Editar' | t }}</span>
               </button>
               <button
                 type="button"
@@ -237,7 +239,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span>Excluir</span>
+                <span>{{ 'Excluir' | t }}</span>
               </button>
             </div>
           </div>
@@ -251,9 +253,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               <rect x="14" y="12" width="7" height="9"/>
               <rect x="3" y="16" width="7" height="5"/>
             </svg>
-            <p class="empty-text">Nenhuma categoria encontrada.</p>
+            <p class="empty-text">{{ 'Nenhuma categoria encontrada.' | t }}</p>
             <button class="btn btn-outline-primary btn-sm btn-pill" (click)="openCreateModal()">
-              Cadastrar Categoria
+              {{ 'Cadastrar Categoria' | t }}
             </button>
           </div>
         </div>
@@ -271,8 +273,8 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
               </svg>
             </div>
             <div>
-              <h3 class="modal-title">{{ isEditing ? 'Editar Categoria' : 'Nova Categoria de Item' }}</h3>
-              <p class="modal-subtitle">Defina o nome de identificação e a cor do badge</p>
+              <h3 class="modal-title">{{ isEditing ? ('Editar Categoria' | t) : ('Nova Categoria de Item' | t) }}</h3>
+              <p class="modal-subtitle">{{ 'Defina o nome de identificação e a cor do badge' | t }}</p>
             </div>
             <button class="modal-close" (click)="closeModal()">✕</button>
           </div>
@@ -281,7 +283,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
             <div class="modal-body">
               <div class="form-group">
                 <label for="catNome" class="form-label">
-                  Nome da Categoria <span class="required">*</span>
+                  {{ 'Nome da Categoria' | t }} <span class="required">*</span>
                 </label>
                 <input
                   id="catNome"
@@ -289,13 +291,13 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   name="nome"
                   [(ngModel)]="formData.nome"
                   required
-                  placeholder="Ex: Alimentação, Tecnologia, Moradia..."
+                  [placeholder]="'Ex: Alimentação, Tecnologia, Moradia...' | t"
                   class="form-control"
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">Cor de Identificação</label>
+                <label class="form-label">{{ 'Cor de Identificação' | t }}</label>
                 <div class="color-palette-selector">
                   <button
                     type="button"
@@ -311,7 +313,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                     </svg>
                   </button>
 
-                  <div class="custom-color-picker-wrap" title="Escolher cor personalizada">
+                  <div class="custom-color-picker-wrap" [title]="'Escolher cor personalizada' | t">
                     <input
                       type="color"
                       [(ngModel)]="formData.cor"
@@ -322,9 +324,9 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                 </div>
 
                 <div class="color-preview-banner" [style.borderLeftColor]="formData.cor">
-                  <span>Pré-visualização do badge:</span>
+                  <span>{{ 'Pré-visualização do badge:' | t }}</span>
                   <span class="badge" [style.backgroundColor]="formData.cor + '22'" [style.color]="formData.cor" [style.borderColor]="formData.cor + '66'">
-                    {{ formData.nome || 'Nome da Categoria' }}
+                    {{ formData.nome || ('Nome da Categoria' | t) }}
                   </span>
                 </div>
               </div>
@@ -339,25 +341,25 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
                   <span class="switch-slider"></span>
                 </label>
                 <div class="switch-label-text">
-                  <strong>Definir como categoria padrão</strong>
-                  <span class="text-xs text-muted block">Será pré-selecionada automaticamente ao adicionar itens em novos lançamentos</span>
+                  <strong>{{ 'Definir como categoria padrão' | t }}</strong>
+                  <span class="text-xs text-muted block">{{ 'Será pré-selecionada automaticamente ao adicionar itens em novos lançamentos' | t }}</span>
                 </div>
               </div>
             </div>
 
             <div class="modal-footer">
               <button type="button" class="btn btn-light btn-pill" (click)="closeModal()">
-                Cancelar
+                {{ 'Cancelar' | t }}
               </button>
               <button
                 type="submit"
                 class="btn btn-primary btn-pill shadow-glow"
                 [disabled]="!formData.nome || isSaving"
               >
-                <span *ngIf="!isSaving">{{ isEditing ? 'Salvar Alterações' : 'Cadastrar Categoria' }}</span>
+                <span *ngIf="!isSaving">{{ isEditing ? ('Salvar Alterações' | t) : ('Cadastrar Categoria' | t) }}</span>
                 <span *ngIf="isSaving" class="btn-spinner-wrap">
                   <span class="mini-spinner"></span>
-                  Salvando...
+                  {{ 'Salvando...' | t }}
                 </span>
               </button>
             </div>
@@ -368,7 +370,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/general/con
       <!-- Modal de Confirmação para Exclusão -->
       <app-confirm-modal
         [isOpen]="showDeleteConfirm"
-        title="Excluir Categoria de Item"
+        [title]="'Excluir Categoria de Item' | t"
         [message]="deleteConfirmationMessage"
         confirmText="Sim, Excluir"
         cancelText="Cancelar"
@@ -1286,7 +1288,7 @@ export class ItemCategoriesComponent implements OnInit {
   }
 
   get deleteConfirmationMessage(): string {
-    return 'Tem certeza que deseja remover a categoria "' + (this.categoryToDelete?.nome || '') + '"?';
+    return t('Tem certeza que deseja remover a categoria "{nome}"?', { nome: this.categoryToDelete?.nome || '' });
   }
 
   get filteredCategories(): CategoriaItem[] {
@@ -1309,7 +1311,7 @@ export class ItemCategoriesComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Erro ao carregar categorias de itens.';
+        this.errorMessage = t('Erro ao carregar categorias de itens.');
         this.loading = false;
       },
     });
@@ -1371,12 +1373,12 @@ export class ItemCategoriesComponent implements OnInit {
           }
           this.isSaving = false;
           this.showModal = false;
-          this.showSuccess('Categoria atualizada com sucesso!');
+          this.showSuccess(t('Categoria atualizada com sucesso!'));
           this.loadCategories();
         },
         error: (err) => {
           this.isSaving = false;
-          this.errorMessage = 'Erro ao atualizar categoria: ' + (err.error?.message || err.message);
+          this.errorMessage = t('Erro ao atualizar categoria: {erro}', { erro: err.error?.message || err.message });
         },
       });
     } else {
@@ -1393,12 +1395,12 @@ export class ItemCategoriesComponent implements OnInit {
           }
           this.isSaving = false;
           this.showModal = false;
-          this.showSuccess('Categoria cadastrada com sucesso!');
+          this.showSuccess(t('Categoria cadastrada com sucesso!'));
           this.loadCategories();
         },
         error: (err) => {
           this.isSaving = false;
-          this.errorMessage = 'Erro ao cadastrar categoria: ' + (err.error?.message || err.message);
+          this.errorMessage = t('Erro ao cadastrar categoria: {erro}', { erro: err.error?.message || err.message });
         },
       });
     }
@@ -1422,11 +1424,11 @@ export class ItemCategoriesComponent implements OnInit {
         if (wasDefault) {
           this.preferencesService.setDefaultCategory(null).subscribe({ error: () => {} });
         }
-        this.showSuccess('Categoria removida com sucesso!');
+        this.showSuccess(t('Categoria removida com sucesso!'));
         this.loadCategories();
       },
       error: (err) => {
-        this.errorMessage = 'Erro ao excluir categoria: ' + (err.error?.message || err.message);
+        this.errorMessage = t('Erro ao excluir categoria: {erro}', { erro: err.error?.message || err.message });
       },
     });
   }
