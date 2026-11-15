@@ -5,6 +5,7 @@ import { Bot, Context } from 'grammy';
 import type { InlineKeyboardMarkup, Update } from 'grammy/types';
 import { timingSafeEqual } from 'crypto';
 import { BOT_COMMANDS, BotEngineService } from '../bot-engine.service';
+import { t } from '../../../common/i18n/translate';
 import { BotButton, BotIncoming, BotReply } from '../bot.types';
 
 /**
@@ -53,7 +54,12 @@ export class TelegramAdapter implements OnApplicationBootstrap, OnModuleDestroy 
 
     try {
       await bot.init();
+      // Descrições dos comandos em português (padrão) e em inglês (app do Telegram em inglês)
       await bot.api.setMyCommands(BOT_COMMANDS);
+      await bot.api.setMyCommands(
+        BOT_COMMANDS.map((c) => ({ command: c.command, description: t(c.description, undefined, 'en') })),
+        { language_code: 'en' },
+      );
       const mode = this.config.get<string>('TELEGRAM_MODE', 'webhook');
       if (mode === 'polling') {
         this.polling = true;
@@ -108,6 +114,7 @@ export class TelegramAdapter implements OnApplicationBootstrap, OnModuleDestroy 
       externalUserId: String(ctx.from.id),
       chatId: String(ctx.chat.id),
       username: ctx.from.username,
+      languageCode: ctx.from.language_code,
       isPrivate: ctx.chat.type === 'private',
       ...payload,
     };

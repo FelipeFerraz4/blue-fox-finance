@@ -8,6 +8,10 @@ import { BillsFlow } from './flows/bills.flow';
 import { SummaryFlow } from './flows/summary.flow';
 import { RegisterFlow } from './flows/register.flow';
 import { FormKind } from './bot.types';
+import { PreferencesService } from '../preferences/preferences.service';
+import { LocaleContext, runWithLocale } from '../../common/i18n/locale-context';
+import { Language } from '../../common/constants/locale';
+import { t, translateMessage } from '../../common/i18n/translate';
 
 /** Atalhos diretos para cada cadastro (ex.: "/novaloja Padaria Sol"). */
 const REGISTER_COMMANDS: Record<string, FormKind> = {
@@ -51,14 +55,33 @@ export class BotEngineService {
     private readonly summaryFlow: SummaryFlow,
     private readonly register: RegisterFlow,
     private readonly config: ConfigService,
+    private readonly preferences: PreferencesService,
   ) {}
 
+  /** Atende no idioma e país do usuário: textos (t) e formatos (BotFormat) leem o contexto. */
   async handle(msg: BotIncoming): Promise<BotReply[]> {
+    const locale = await this.resolveLocale(msg);
+    return runWithLocale(locale, () => this.handleInLocale(msg));
+  }
+
+  /** Escolha salva no site; sem ela, o idioma do app do Telegram (português → pt, outro → en). */
+  private async resolveLocale(msg: BotIncoming): Promise<LocaleContext> {
+    const userId = msg.isPrivate ? await this.link.findUserId(msg.canal, msg.externalUserId) : null;
+    if (userId) {
+      const pref = await this.preferences.getLocale(userId);
+      if (pref.salvo) return { lang: pref.idioma, region: pref.regiao };
+    }
+    const code = msg.languageCode?.toLowerCase();
+    const lang: Language = !code || code.startsWith('pt') ? 'pt' : 'en';
+    return { lang, region: lang === 'pt' ? 'BR' : 'US' };
+  }
+
+  private async handleInLocale(msg: BotIncoming): Promise<BotReply[]> {
     if (!msg.isPrivate) {
-      return [{ text: 'Por segurança, só converso em chat privado.' }];
+      return [{ text: t('Por segurança, só converso em chat privado.') }];
     }
     if (this.rateLimited(`${msg.canal}:${msg.externalUserId}`)) {
-      return [{ text: 'Muitas mensagens seguidas. Espere um minuto, por favor.' }];
+      return [{ text: t('Muitas mensagens seguidas. Espere um minuto, por favor.') }];
     }
 
     try {
@@ -68,10 +91,11 @@ export class BotEngineService {
         // Erros de negócio dos services (ex.: "Meio de pagamento não existe")
         const response = err.getResponse();
         const message = typeof response === 'string' ? response : (response as { message?: string | string[] }).message;
-        return [{ text: `⚠️ ${F.esc(Array.isArray(message) ? message.join('; ') : (message ?? err.message))}` }];
+        const list = Array.isArray(message) ? message : [message ?? err.message];
+        return [{ text: `⚠️ ${F.esc(list.map((m) => translateMessage(String(m))).join('; '))}` }];
       }
       this.logger.error(`Erro ao processar mensagem do bot: ${(err as Error).message}`, (err as Error).stack);
-      return [{ text: '⚠️ Algo deu errado. Tente de novo em instantes.' }];
+      return [{ text: t('⚠️ Algo deu errado. Tente de novo em instantes.') }];
     }
   }
 
@@ -106,12 +130,12 @@ export class BotEngineService {
       ...replies.slice(0, -1),
       {
         ...last,
-        text: `${last.text}\n\n<i>Mais alguma coisa?</i>`,
+        text: `${last.text}\n\n${t('<i>Mais alguma coisa?</i>')}`,
         buttons: [
           ...(last.buttons ?? []),
           [
-            { label: '👍 Sim', data: 'm::mais' },
-            { label: '👋 Não', data: 'm::tchau' },
+            { label: t('👍 Sim'), data: 'm::mais' },
+            { label: t('👋 Não'), data: 'm::tchau' },
           ],
         ],
       },
@@ -138,10 +162,10 @@ export class BotEngineService {
           return this.expense.recent(u);
         case 'cancelar':
           await this.link.clearState(u.canal, u.externalUserId);
-          return [{ text: 'Ok, cancelado.' }];
+          return [{ text: t('Ok, cancelado.') }];
         case 'desconectar':
           await this.link.unlinkUser(u.userId);
-          return [{ text: 'Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.', noFollowUp: true }];
+          return [{ text: t('Conta desvinculada. Para conectar de novo, use o botão no seu perfil do site.'), noFollowUp: true }];
         case 'start':
         case 'ajuda':
         case 'help':
@@ -149,7 +173,7 @@ export class BotEngineService {
           return [this.menu()];
         default:
           if (REGISTER_COMMANDS[command]) return this.register.start(u, REGISTER_COMMANDS[command], args);
-          return [{ text: 'Não conheço esse comando.' }, this.menu()];
+          return [{ text: t('Não conheço esse comando.') }, this.menu()];
       }
     }
 
@@ -199,42 +223,44 @@ export class BotEngineService {
           case 'mais':
             return [this.quickMenu()];
           case 'tchau':
-            return [{ text: 'Até mais! 👋 Quando precisar, é só mandar uma mensagem.', noFollowUp: true }];
+            return [{ text: t('Até mais! 👋 Quando precisar, é só mandar uma mensagem.'), noFollowUp: true }];
         }
     }
-    return [{ text: 'Esse botão não é mais válido.' }];
+    return [{ text: t('Esse botão não é mais válido.') }];
   }
 
   private async linkAccount(msg: BotIncoming, code: string): Promise<BotReply[]> {
     const result = await this.link.consumeLinkCode(code, msg.canal, msg.externalUserId, msg.chatId, msg.username);
     if (!result.ok) {
-      return [{ text: '❌ Código inválido ou expirado. Gere um novo no seu perfil do site (vale por 10 minutos).' }];
+      return [{ text: t('❌ Código inválido ou expirado. Gere um novo no seu perfil do site (vale por 10 minutos).') }];
     }
     this.logger.log(`Conta vinculada ao ${msg.canal}`);
-    return [{ text: '✅ <b>Conta conectada!</b> Agora o que você lançar aqui aparece no site.' }, this.menu()];
+    // Recém-vinculado: agora vale o idioma escolhido no site
+    const locale = await this.resolveLocale(msg);
+    return runWithLocale(locale, () => [{ text: t('✅ <b>Conta conectada!</b> Agora o que você lançar aqui aparece no site.') }, this.menu()]);
   }
 
   /** Menu inicial: o que cada comando faz, com atalhos em botões. */
   private menu(): BotReply {
     return {
       text: [
-        '<b>Blue Fox Finance</b> 🦊',
+        t('<b>Blue Fox Finance</b> 🦊'),
         '',
-        '<b>Novo lançamento</b>',
-        '/lancamento · responda às perguntas (os mesmos campos do site)',
-        'ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>',
+        t('<b>Novo lançamento</b>'),
+        t('/lancamento · responda às perguntas (os mesmos campos do site)'),
+        t('ou já comece com valor, item e loja: <code>45,90 pão @ padaria</code>'),
         '',
-        '<b>Consultar</b>',
-        '/resumo · gastos do mês e dos próximos meses',
-        '/contas · contas a pagar e confirmação de pagamento',
-        '/ultimos · últimos lançamentos',
+        t('<b>Consultar</b>'),
+        t('/resumo · gastos do mês e dos próximos meses'),
+        t('/contas · contas a pagar e confirmação de pagamento'),
+        t('/ultimos · últimos lançamentos'),
         '',
-        '<b>Cadastros</b>',
-        '/cadastrar · loja, comprador, meio de pagamento, categoria ou conta a pagar',
+        t('<b>Cadastros</b>'),
+        t('/cadastrar · loja, comprador, meio de pagamento, categoria ou conta a pagar'),
         '',
-        '<b>Outros</b>',
-        '/cancelar · cancela o que estiver em andamento',
-        '/desconectar · desvincula sua conta',
+        t('<b>Outros</b>'),
+        t('/cancelar · cancela o que estiver em andamento'),
+        t('/desconectar · desvincula sua conta'),
       ].join('\n'),
       buttons: this.menuButtons(),
       noFollowUp: true,
@@ -243,26 +269,26 @@ export class BotEngineService {
 
   /** Só os botões do menu, para quem respondeu "Sim" ao "Mais alguma coisa?". */
   private quickMenu(): BotReply {
-    return { text: 'O que vamos fazer?', buttons: this.menuButtons(), noFollowUp: true };
+    return { text: t('O que vamos fazer?'), buttons: this.menuButtons(), noFollowUp: true };
   }
 
   private menuButtons(): BotReply['buttons'] {
     return [
-      [{ label: '➕ Novo lançamento', data: 'm::lancamento' }],
+      [{ label: t('➕ Novo lançamento'), data: 'm::lancamento' }],
       [
-        { label: '📊 Resumo', data: 'm::resumo' },
-        { label: '🔔 Contas', data: 'm::contas' },
-        { label: '🧾 Últimos', data: 'm::ultimos' },
+        { label: t('📊 Resumo'), data: 'm::resumo' },
+        { label: t('🔔 Contas'), data: 'm::contas' },
+        { label: t('🧾 Últimos'), data: 'm::ultimos' },
       ],
-      [{ label: '🗂 Cadastrar', data: 'm::cadastrar' }],
+      [{ label: t('🗂 Cadastrar'), data: 'm::cadastrar' }],
     ];
   }
 
   private notLinked(): BotReply {
     const site = this.config.get<string>('FRONTEND_URL', '');
-    const where = site ? ` em <b>${F.esc(site.replace(/\/$/, ''))}/admin/user-profile</b>` : ' no seu perfil do site';
+    const where = site ? t(' em <b>{url}</b>', { url: `${F.esc(site.replace(/\/$/, ''))}/admin/user-profile` }) : t(' no seu perfil do site');
     return {
-      text: `Olá! Para usar o bot, conecte sua conta Blue Fox Finance: abra o seu perfil${where} e toque em <b>Conectar Telegram</b>.`,
+      text: t('Olá! Para usar o bot, conecte sua conta Blue Fox Finance: abra o seu perfil{onde} e toque em <b>Conectar Telegram</b>.', { onde: where }),
       noFollowUp: true,
     };
   }

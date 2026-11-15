@@ -16,6 +16,7 @@ import localePt from '@angular/common/locales/pt';
 import { routes } from './app.routes';
 import { AuthService } from './core/services/auth/auth.service';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { languageInterceptor } from './core/interceptors/language.interceptor';
 
 registerLocaleData(localePt, 'pt-BR');
 
@@ -30,7 +31,7 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
     ),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([languageInterceptor, authInterceptor])),
     // Páginas públicas chegam prontas do prerender; o navegador reaproveita o HTML
     provideClientHydration(withEventReplay()),
     {

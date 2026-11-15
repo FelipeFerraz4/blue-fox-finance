@@ -6,6 +6,8 @@ export interface BotIncoming {
   externalUserId: string;
   chatId: string;
   username?: string;
+  /** Idioma do app do usuário no canal (Telegram: from.language_code), usado se ele não escolheu no site */
+  languageCode?: string;
   isPrivate: boolean;
   text?: string;
   callbackData?: string;

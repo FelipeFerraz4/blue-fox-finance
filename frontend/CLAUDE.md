@@ -50,7 +50,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 - **`TranslationService`** (`core/services/translation/`): signals `lang`, `page` e `content` (dicionário de `core/content/{pt,en}`), `path(page)` para links no idioma atual, `pathIn(lang)` para o seletor e `remember(lang)`. Mantém o `lang` do `<html>` (`pt-BR`/`en`; rotas internas ficam `pt-BR`), usado também pela leitura em voz alta para escolher a voz.
 - **Textos:** o arquivo PT define o tipo (`typeof`), e o EN é tipado por ele: campo faltando no inglês quebra o build. Campos `html` (só `<strong>`) vão para `[innerHTML]`; o CSS deles usa `:host ::ng-deep` porque o conteúdo injetado fica fora do encapsulamento.
 - **Seletor PT | EN** no cabeçalho (e na gaveta do celular): links reais para a mesma página no outro idioma (o Google segue), com `hreflang`/`lang` e `aria-current`.
-- O sistema interno segue o idioma preferido (seção abaixo); API e bot, a etapa 5.
+- O sistema interno segue o idioma preferido (seção abaixo).
 
 ## 🌍 Sistema interno: idioma e país (`core/i18n/`)
 - **Chave = texto em português.** No template: `{{ 'Salvar' | t }}`, `[title]="'Excluir' | t"`, com parâmetros `{{ '{n} itens' | t: { n: total } }}`; no código: `t('Erro ao salvar: {erro}', { erro })`. O inglês fica em `core/i18n/en.ts` (PT → EN); texto sem tradução aparece em português. **Texto novo = chave em português no código + entrada em `en.ts`** (mesmos `{parâmetros}`).
@@ -65,7 +65,7 @@ O projeto segue a arquitetura modular padrão da Blue Fox para escalabilidade e 
 2. ✅ **Páginas públicas em `/pt` e `/en`** (seção Idiomas acima).
 3. ✅ **Prerender das públicas** (seção Prerender acima).
 4. ✅ **Sistema interno traduzido, com idioma e país separados** (seção acima).
-5. **API e bot:** `Accept-Language` nas mensagens de erro; o bot usa a preferência salva (ou o `language_code` do Telegram) e formata valores pela região (hoje `BotFormat.brl`).
+5. ✅ **API e bot:** o `languageInterceptor` manda `Accept-Language` e a API devolve os erros traduzidos; o bot usa a preferência salva (ou o idioma do Telegram) e formata pelo país (detalhes no `CLAUDE.md` da raiz).
 
 ## 📅 Datas
 - A data da compra (`Lancamento.data`) é gravada como meia-noite UTC (`YYYY-MM-DD` enviado pelo formulário). Exiba sempre em UTC (`date:'dd/MM/yyyy':'UTC'`), senão no Brasil (UTC−3) aparece o dia anterior. Para "hoje", use a data local (`toLocaleDateString('en-CA')`), nunca `toISOString()`.
