@@ -5,11 +5,12 @@ import { filter } from 'rxjs/operators';
 import { NoticeModalComponent } from '../notice-modal/notice-modal.component';
 import { UserService, UserProfile, SystemAvatar } from '../../../../core/services/user/user.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, NoticeModalComponent],
+  imports: [...I18N, CommonModule, RouterModule, NoticeModalComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })

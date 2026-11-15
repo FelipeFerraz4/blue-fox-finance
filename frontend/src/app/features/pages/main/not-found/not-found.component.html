@@ -1,0 +1,14 @@
+@let c = i18n.content().common;
+<div class="nf-wrapper">
+  <app-public-header />
+  <main class="nf-main">
+    <p class="nf-code" aria-hidden="true">404</p>
+    <h1 class="nf-title">{{ c.notFound.title }}</h1>
+    <p class="nf-text">{{ c.notFound.text }}</p>
+    <div class="nf-actions">
+      <a [routerLink]="i18n.path('home')" class="nf-btn primary">{{ c.notFound.home }}</a>
+      <a routerLink="/dashboard" class="nf-btn ghost">{{ c.notFound.app }}</a>
+    </div>
+  </main>
+  <app-public-footer />
+</div>

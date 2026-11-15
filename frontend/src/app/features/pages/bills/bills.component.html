@@ -12,20 +12,20 @@
             <polyline points="9 15 11 17 15 13" />
           </svg>
         </div>
-        <h1 class="page-title">Contas a Pagar</h1>
+        <h1 class="page-title">{{ 'Contas a Pagar' | t }}</h1>
       </div>
     </div>
 
     <div class="header-actions">
       <button class="btn btn-secondary btn-pill" (click)="showManage.set(!showManage())">
-        {{ showManage() ? 'Vencimentos' : 'Cadastro' }}
+        {{ showManage() ? ('Vencimentos' | t) : ('Cadastro' | t) }}
       </button>
       <button class="btn btn-primary btn-pill" (click)="openNewBill()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        <span>Nova</span>
+        <span>{{ 'Nova' | t }}</span>
       </button>
     </div>
   </div>
@@ -33,36 +33,36 @@
   @if (!showManage()) {
     <!-- Navegação entre meses -->
     <div class="month-nav card">
-      <button class="btn btn-secondary btn-sm" (click)="changeMonth(-1)" aria-label="Mês anterior">‹</button>
+      <button class="btn btn-secondary btn-sm" (click)="changeMonth(-1)" [attr.aria-label]="'Mês anterior' | t">‹</button>
       <div class="month-nav-label">
         <strong>{{ monthLabel() }}</strong>
         @if (!isCurrentMonth()) {
-          <button class="link-btn" (click)="goToCurrentMonth()">Hoje</button>
+          <button class="link-btn" (click)="goToCurrentMonth()">{{ 'Hoje' | t }}</button>
         }
       </div>
-      <button class="btn btn-secondary btn-sm" (click)="changeMonth(1)" aria-label="Próximo mês">›</button>
+      <button class="btn btn-secondary btn-sm" (click)="changeMonth(1)" [attr.aria-label]="'Próximo mês' | t">›</button>
     </div>
 
     @if (loading()) {
       <div class="card loading-state">
         <div class="mini-spinner"></div>
-        <p>Carregando...</p>
+        <p>{{ 'Carregando...' | t }}</p>
       </div>
     } @else {
       @if (overview(); as data) {
         <!-- Totais do mês -->
         <div class="summary-grid">
           <div class="card summary-card">
-            <span class="summary-label">Total</span>
-            <strong class="summary-value">{{ data.totais.previsto | currency: 'BRL' }}</strong>
+            <span class="summary-label">{{ 'Total' | t }}</span>
+            <strong class="summary-value">{{ data.totais.previsto | money }}</strong>
           </div>
           <div class="card summary-card summary-paid">
-            <span class="summary-label">Pago</span>
-            <strong class="summary-value">{{ data.totais.pago | currency: 'BRL' }}</strong>
+            <span class="summary-label">{{ 'Pago' | t }}</span>
+            <strong class="summary-value">{{ data.totais.pago | money }}</strong>
           </div>
           <div class="card summary-card summary-pending">
-            <span class="summary-label">Pendente</span>
-            <strong class="summary-value">{{ data.totais.pendente | currency: 'BRL' }}</strong>
+            <span class="summary-label">{{ 'Pendente' | t }}</span>
+            <strong class="summary-value">{{ data.totais.pendente | money }}</strong>
           </div>
         </div>
 
@@ -70,7 +70,7 @@
         @if (data.atrasadasAnteriores.length > 0) {
           <div class="card overdue-card">
             <div class="card-title">
-              <span>Atrasadas</span>
+              <span>{{ 'Atrasadas' | t }}</span>
               <span class="badge badge-danger">{{ data.atrasadasAnteriores.length }}</span>
             </div>
             <ng-container
@@ -88,9 +88,9 @@
 
           @if (data.ocorrencias.length === 0) {
             <div class="empty-state">
-              <p>Nada neste mês</p>
+              <p>{{ 'Nada neste mês' | t }}</p>
               @if (bills().length === 0) {
-                <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
+                <button class="btn btn-primary btn-pill" (click)="openNewBill()">{{ 'Nova conta' | t }}</button>
               }
             </div>
           } @else {
@@ -105,14 +105,14 @@
     <!-- Cadastro de contas -->
     <div class="card">
       <div class="card-title">
-        <span>Contas</span>
+        <span>{{ 'Contas' | t }}</span>
         <span class="badge badge-primary">{{ bills().length }}</span>
       </div>
 
       @if (bills().length === 0) {
         <div class="empty-state">
-          <p>Nenhuma conta</p>
-          <button class="btn btn-primary btn-pill" (click)="openNewBill()">Nova conta</button>
+          <p>{{ 'Nenhuma conta' | t }}</p>
+          <button class="btn btn-primary btn-pill" (click)="openNewBill()">{{ 'Nova conta' | t }}</button>
         </div>
       } @else {
         <ul class="bill-list">
@@ -123,26 +123,26 @@
                 <div class="bill-meta">
                   <span>{{ recurrenceLabel(bill) }}</span>
                   @if (bill.meioPagamento) {
-                    <span class="badge badge-brand">Fatura {{ bill.meioPagamento.nome }}</span>
+                    <span class="badge badge-brand">{{ 'Fatura {nome}' | t: { nome: bill.meioPagamento.nome } }}</span>
                   } @else if (bill.valorPrevisto !== null) {
-                    <span>{{ +bill.valorPrevisto | currency: 'BRL' }}</span>
+                    <span>{{ +bill.valorPrevisto | money }}</span>
                   } @else {
-                    <span class="text-muted">Variável</span>
+                    <span class="text-muted">{{ 'Variável' | t }}</span>
                   }
                   @if (bill.categoria) {
                     <span class="badge badge-gray">{{ bill.categoria }}</span>
                   }
                   @if (!bill.ativo) {
-                    <span class="badge badge-danger">Inativa</span>
+                    <span class="badge badge-danger">{{ 'Inativa' | t }}</span>
                   }
                 </div>
               </div>
               <div class="row-actions">
-                <button class="btn btn-secondary btn-sm" (click)="openEditBill(bill)">Editar</button>
+                <button class="btn btn-secondary btn-sm" (click)="openEditBill(bill)">{{ 'Editar' | t }}</button>
                 <button class="btn btn-secondary btn-sm" (click)="toggleActive(bill)">
-                  {{ bill.ativo ? 'Desativar' : 'Ativar' }}
+                  {{ bill.ativo ? ('Desativar' | t) : ('Ativar' | t) }}
                 </button>
-                <button class="btn btn-danger btn-sm" (click)="billToDelete = bill">Excluir</button>
+                <button class="btn btn-danger btn-sm" (click)="billToDelete = bill">{{ 'Excluir' | t }}</button>
               </div>
             </li>
           }
@@ -173,7 +173,7 @@
 
           <div class="occurrence-value">
             @if (o.valor !== null) {
-              {{ o.valor | currency: 'BRL' }}
+              {{ o.valor | money }}
             } @else {
               <span class="text-muted">—</span>
             }
@@ -181,9 +181,9 @@
 
           <div class="row-actions">
             @if (o.status === 'PAGA') {
-              <button class="btn btn-secondary btn-sm" (click)="occurrenceToUnpay = o">Desfazer</button>
+              <button class="btn btn-secondary btn-sm" (click)="occurrenceToUnpay = o">{{ 'Desfazer' | t }}</button>
             } @else {
-              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">Confirmar pagamento</button>
+              <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">{{ 'Confirmar pagamento' | t }}</button>
             }
           </div>
         </li>
@@ -203,7 +203,7 @@
               </svg>
             </div>
             <div>
-              <h3>Confirmar pagamento</h3>
+              <h3>{{ 'Confirmar pagamento' | t }}</h3>
               <p class="modal-subtitle">{{ o.nome }}</p>
             </div>
           </div>
@@ -214,7 +214,7 @@
           <div class="modal-body">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Valor pago *</label>
+                <label class="form-label">{{ 'Valor pago *' | t }}</label>
                 <input
                   type="number"
                   name="valorPago"
@@ -223,23 +223,23 @@
                   [(ngModel)]="payValue"
                   required
                   class="form-control"
-                  placeholder="ex: 187,35"
+                  [placeholder]="'ex: 187,35' | t"
                 />
               </div>
               <div class="form-group">
-                <label class="form-label">Data do pagamento *</label>
+                <label class="form-label">{{ 'Data do pagamento *' | t }}</label>
                 <input type="date" name="pagoEm" [(ngModel)]="payDate" required class="form-control" />
               </div>
             </div>
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closePayModal()">Cancelar</button>
+            <button type="button" class="btn btn-secondary" (click)="closePayModal()">{{ 'Cancelar' | t }}</button>
             <button type="submit" class="btn btn-primary btn-pill" [disabled]="!payForm.valid || savingPay">
               @if (savingPay) {
-                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
+                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> {{ 'Salvando...' | t }}</span>
               } @else {
-                Confirmar
+                {{ 'Confirmar' | t }}
               }
             </button>
           </div>
@@ -261,7 +261,7 @@
               </svg>
             </div>
             <div>
-              <h3>{{ editingBillId ? 'Editar conta' : 'Nova conta' }}</h3>
+              <h3>{{ editingBillId ? ('Editar conta' | t) : ('Nova conta' | t) }}</h3>
                           </div>
           </div>
           <button class="btn-close" (click)="closeBillModal()">✕</button>
@@ -270,43 +270,43 @@
         <form (ngSubmit)="saveBill()" #billForm="ngForm">
           <div class="modal-body">
             <div class="form-group">
-              <label class="form-label">Cartão</label>
+              <label class="form-label">{{ 'Cartão' | t }}</label>
               <app-searchable-dropdown
                 [options]="cardOptions()"
                 [ngModel]="form.meioPagamentoId"
                 (ngModelChange)="onCardChange($event)"
                 name="meioPagamentoId"
-                placeholder="Nenhum"
+                [placeholder]="'Nenhum' | t"
                 emptyMessage="Nenhum cartão"
               ></app-searchable-dropdown>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Nome *</label>
+                <label class="form-label">{{ 'Nome *' | t }}</label>
                 <input
                   type="text"
                   name="nome"
                   [(ngModel)]="form.nome"
                   required
                   class="form-control"
-                  placeholder="ex: Energia, Internet, Aluguel"
+                  [placeholder]="'ex: Energia, Internet, Aluguel' | t"
                 />
               </div>
               <div class="form-group">
-                <label class="form-label">Categoria</label>
+                <label class="form-label">{{ 'Categoria' | t }}</label>
                 <input
                   type="text"
                   name="categoria"
                   [(ngModel)]="form.categoria"
                   class="form-control"
-                  placeholder="ex: Moradia, Serviços"
+                  [placeholder]="'ex: Moradia, Serviços' | t"
                 />
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Repetição *</label>
+              <label class="form-label">{{ 'Repetição *' | t }}</label>
               <app-searchable-dropdown
                 [options]="recorrenciaOptions"
                 [(ngModel)]="form.recorrencia"
@@ -319,12 +319,12 @@
             <div class="form-row">
               @if (form.recorrencia === 'UNICA') {
                 <div class="form-group">
-                  <label class="form-label">Vencimento *</label>
+                  <label class="form-label">{{ 'Vencimento *' | t }}</label>
                   <input type="date" name="dataUnica" [(ngModel)]="form.dataUnica" required class="form-control" />
                 </div>
               } @else {
                 <div class="form-group">
-                  <label class="form-label">Dia *</label>
+                  <label class="form-label">{{ 'Dia *' | t }}</label>
                   <input
                     type="number"
                     name="diaVencimento"
@@ -333,19 +333,19 @@
                     [(ngModel)]="form.diaVencimento"
                     required
                     class="form-control"
-                    placeholder="ex: 10"
+                    [placeholder]="'ex: 10' | t"
                   />
                 </div>
                 @if (form.recorrencia === 'ANUAL') {
                   <div class="form-group">
-                    <label class="form-label">Mês *</label>
+                    <label class="form-label">{{ 'Mês *' | t }}</label>
                     <app-searchable-dropdown
                       [options]="monthOptions"
                       [(ngModel)]="form.mesVencimento"
                       name="mesVencimento"
                       [showSearch]="false"
                       [clearable]="false"
-                      placeholder="Selecione o mês..."
+                      [placeholder]="'Selecione o mês...' | t"
                     ></app-searchable-dropdown>
                   </div>
                 }
@@ -355,7 +355,7 @@
             <div class="form-row">
               @if (!form.meioPagamentoId) {
                 <div class="form-group">
-                  <label class="form-label">Valor</label>
+                  <label class="form-label">{{ 'Valor' | t }}</label>
                   <input
                     type="number"
                     name="valorPrevisto"
@@ -363,12 +363,12 @@
                     step="0.01"
                     [(ngModel)]="form.valorPrevisto"
                     class="form-control"
-                    placeholder="Variável"
+                    [placeholder]="'Variável' | t"
                   />
                 </div>
               }
               <div class="form-group">
-                <label class="form-label">Aviso (dias)</label>
+                <label class="form-label">{{ 'Aviso (dias)' | t }}</label>
                 <input
                   type="number"
                   name="lembrarDiasAntes"
@@ -382,28 +382,28 @@
 
             @if (form.recorrencia !== 'UNICA') {
               <div class="form-group">
-                <label class="form-label">Início</label>
+                <label class="form-label">{{ 'Início' | t }}</label>
                 <input type="month" name="dataInicio" [(ngModel)]="form.dataInicio" required class="form-control" />
               </div>
             }
 
             <div class="form-group">
-              <label class="form-label">Observações</label>
+              <label class="form-label">{{ 'Observações' | t }}</label>
               <input type="text" name="observacoes" [(ngModel)]="form.observacoes" class="form-control" />
             </div>
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closeBillModal()">Cancelar</button>
+            <button type="button" class="btn btn-secondary" (click)="closeBillModal()">{{ 'Cancelar' | t }}</button>
             <button
               type="submit"
               class="btn btn-primary btn-pill"
               [disabled]="!billForm.valid || savingBill || (form.recorrencia === 'ANUAL' && !form.mesVencimento)"
             >
               @if (savingBill) {
-                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> Salvando...</span>
+                <span class="btn-spinner-wrap"><span class="mini-spinner"></span> {{ 'Salvando...' | t }}</span>
               } @else {
-                Salvar
+                {{ 'Salvar' | t }}
               }
             </button>
           </div>
@@ -414,7 +414,7 @@
 
   <app-confirm-modal
     [isOpen]="!!billToDelete"
-    title="Excluir conta"
+    [title]="'Excluir conta' | t"
     message="O histórico também será excluído."
     [itemName]="billToDelete?.nome"
     confirmText="Excluir"
@@ -425,7 +425,7 @@
 
   <app-confirm-modal
     [isOpen]="!!occurrenceToUnpay"
-    title="Desfazer pagamento"
+    [title]="'Desfazer pagamento' | t"
     message="A conta volta a ficar pendente."
     [itemName]="occurrenceToUnpay?.nome"
     confirmText="Desfazer"
@@ -437,7 +437,7 @@
 
   <app-notice-modal
     [isOpen]="noticeOpen"
-    title="Erro"
+    [title]="'Erro' | t"
     [message]="noticeMessage"
     type="warning"
     (close)="noticeOpen = false"

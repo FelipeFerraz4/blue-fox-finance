@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { isBrowserEnv, storageGet, storageSet } from '../../utils/browser-storage';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type EffectiveTheme = 'light' | 'dark';
@@ -12,8 +13,10 @@ const STORAGE_KEY = 'bf-theme';
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private readonly media = window.matchMedia('(prefers-color-scheme: dark)');
-  private readonly systemDark = signal(this.media.matches);
+  // No prerender não há navegador: o script inline do index.html aplica o tema ao abrir
+  private readonly browser = isBrowserEnv();
+  private readonly media = this.browser ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  private readonly systemDark = signal(this.media?.matches ?? false);
 
   readonly preference = signal<ThemePreference>(this.read());
   readonly effective = computed<EffectiveTheme>(() => {
@@ -23,7 +26,7 @@ export class ThemeService {
   });
 
   constructor() {
-    this.media.addEventListener('change', (e) => {
+    this.media?.addEventListener('change', (e) => {
       this.systemDark.set(e.matches);
       this.apply();
     });
@@ -32,12 +35,7 @@ export class ThemeService {
 
   set(pref: ThemePreference): void {
     this.preference.set(pref);
-    try {
-      if (pref === 'system') localStorage.removeItem(STORAGE_KEY);
-      else localStorage.setItem(STORAGE_KEY, pref);
-    } catch {
-      /* navegação privada: vale só nesta aba */
-    }
+    storageSet(STORAGE_KEY, pref === 'system' ? null : pref);
     this.apply();
   }
 
@@ -47,15 +45,11 @@ export class ThemeService {
   }
 
   private apply(): void {
-    document.documentElement.setAttribute('data-theme', this.effective());
+    if (this.browser) document.documentElement.setAttribute('data-theme', this.effective());
   }
 
   private read(): ThemePreference {
-    try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      return v === 'light' || v === 'dark' ? v : 'system';
-    } catch {
-      return 'system';
-    }
+    const v = storageGet(STORAGE_KEY);
+    return v === 'light' || v === 'dark' ? v : 'system';
   }
 }

@@ -1,4 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { t } from '../../../core/i18n/i18n';
+import { monthName } from '../../../core/i18n/format';
 import {
   AnalyticsDimension,
   AnalyticsFact,
@@ -7,11 +9,12 @@ import {
   DimensionSlice,
 } from '../../../shared/model/types/analytics.model';
 
-export const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-export const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-];
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** Meses abreviados no idioma em uso (Jan, Fev... / Jan, Feb...). Funções, não constantes: o idioma é lido na hora. */
+export const monthLabels = (): string[] => Array.from({ length: 12 }, (_, i) => capitalize(monthName(i, 'short')));
+/** Meses por extenso no idioma em uso. */
+export const monthNames = (): string[] => Array.from({ length: 12 }, (_, i) => capitalize(monthName(i)));
 
 export const DIMENSION_LABELS: Record<AnalyticsDimension, string> = {
   mes: 'Mês',
@@ -23,8 +26,10 @@ export const DIMENSION_LABELS: Record<AnalyticsDimension, string> = {
   tipo: 'Tipo',
 };
 
+/** Rótulos em português (chaves do t()): traduza na exibição. */
 export const TIPO_LABELS: Record<string, string> = { A_VISTA: 'À vista', PARCELADO: 'Parcelado' };
 
+/** Chave do filtro para loja sem categoria (fica em português; o rótulo é traduzido). */
 const SEM_CATEGORIA_LOJA = 'Sem categoria';
 
 /** Valor da dimensão numa linha (o que o filtro compara). */
@@ -74,7 +79,7 @@ export class AnalyticsStore {
   readonly byLoja = computed(() => this.slices('loja'));
   readonly byComprador = computed(() => this.slices('comprador'));
   readonly byCategoriaLoja = computed(() => this.slices('categoriaLoja'));
-  readonly byTipo = computed(() => this.slices('tipo', (f) => TIPO_LABELS[f.tipo]));
+  readonly byTipo = computed(() => this.slices('tipo', (f) => t(TIPO_LABELS[f.tipo])));
 
   /** Meses considerados no período (mês selecionado, ou até o mês atual no ano corrente). */
   readonly periodMonths = computed<number[]>(() => {
@@ -163,7 +168,8 @@ export class AnalyticsStore {
     const map = new Map<string, DimensionSlice>();
     for (const f of this.applyFilters(dim)) {
       const key = String(keyOf(f, dim));
-      const slice = map.get(key) ?? { key, label: labelOf ? labelOf(f) : key, total: 0, count: 0 };
+      const label = labelOf ? labelOf(f) : key === SEM_CATEGORIA_LOJA ? t(key) : key;
+      const slice = map.get(key) ?? { key, label, total: 0, count: 0 };
       slice.total += f.valor;
       slice.count += 1;
       map.set(key, slice);
@@ -174,8 +180,9 @@ export class AnalyticsStore {
   }
 
   private valueLabel(dim: AnalyticsDimension, value: string | number): string {
-    if (dim === 'mes') return MONTH_NAMES[Number(value) - 1];
-    if (dim === 'tipo') return TIPO_LABELS[String(value)] ?? String(value);
+    if (dim === 'mes') return monthNames()[Number(value) - 1];
+    if (dim === 'tipo') return t(TIPO_LABELS[String(value)] ?? String(value));
+    if (value === SEM_CATEGORIA_LOJA) return t(SEM_CATEGORIA_LOJA);
     if (dim === 'meioPagamentoId') {
       return this.facts().find((f) => f.meioPagamentoId === value)?.meioPagamento ?? String(value);
     }

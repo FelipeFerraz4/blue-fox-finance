@@ -14,11 +14,14 @@ import { PaymentMethod } from '../../../../shared/model/types/payment-method.mod
 import { CategoriaItem } from '../../../../shared/model/types/category.model';
 import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
 import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-card.component';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
+import { LocaleCardComponent } from './locale-card/locale-card.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SearchableDropdownComponent, TelegramLinkCardComponent],
+  imports: [...I18N, CommonModule, FormsModule, RouterModule, SearchableDropdownComponent, TelegramLinkCardComponent, LocaleCardComponent],
   template: `
     <div class="profile-page">
       <!-- Breadcrumb & Cabeçalho -->
@@ -29,20 +32,20 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Voltar para Serviços
+            {{ 'Voltar para Serviços' | t }}
           </a>
           <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">Perfil do Usuário</span>
+          <span class="breadcrumb-current">{{ 'Perfil do Usuário' | t }}</span>
         </div>
 
         <div class="header-main">
           <div class="header-text">
             <div class="title-with-badge">
-              <h1 class="page-title">Configurações de Usuário</h1>
+              <h1 class="page-title">{{ 'Configurações de Usuário' | t }}</h1>
               <span class="badge-role">{{ profile.role }}</span>
             </div>
             <p class="page-subtitle">
-              Gerencie suas informações cadastrais, preferências e escolha seu avatar oficial do sistema.
+              {{ 'Gerencie suas informações cadastrais, preferências e escolha seu avatar oficial do sistema.' | t }}
             </p>
           </div>
         </div>
@@ -70,7 +73,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                 <img
                   *ngIf="selectedAvatar.iconType === 'fox-blue'"
                   src="assets/logo.png"
-                  alt="Blue Fox Oficial"
+                  [alt]="'Blue Fox Oficial' | t"
                   class="avatar-fox-img-hero"
                 />
                 <svg *ngIf="selectedAvatar.iconType === 'fox-cyan'" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
@@ -91,20 +94,20 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                   <line x1="6" y1="20" x2="6" y2="14"/>
                 </svg>
               </div>
-              <span class="avatar-status-dot" title="Usuário Ativo"></span>
+              <span class="avatar-status-dot" [title]="'Usuário Ativo' | t"></span>
             </div>
 
             <div class="user-hero-info">
               <h3 class="user-display-name">{{ profile.name }}</h3>
               <p class="user-display-username">&#64;{{ profile.username }}</p>
               <div class="user-pill-wrap">
-                <span class="status-pill online">Conta Ativa</span>
+                <span class="status-pill online">{{ 'Conta Ativa' | t }}</span>
               </div>
             </div>
 
             <!-- Seletor de Avatares Fixos do Sistema -->
             <div class="avatars-selection-section">
-              <label class="section-sublabel">Escolha seu Avatar Blue Fox:</label>
+              <label class="section-sublabel">{{ 'Escolha seu Avatar Blue Fox:' | t }}</label>
               <div class="avatars-grid">
                 <button
                   type="button"
@@ -122,7 +125,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     <img
                       *ngIf="av.iconType === 'fox-blue'"
                       src="assets/logo.png"
-                      alt="Blue Fox Oficial"
+                      [alt]="'Blue Fox Oficial' | t"
                       class="avatar-fox-img-picker"
                     />
                     <svg *ngIf="av.iconType === 'fox-cyan'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
@@ -161,8 +164,8 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                 </svg>
               </div>
               <div class="card-header-text">
-                <h3 class="card-title">Dados Pessoais & Acesso</h3>
-                <p class="card-subtitle">Mantenha seus dados atualizados para identificação e auditoria</p>
+                <h3 class="card-title">{{ 'Dados Pessoais & Acesso' | t }}</h3>
+                <p class="card-subtitle">{{ 'Mantenha seus dados atualizados para identificação e auditoria' | t }}</p>
               </div>
             </div>
 
@@ -170,7 +173,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label for="fullName" class="form-label">
-                    Nome Completo <span class="required">*</span>
+                    {{ 'Nome Completo' | t }} <span class="required">*</span>
                   </label>
                   <input
                     id="fullName"
@@ -179,13 +182,13 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     [(ngModel)]="formData.name"
                     required
                     class="form-control"
-                    placeholder="Nome e sobrenome"
+                    [placeholder]="'Nome e sobrenome' | t"
                   />
                 </div>
 
                 <div class="form-group flex-1">
                   <label for="userName" class="form-label">
-                    Nome de Usuário (Username) <span class="required">*</span>
+                    {{ 'Nome de Usuário (Username)' | t }} <span class="required">*</span>
                   </label>
                   <input
                     id="userName"
@@ -194,7 +197,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     [(ngModel)]="formData.username"
                     required
                     class="form-control"
-                    placeholder="Ex: felipe.ferraz"
+                    [placeholder]="'Ex: felipe.ferraz' | t"
                   />
                 </div>
               </div>
@@ -202,7 +205,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label for="userEmail" class="form-label">
-                    E-mail Corporativo <span class="required">*</span>
+                    {{ 'E-mail Corporativo' | t }} <span class="required">*</span>
                   </label>
                   <input
                     id="userEmail"
@@ -211,12 +214,12 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     [(ngModel)]="formData.email"
                     required
                     class="form-control"
-                    placeholder="email@bluefox.com.br"
+                    [placeholder]="'email@bluefox.com.br' | t"
                   />
                 </div>
 
                 <div class="form-group flex-1">
-                  <label for="userPhone" class="form-label">Telefone</label>
+                  <label for="userPhone" class="form-label">{{ 'Telefone' | t }}</label>
                   <input
                     id="userPhone"
                     type="text"
@@ -230,21 +233,21 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="userRole" class="form-label">Cargo</label>
+                  <label for="userRole" class="form-label">{{ 'Cargo' | t }}</label>
                   <input
                     id="userRole"
                     type="text"
                     name="role"
                     [(ngModel)]="formData.role"
                     class="form-control"
-                    placeholder="Ex: Administrador do Sistema"
+                    [placeholder]="'Ex: Administrador do Sistema' | t"
                   />
                 </div>
               </div>
 
               <div class="form-actions">
                 <a routerLink="/admin" class="btn btn-light btn-pill">
-                  Cancelar
+                  {{ 'Cancelar' | t }}
                 </a>
                 <button
                   type="submit"
@@ -256,7 +259,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     <polyline points="17 21 17 13 7 13 7 21"/>
                     <polyline points="7 3 7 8 15 8"/>
                   </svg>
-                  <span>{{ isSaving ? 'Salvando Alterações...' : 'Salvar Alterações' }}</span>
+                  <span>{{ isSaving ? ('Salvando Alterações...' | t) : ('Salvar Alterações' | t) }}</span>
                 </button>
               </div>
             </form>
@@ -271,8 +274,8 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                 </svg>
               </div>
               <div class="card-header-text">
-                <h3 class="card-title">Padrões de Lançamento</h3>
-                <p class="card-subtitle">Configure quais opções virão selecionadas automaticamente ao abrir a tela de novo lançamento</p>
+                <h3 class="card-title">{{ 'Padrões de Lançamento' | t }}</h3>
+                <p class="card-subtitle">{{ 'Configure quais opções virão selecionadas automaticamente ao abrir a tela de novo lançamento' | t }}</p>
               </div>
             </div>
 
@@ -288,22 +291,22 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
             <div class="profile-form">
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label class="form-label">Comprador Padrão</label>
+                  <label class="form-label">{{ 'Comprador Padrão' | t }}</label>
                   <app-searchable-dropdown
                     [options]="buyerDropdownOptions"
                     [(ngModel)]="prefBuyerId"
-                    placeholder="Nenhum (seleção manual)"
+                    [placeholder]="'Nenhum (seleção manual)' | t"
                     searchPlaceholder="Pesquisar comprador..."
                     [clearable]="true"
                   ></app-searchable-dropdown>
                 </div>
 
                 <div class="form-group flex-1">
-                  <label class="form-label">Loja Padrão</label>
+                  <label class="form-label">{{ 'Loja Padrão' | t }}</label>
                   <app-searchable-dropdown
                     [options]="storeDropdownOptions"
                     [(ngModel)]="prefStoreId"
-                    placeholder="Nenhuma (seleção manual)"
+                    [placeholder]="'Nenhuma (seleção manual)' | t"
                     searchPlaceholder="Pesquisar loja..."
                     [clearable]="true"
                   ></app-searchable-dropdown>
@@ -312,22 +315,22 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label class="form-label">Meio de Pagamento Padrão</label>
+                  <label class="form-label">{{ 'Meio de Pagamento Padrão' | t }}</label>
                   <app-searchable-dropdown
                     [options]="paymentMethodDropdownOptions"
                     [(ngModel)]="prefPaymentMethodId"
-                    placeholder="Nenhum (seleção manual)"
+                    [placeholder]="'Nenhum (seleção manual)' | t"
                     searchPlaceholder="Pesquisar meio de pagamento..."
                     [clearable]="true"
                   ></app-searchable-dropdown>
                 </div>
 
                 <div class="form-group flex-1">
-                  <label class="form-label">Categoria de Item Padrão</label>
+                  <label class="form-label">{{ 'Categoria de Item Padrão' | t }}</label>
                   <app-searchable-dropdown
                     [options]="categoryDropdownOptions"
                     [(ngModel)]="prefCategoria"
-                    placeholder="Nenhuma (seleção manual)"
+                    [placeholder]="'Nenhuma (seleção manual)' | t"
                     searchPlaceholder="Pesquisar categoria..."
                     [clearable]="true"
                   ></app-searchable-dropdown>
@@ -341,7 +344,7 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                   (click)="clearPreferences()"
                   [disabled]="isSavingPrefs"
                 >
-                  Limpar Todos
+                  {{ 'Limpar Todos' | t }}
                 </button>
                 <button
                   type="button"
@@ -354,13 +357,15 @@ import { TelegramLinkCardComponent } from './telegram-link-card/telegram-link-ca
                     <polyline points="17 21 17 13 7 13 7 21"/>
                     <polyline points="7 3 7 8 15 8"/>
                   </svg>
-                  <span>{{ isSavingPrefs ? 'Salvando Padrões...' : 'Salvar Padrões' }}</span>
+                  <span>{{ isSavingPrefs ? ('Salvando Padrões...' | t) : ('Salvar Padrões' | t) }}</span>
                 </button>
               </div>
             </div>
           </div>
 
           <!-- Vínculo com o bot do Telegram -->
+          <app-locale-card />
+
           <app-telegram-link-card />
         </div>
       </div>
@@ -1101,8 +1106,9 @@ export class UserProfileComponent implements OnInit {
       'Vestuário',
       'Outros',
     ];
+    // Sugestões no idioma do usuário (o nome escolhido é o que fica salvo).
     const registered = this.categories.map((c) => c.nome);
-    const unique = Array.from(new Set([...registered, ...defaults])).filter(Boolean);
+    const unique = Array.from(new Set([...registered, ...defaults.map((d) => t(d))])).filter(Boolean);
     return unique.map((cat) => ({
       value: cat,
       label: cat,
@@ -1121,7 +1127,7 @@ export class UserProfileComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSavingPrefs = false;
-          this.prefsSuccessMessage = 'Padrões de lançamento salvos com sucesso no banco de dados!';
+          this.prefsSuccessMessage = t('Padrões de lançamento salvos com sucesso no banco de dados!');
           setTimeout(() => {
             this.prefsSuccessMessage = '';
           }, 3500);
@@ -1141,7 +1147,7 @@ export class UserProfileComponent implements OnInit {
         this.prefPaymentMethodId = null;
         this.prefCategoria = null;
         this.isSavingPrefs = false;
-        this.prefsSuccessMessage = 'Todos os padrões foram limpos com sucesso!';
+        this.prefsSuccessMessage = t('Todos os padrões foram limpos com sucesso!');
         setTimeout(() => {
           this.prefsSuccessMessage = '';
         }, 3500);
@@ -1172,7 +1178,7 @@ export class UserProfileComponent implements OnInit {
       });
 
       this.isSaving = false;
-      this.successMessage = 'Dados do usuário atualizados com sucesso!';
+      this.successMessage = t('Dados do usuário atualizados com sucesso!');
       setTimeout(() => {
         this.successMessage = '';
       }, 3500);

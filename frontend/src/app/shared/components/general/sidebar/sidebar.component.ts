@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarService } from '../../../../core/services/sidebar/sidebar.service';
 import { BillsService } from '../../../../core/services/bills/bills.service';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [...I18N, CommonModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })

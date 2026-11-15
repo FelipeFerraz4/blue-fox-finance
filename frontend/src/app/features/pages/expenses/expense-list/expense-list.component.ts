@@ -14,11 +14,14 @@ import { Store } from '../../../../shared/model/types/store.model';
 import { Buyer } from '../../../../shared/model/types/buyer.model';
 import { ConfirmModalComponent } from '../../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/components/general/searchable-dropdown';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
+import { currencySymbol, formatNumber, monthName, parseDecimal } from '../../../../core/i18n/format';
 
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ConfirmModalComponent, SearchableDropdownComponent],
+  imports: [...I18N, CommonModule, FormsModule, RouterModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="expense-list-page">
       <!-- Header da Página -->
@@ -31,10 +34,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
               </svg>
             </div>
-            <h1 class="page-title">Lançamentos de Despesas</h1>
-            <span class="badge badge-brand">Histórico & Faturas</span>
+            <h1 class="page-title">{{ 'Lançamentos de Despesas' | t }}</h1>
+            <span class="badge badge-brand">{{ 'Histórico & Faturas' | t }}</span>
           </div>
-          <p class="page-subtitle">Visualização de lançamentos com ordenação por mais recente, paginação e filtros</p>
+          <p class="page-subtitle">{{ 'Visualização de lançamentos com ordenação por mais recente, paginação e filtros' | t }}</p>
         </div>
 
         <div class="header-actions">
@@ -44,7 +47,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               class="toggle-btn"
               [class.active]="viewMode === 'table'"
               (click)="setViewMode('table')"
-              title="Visualizar em Tabela Paginada"
+              [title]="'Visualizar em Tabela Paginada' | t"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -52,13 +55,13 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 <line x1="3" y1="15" x2="21" y2="15"/>
                 <line x1="9" y1="3" x2="9" y2="21"/>
               </svg>
-              Tabela (20/pág)
+              {{ 'Tabela (20/pág)' | t }}
             </button>
             <button
               class="toggle-btn"
               [class.active]="viewMode === 'grouped'"
               (click)="setViewMode('grouped')"
-              title="Visualizar Agrupado por Dia e Loja"
+              [title]="'Visualizar Agrupado por Dia e Loja' | t"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -66,7 +69,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 <line x1="8" y1="2" x2="8" y2="6"/>
                 <line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
-              Agrupado Dia/Loja
+              {{ 'Agrupado Dia/Loja' | t }}
             </button>
           </div>
 
@@ -75,7 +78,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Novo Lançamento
+            {{ 'Novo Lançamento' | t }}
           </a>
         </div>
       </div>
@@ -93,10 +96,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               type="text"
               [(ngModel)]="searchTerm"
               (keyup.enter)="onFilterChange()"
-              placeholder="Buscar lançamento por item, comprador, loja, categoria ou observações..."
+              [placeholder]="'Buscar lançamento por item, comprador, loja, categoria ou observações...' | t"
               class="form-control search-input"
             />
-            <button *ngIf="searchTerm" (click)="searchTerm = ''; onFilterChange()" class="btn-clear-search" title="Limpar busca">
+            <button *ngIf="searchTerm" (click)="searchTerm = ''; onFilterChange()" class="btn-clear-search" [title]="'Limpar busca' | t">
               ✕
             </button>
           </div>
@@ -105,7 +108,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <span>Buscar</span>
+            <span>{{ 'Buscar' | t }}</span>
           </button>
         </div>
 
@@ -115,12 +118,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
         <div class="filter-grid">
           <!-- Filtro: Categoria da Loja -->
           <div class="filter-item">
-            <label class="filter-label">Categoria da Loja:</label>
+            <label class="filter-label">{{ 'Categoria da Loja:' | t }}</label>
             <app-searchable-dropdown
               [options]="storeCategories"
               [(ngModel)]="selectedCategoriaLoja"
               (valueChange)="onFilterChange()"
-              placeholder="Todas as Categorias"
+              [placeholder]="'Todas as Categorias' | t"
               searchPlaceholder="Pesquisar categoria..."
               size="sm"
               [clearable]="true"
@@ -129,7 +132,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
           <!-- Filtro: Loja -->
           <div class="filter-item">
-            <label class="filter-label">Loja:</label>
+            <label class="filter-label">{{ 'Loja:' | t }}</label>
             <app-searchable-dropdown
               [options]="storesList"
               valueField="id"
@@ -137,7 +140,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               sublabelField="categoria"
               [(ngModel)]="selectedLojaId"
               (valueChange)="onFilterChange()"
-              placeholder="Todas as Lojas"
+              [placeholder]="'Todas as Lojas' | t"
               searchPlaceholder="Pesquisar loja..."
               size="sm"
               [clearable]="true"
@@ -146,14 +149,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
           <!-- Filtro: Comprador -->
           <div class="filter-item">
-            <label class="filter-label">Comprador:</label>
+            <label class="filter-label">{{ 'Comprador:' | t }}</label>
             <app-searchable-dropdown
               [options]="buyersList"
               valueField="id"
               labelField="nome"
               [(ngModel)]="selectedCompradorId"
               (valueChange)="onFilterChange()"
-              placeholder="Todos os Compradores"
+              [placeholder]="'Todos os Compradores' | t"
               searchPlaceholder="Pesquisar comprador..."
               size="sm"
               [clearable]="true"
@@ -162,7 +165,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
           <!-- Filtro: Meio de Pagamento -->
           <div class="filter-item">
-            <label class="filter-label">Meio de Pagamento:</label>
+            <label class="filter-label">{{ 'Meio de Pagamento:' | t }}</label>
             <app-searchable-dropdown
               [options]="paymentFilterOptions"
               valueField="id"
@@ -170,7 +173,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               sublabelField="sublabel"
               [(ngModel)]="selectedMeioPagamentoId"
               (valueChange)="onFilterChange()"
-              placeholder="Todos os Meios"
+              [placeholder]="'Todos os Meios' | t"
               searchPlaceholder="Pesquisar cartão ou banco..."
               size="sm"
               [clearable]="true"
@@ -179,7 +182,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
           <!-- Filtro: Mês / Competência -->
           <div class="filter-item">
-            <label class="filter-label">Mês de Referência:</label>
+            <label class="filter-label">{{ 'Mês de Referência:' | t }}</label>
             <input
               type="month"
               [(ngModel)]="selectedMonth"
@@ -191,7 +194,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
         <div class="filter-footer" *ngIf="hasActiveFilters">
           <button (click)="clearFilters()" class="btn-clear-filters">
-            ✕ Limpar Todos os Filtros
+            {{ '✕ Limpar Todos os Filtros' | t }}
           </button>
         </div>
       </div>
@@ -199,7 +202,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       <!-- Loading State -->
       <div *ngIf="loading" class="card loading-state">
         <div class="spinner"></div>
-        <p>Carregando lançamentos...</p>
+        <p>{{ 'Carregando lançamentos...' | t }}</p>
       </div>
 
       <!-- VISUALIZAÇÃO 1: TABELA PAGINADA (PADRÃO - 20 ITENS POR PÁGINA) -->
@@ -207,10 +210,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
         <!-- Barra de resumo do total -->
         <div class="table-summary-bar">
           <span class="text-sm text-muted">
-            Total de registros: <strong>{{ totalExpenses }}</strong> lançamentos encontrados
+            {{ 'Total de registros:' | t }} <strong>{{ totalExpenses }}</strong> {{ 'lançamentos encontrados' | t }}
           </span>
           <span class="text-sm text-muted" *ngIf="totalPages > 1">
-            Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
+            {{ 'Página' | t }} <strong>{{ currentPage }}</strong> {{ 'de' | t }} <strong>{{ totalPages }}</strong>
           </span>
         </div>
 
@@ -221,24 +224,24 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Data</th>
-                    <th>Loja</th>
-                    <th>Nome</th>
-                    <th>Comprador</th>
-                    <th>Categoria</th>
-                    <th class="text-center">Qtd</th>
-                    <th class="text-right">Valor Unit.</th>
-                    <th class="text-right">Valor Total</th>
-                    <th>Meio de Pagamento</th>
-                    <th>Parcelas</th>
-                    <th class="text-center">Ações</th>
+                    <th>{{ 'Data' | t }}</th>
+                    <th>{{ 'Loja' | t }}</th>
+                    <th>{{ 'Nome' | t }}</th>
+                    <th>{{ 'Comprador' | t }}</th>
+                    <th>{{ 'Categoria' | t }}</th>
+                    <th class="text-center">{{ 'Qtd' | t }}</th>
+                    <th class="text-right">{{ 'Valor Unit.' | t }}</th>
+                    <th class="text-right">{{ 'Valor Total' | t }}</th>
+                    <th>{{ 'Meio de Pagamento' | t }}</th>
+                    <th>{{ 'Parcelas' | t }}</th>
+                    <th class="text-center">{{ 'Ações' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of expenses">
                     <td>
                       <span class="date-badge">
-                        {{ item.data | date:'dd/MM/yyyy':'UTC' }}
+                        {{ item.data | appDate }}
                       </span>
                     </td>
                     <td>
@@ -256,10 +259,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                     </td>
                     <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
                     <td class="text-right text-muted">
-                      {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      {{ item.valorUnitario | money }}
                     </td>
                     <td class="text-right font-bold text-primary">
-                      {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      {{ item.valorTotal | money }}
                     </td>
                     <td>
                       <span class="badge badge-primary">
@@ -271,16 +274,16 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                         *ngIf="item.tipo === 'PARCELADO'"
                         (click)="openParcelasModal(item)"
                         class="btn-parcelas-pill"
-                        title="Ver parcelas do lançamento"
+                        [title]="'Ver parcelas do lançamento' | t"
                       >
                         <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                        <span class="pill-text">ver parcelas</span>
+                        <span class="pill-text">{{ 'ver parcelas' | t }}</span>
                       </button>
                       <span
                         *ngIf="item.tipo !== 'PARCELADO'"
                         class="badge badge-success"
                       >
-                        À Vista
+                        {{ 'À Vista' | t }}
                       </span>
                     </td>
                     <td class="text-center">
@@ -288,24 +291,24 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                         <button
                           (click)="openEditModal(item)"
                           class="btn-action-icon btn-action-edit"
-                          title="Editar Lançamento"
+                          [title]="'Editar Lançamento' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
-                          <span class="action-btn-text">Editar</span>
+                          <span class="action-btn-text">{{ 'Editar' | t }}</span>
                         </button>
                         <button
                           (click)="promptDelete(item)"
                           class="btn-action-icon btn-action-delete"
-                          title="Excluir Lançamento"
+                          [title]="'Excluir Lançamento' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
-                          <span class="action-btn-text">Excluir</span>
+                          <span class="action-btn-text">{{ 'Excluir' | t }}</span>
                         </button>
                       </div>
                     </td>
@@ -326,10 +329,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 </div>
                 <div class="expense-card-price-wrap">
                   <span class="expense-card-total font-bold text-primary">
-                    {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    {{ item.valorTotal | money }}
                   </span>
                   <span class="expense-card-unit text-muted text-xs">
-                    {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | money }}
                   </span>
                 </div>
               </div>
@@ -337,11 +340,11 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <!-- Metadados: Data e Comprador -->
               <div class="expense-card-meta">
                 <div class="meta-item">
-                  <span class="meta-label">Data:</span>
-                  <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
+                  <span class="meta-label">{{ 'Data:' | t }}</span>
+                  <span class="meta-val">{{ item.data | appDate }}</span>
                 </div>
                 <div class="meta-item">
-                  <span class="meta-label">Comprador:</span>
+                  <span class="meta-label">{{ 'Comprador:' | t }}</span>
                   <span class="comprador-badge">{{ item.comprador }}</span>
                 </div>
               </div>
@@ -354,12 +357,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   *ngIf="item.tipo === 'PARCELADO'"
                   (click)="openParcelasModal(item)"
                   class="btn-parcelas-pill"
-                  title="Ver parcelas do lançamento"
+                  [title]="'Ver parcelas do lançamento' | t"
                 >
                   <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                  <span class="pill-text">ver parcelas</span>
+                  <span class="pill-text">{{ 'ver parcelas' | t }}</span>
                 </button>
-                <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">À Vista</span>
+                <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">{{ 'À Vista' | t }}</span>
               </div>
 
               <!-- Observações caso existam -->
@@ -374,14 +377,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
-                  <span>Editar</span>
+                  <span>{{ 'Editar' | t }}</span>
                 </button>
                 <button (click)="promptDelete(item)" class="btn btn-danger btn-sm mobile-action-btn">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
-                  <span>Excluir</span>
+                  <span>{{ 'Excluir' | t }}</span>
                 </button>
               </div>
             </div>
@@ -390,8 +393,8 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
           <!-- Controles de Paginação -->
           <div class="pagination-footer">
             <div class="pagination-info">
-              Exibindo <strong>{{ totalExpenses > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong> a
-              <strong>{{ getPaginationEnd() }}</strong> de <strong>{{ totalExpenses }}</strong> lançamentos
+              {{ 'Exibindo' | t }} <strong>{{ totalExpenses > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong> a
+              <strong>{{ getPaginationEnd() }}</strong> {{ 'de' | t }} <strong>{{ totalExpenses }}</strong> {{ 'lançamentos' | t }}
             </div>
 
             <div class="pagination-buttons">
@@ -400,12 +403,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 [disabled]="currentPage <= 1"
                 (click)="goToPage(currentPage - 1)"
               >
-                ← Anterior
+                {{ '← Anterior' | t }}
               </button>
 
               <div class="pagination-pages">
                 <span class="page-number-current">{{ currentPage }}</span>
-                <span class="page-number-total">de {{ totalPages }}</span>
+                <span class="page-number-total">{{ 'de {total}' | t: { total: totalPages } }}</span>
               </div>
 
               <button
@@ -413,7 +416,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 [disabled]="currentPage >= totalPages"
                 (click)="goToPage(currentPage + 1)"
               >
-                Próxima →
+                {{ 'Próxima →' | t }}
               </button>
             </div>
           </div>
@@ -433,19 +436,19 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 </div>
                 <div class="group-titles">
                   <h3 class="store-name">{{ group.loja }}</h3>
-                  <span class="group-date-text">Data: {{ group.dataFormatada }}</span>
+                  <span class="group-date-text">{{ 'Data: {data}' | t: { data: group.dataFormatada } }}</span>
                 </div>
               </div>
 
               <div class="group-info-right">
                 <div class="group-stat">
-                  <span class="stat-label">Itens</span>
+                  <span class="stat-label">{{ 'Itens' | t }}</span>
                   <span class="stat-badge">{{ formatQuantity(group.totalItens) }}</span>
                 </div>
                 <div class="group-stat">
-                  <span class="stat-label">Total do Grupo</span>
+                  <span class="stat-label">{{ 'Total do Grupo' | t }}</span>
                   <span class="stat-val font-bold">
-                    {{ group.totalValor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    {{ group.totalValor | money }}
                   </span>
                 </div>
                 <div class="chevron-icon" [class.rotated]="isGroupExpanded(idx)">
@@ -463,15 +466,15 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Nome</th>
-                        <th>Comprador</th>
-                        <th>Categoria</th>
-                        <th class="text-center">Qtd</th>
-                        <th class="text-right">Valor Unit.</th>
-                        <th class="text-right">Valor Total</th>
-                        <th>Meio Pagamento</th>
-                        <th>Parcelas</th>
-                        <th class="text-center">Ações</th>
+                        <th>{{ 'Nome' | t }}</th>
+                        <th>{{ 'Comprador' | t }}</th>
+                        <th>{{ 'Categoria' | t }}</th>
+                        <th class="text-center">{{ 'Qtd' | t }}</th>
+                        <th class="text-right">{{ 'Valor Unit.' | t }}</th>
+                        <th class="text-right">{{ 'Valor Total' | t }}</th>
+                        <th>{{ 'Meio Pagamento' | t }}</th>
+                        <th>{{ 'Parcelas' | t }}</th>
+                        <th class="text-center">{{ 'Ações' | t }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -488,10 +491,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                         </td>
                         <td class="text-center font-medium">{{ formatQuantity(item.quantidade) }}</td>
                         <td class="text-right text-muted">
-                          {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                          {{ item.valorUnitario | money }}
                         </td>
                         <td class="text-right font-bold text-primary">
-                          {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                          {{ item.valorTotal | money }}
                         </td>
                         <td>
                           <span class="badge badge-primary">{{ item.meioPagamento?.nome || 'N/A' }}</span>
@@ -501,16 +504,16 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                             *ngIf="item.tipo === 'PARCELADO'"
                             (click)="openParcelasModal(item)"
                             class="btn-parcelas-pill"
-                            title="Ver parcelas do lançamento"
+                            [title]="'Ver parcelas do lançamento' | t"
                           >
                             <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                            <span class="pill-text">ver parcelas</span>
+                            <span class="pill-text">{{ 'ver parcelas' | t }}</span>
                           </button>
                           <span
                             *ngIf="item.tipo !== 'PARCELADO'"
                             class="badge badge-success"
                           >
-                            À Vista
+                            {{ 'À Vista' | t }}
                           </span>
                         </td>
                         <td class="text-center">
@@ -518,24 +521,24 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                             <button
                               (click)="openEditModal(item)"
                               class="btn-action-icon btn-action-edit"
-                              title="Editar Lançamento"
+                              [title]="'Editar Lançamento' | t"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                               </svg>
-                              <span class="action-btn-text">Editar</span>
+                              <span class="action-btn-text">{{ 'Editar' | t }}</span>
                             </button>
                             <button
                               (click)="promptDelete(item)"
                               class="btn-action-icon btn-action-delete"
-                              title="Excluir Lançamento"
+                              [title]="'Excluir Lançamento' | t"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"/>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                               </svg>
-                              <span class="action-btn-text">Excluir</span>
+                              <span class="action-btn-text">{{ 'Excluir' | t }}</span>
                             </button>
                           </div>
                         </td>
@@ -556,10 +559,10 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                     </div>
                     <div class="expense-card-price-wrap">
                       <span class="expense-card-total font-bold text-primary">
-                        {{ item.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        {{ item.valorTotal | money }}
                       </span>
                       <span class="expense-card-unit text-muted text-xs">
-                        {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                        {{ formatQuantity(item.quantidade) }}x {{ item.valorUnitario | money }}
                       </span>
                     </div>
                   </div>
@@ -567,11 +570,11 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   <!-- Metadados: Data e Comprador -->
                   <div class="expense-card-meta">
                     <div class="meta-item">
-                      <span class="meta-label">Data:</span>
-                      <span class="meta-val">{{ item.data | date:'dd/MM/yyyy':'UTC' }}</span>
+                      <span class="meta-label">{{ 'Data:' | t }}</span>
+                      <span class="meta-val">{{ item.data | appDate }}</span>
                     </div>
                     <div class="meta-item">
-                      <span class="meta-label">Comprador:</span>
+                      <span class="meta-label">{{ 'Comprador:' | t }}</span>
                       <span class="comprador-badge">{{ item.comprador }}</span>
                     </div>
                   </div>
@@ -584,12 +587,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                       *ngIf="item.tipo === 'PARCELADO'"
                       (click)="openParcelasModal(item)"
                       class="btn-parcelas-pill"
-                      title="Ver parcelas do lançamento"
+                      [title]="'Ver parcelas do lançamento' | t"
                     >
                       <span class="pill-badge">{{ item.numeroParcelas }}x</span>
-                      <span class="pill-text">ver parcelas</span>
+                      <span class="pill-text">{{ 'ver parcelas' | t }}</span>
                     </button>
-                    <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">À Vista</span>
+                    <span *ngIf="item.tipo !== 'PARCELADO'" class="badge badge-success">{{ 'À Vista' | t }}</span>
                   </div>
 
                   <!-- Observações caso existam -->
@@ -604,14 +607,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                       </svg>
-                      <span>Editar</span>
+                      <span>{{ 'Editar' | t }}</span>
                     </button>
                     <button (click)="promptDelete(item)" class="btn btn-danger btn-sm mobile-action-btn">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                       </svg>
-                      <span>Excluir</span>
+                      <span>{{ 'Excluir' | t }}</span>
                     </button>
                   </div>
                 </div>
@@ -629,14 +632,14 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <h3 class="mt-3">Nenhum lançamento encontrado</h3>
-          <p class="text-muted">Não foram encontrados registros para os filtros selecionados.</p>
+          <h3 class="mt-3">{{ 'Nenhum lançamento encontrado' | t }}</h3>
+          <p class="text-muted">{{ 'Não foram encontrados registros para os filtros selecionados.' | t }}</p>
           <div class="empty-state-actions mt-3">
             <button *ngIf="hasActiveFilters" (click)="clearFilters()" class="btn btn-secondary btn-sm">
-              Limpar Filtros
+              {{ 'Limpar Filtros' | t }}
             </button>
             <a routerLink="/expenses/new" class="btn btn-primary btn-sm">
-              + Adicionar Novo Lançamento
+              {{ '+ Adicionar Novo Lançamento' | t }}
             </a>
           </div>
         </div>
@@ -646,23 +649,23 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       <div *ngIf="selectedItemForModal" class="modal-backdrop" (click)="closeModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>Parcelas do Lançamento: {{ selectedItemForModal.nome }}</h3>
+            <h3>{{ 'Parcelas do Lançamento: {nome}' | t: { nome: selectedItemForModal.nome } }}</h3>
             <button class="btn-close" (click)="closeModal()">✕</button>
           </div>
           <div class="modal-body">
             <div class="modal-summary-box mb-3">
               <div>
-                <span class="text-muted text-xs">Loja:</span>
+                <span class="text-muted text-xs">{{ 'Loja:' | t }}</span>
                 <strong>{{ selectedItemForModal.loja }}</strong>
               </div>
               <div>
-                <span class="text-muted text-xs">Meio de Pagamento:</span>
+                <span class="text-muted text-xs">{{ 'Meio de Pagamento:' | t }}</span>
                 <strong>{{ selectedItemForModal.meioPagamento?.nome }}</strong>
               </div>
               <div>
-                <span class="text-muted text-xs">Valor Total:</span>
+                <span class="text-muted text-xs">{{ 'Valor Total:' | t }}</span>
                 <strong class="text-primary">
-                  {{ selectedItemForModal.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  {{ selectedItemForModal.valorTotal | money }}
                 </strong>
                 ({{ selectedItemForModal.numeroParcelas }}x)
               </div>
@@ -672,19 +675,19 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Parcela</th>
-                    <th>Mês de Referência</th>
-                    <th>Vencimento Estimado</th>
-                    <th class="text-right">Valor</th>
+                    <th>{{ 'Parcela' | t }}</th>
+                    <th>{{ 'Mês de Referência' | t }}</th>
+                    <th>{{ 'Vencimento Estimado' | t }}</th>
+                    <th class="text-right">{{ 'Valor' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let p of selectedItemForModal.parcelas">
                     <td><strong>{{ p.numero }} / {{ p.totalParcelas }}</strong></td>
                     <td>{{ p.mesReferencia }}</td>
-                    <td>{{ p.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ p.dataVencimento | appDate: 'short' : false }}</td>
                     <td class="text-right font-bold text-primary">
-                      {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                      {{ p.valor | money }}
                     </td>
                   </tr>
                 </tbody>
@@ -695,26 +698,26 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
             <div class="mobile-cards-container">
               <div *ngFor="let p of selectedItemForModal.parcelas" class="parcela-mobile-card">
                 <div class="parcela-card-header">
-                  <span class="parcela-num font-bold">Parcela {{ p.numero }} de {{ p.totalParcelas }}</span>
+                  <span class="parcela-num font-bold">{{ 'Parcela {n} de {total}' | t: { n: p.numero, total: p.totalParcelas } }}</span>
                   <span class="parcela-val font-bold text-primary">
-                    {{ p.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    {{ p.valor | money }}
                   </span>
                 </div>
                 <div class="parcela-card-body">
                   <div class="meta-item">
-                    <span class="meta-label">Mês Ref:</span>
+                    <span class="meta-label">{{ 'Mês Ref:' | t }}</span>
                     <span class="meta-val">{{ p.mesReferencia }}</span>
                   </div>
                   <div class="meta-item">
-                    <span class="meta-label">Vencimento:</span>
-                    <span class="meta-val">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                    <span class="meta-label">{{ 'Vencimento:' | t }}</span>
+                    <span class="meta-val">{{ p.dataVencimento | appDate: 'short' : false }}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="modal-footer mt-4 text-right">
-            <button class="btn btn-secondary" (click)="closeModal()">Fechar</button>
+            <button class="btn btn-secondary" (click)="closeModal()">{{ 'Fechar' | t }}</button>
           </div>
         </div>
       </div>
@@ -731,8 +734,8 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 </svg>
               </div>
               <div>
-                <h3>Editar Lançamento</h3>
-                <p class="modal-subtitle">Atualize as informações do lançamento de despesa</p>
+                <h3>{{ 'Editar Lançamento' | t }}</h3>
+                <p class="modal-subtitle">{{ 'Atualize as informações do lançamento de despesa' | t }}</p>
               </div>
             </div>
             <button class="btn-close" (click)="closeEditModal()">✕</button>
@@ -752,12 +755,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
             <div class="form-grid-2col">
               <!-- Comprador -->
               <div class="form-group">
-                <label class="form-label">Comprador *</label>
+                <label class="form-label">{{ 'Comprador *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="editBuyerOptions"
                   [value]="editSelectedBuyerId"
                   (valueChange)="onEditBuyerOptionSelect($event)"
-                  placeholder="Selecione ou cadastre um comprador..."
+                  [placeholder]="'Selecione ou cadastre um comprador...' | t"
                   searchPlaceholder="Pesquisar comprador..."
                   [allowCreate]="true"
                   [createOnBlur]="false"
@@ -768,12 +771,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
               <!-- Loja -->
               <div class="form-group">
-                <label class="form-label">Loja *</label>
+                <label class="form-label">{{ 'Loja *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="editStoreOptions"
                   [value]="editSelectedStoreId"
                   (valueChange)="onEditStoreOptionSelect($event)"
-                  placeholder="Selecione ou cadastre uma loja..."
+                  [placeholder]="'Selecione ou cadastre uma loja...' | t"
                   searchPlaceholder="Pesquisar loja..."
                   [allowCreate]="true"
                   [createOnBlur]="false"
@@ -784,25 +787,25 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
               <!-- Nome -->
               <div class="form-group">
-                <label class="form-label">Nome *</label>
+                <label class="form-label">{{ 'Nome *' | t }}</label>
                 <input
                   type="text"
                   [(ngModel)]="editForm.nome"
                   name="editNome"
                   required
                   class="form-control"
-                  placeholder="Nome do item"
+                  [placeholder]="'Nome do item' | t"
                 />
               </div>
 
               <!-- Categoria -->
               <div class="form-group">
-                <label class="form-label">Categoria *</label>
+                <label class="form-label">{{ 'Categoria *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="editCategoryOptions"
                   [(ngModel)]="editForm.categoria"
                   name="editCategoria"
-                  placeholder="Selecione ou cadastre..."
+                  [placeholder]="'Selecione ou cadastre...' | t"
                   searchPlaceholder="Pesquisar categoria..."
                   [allowCreate]="true"
                   [createOnBlur]="false"
@@ -813,7 +816,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
               <!-- Data da Compra -->
               <div class="form-group">
-                <label class="form-label">Data da Compra *</label>
+                <label class="form-label">{{ 'Data da Compra *' | t }}</label>
                 <input
                   type="date"
                   [(ngModel)]="editForm.data"
@@ -825,7 +828,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
               <!-- Meio de Pagamento -->
               <div class="form-group">
-                <label class="form-label">Meio de Pagamento *</label>
+                <label class="form-label">{{ 'Meio de Pagamento *' | t }}</label>
                 <app-searchable-dropdown
                   [options]="paymentFilterOptions"
                   valueField="id"
@@ -833,7 +836,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   sublabelField="sublabel"
                   [(ngModel)]="editForm.meioPagamentoId"
                   name="editMeioPagamento"
-                  placeholder="Selecione um meio de pagamento..."
+                  [placeholder]="'Selecione um meio de pagamento...' | t"
                   searchPlaceholder="Pesquisar meio de pagamento..."
                   [clearable]="false"
                 ></app-searchable-dropdown>
@@ -843,7 +846,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
             <!-- Linha Financeira: Qtd, Valor Unitário, Valor Total -->
             <div class="form-grid-3col mt-2">
               <div class="form-group">
-                <label class="form-label">Quantidade *</label>
+                <label class="form-label">{{ 'Quantidade *' | t }}</label>
                 <input
                   type="text"
                   inputmode="decimal"
@@ -851,12 +854,12 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                   (input)="recalculateEditTotal()"
                   name="editQtd"
                   class="form-control text-center font-bold"
-                  placeholder="Ex: 1 ou 0,350"
+                  [placeholder]="'Ex: 1 ou 0,350' | t"
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">Valor Unitário (R$) *</label>
+                <label class="form-label">{{ 'Valor Unitário ({moeda}) *' | t: { moeda: currency } }}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -869,7 +872,7 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
               </div>
 
               <div class="form-group">
-                <label class="form-label">Valor Total (R$) *</label>
+                <label class="form-label">{{ 'Valor Total ({moeda}) *' | t: { moeda: currency } }}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -884,26 +887,26 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
             <!-- Tipo e Parcelas -->
             <div class="form-grid-2col mt-2">
               <div class="form-group">
-                <label class="form-label">Tipo de Pagamento *</label>
+                <label class="form-label">{{ 'Tipo de Pagamento *' | t }}</label>
                 <select
                   [(ngModel)]="editForm.tipo"
                   name="editTipo"
                   class="form-control"
                 >
-                  <option value="A_VISTA">À Vista</option>
-                  <option value="PARCELADO">Parcelado</option>
+                  <option value="A_VISTA">{{ 'À Vista' | t }}</option>
+                  <option value="PARCELADO">{{ 'Parcelado' | t }}</option>
                 </select>
               </div>
 
               <div class="form-group" *ngIf="editForm.tipo === 'PARCELADO'">
-                <label class="form-label">Número de Parcelas *</label>
+                <label class="form-label">{{ 'Número de Parcelas *' | t }}</label>
                 <select
                   [(ngModel)]="editForm.numeroParcelas"
                   name="editNumParcelas"
                   class="form-control"
                 >
                   <option *ngFor="let n of parcelasOptions" [value]="n">
-                    {{ n }}x de {{ (editForm.valorTotal / n) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    {{ '{n}x de {valor}' | t: { n: n, valor: ((editForm.valorTotal / n) | money) } }}
                   </option>
                 </select>
               </div>
@@ -911,13 +914,13 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
 
             <!-- Observações -->
             <div class="form-group mt-2">
-              <label class="form-label">Observações (opcional)</label>
+              <label class="form-label">{{ 'Observações (opcional)' | t }}</label>
               <textarea
                 [(ngModel)]="editForm.observacoes"
                 name="editObservacoes"
                 rows="2"
                 class="form-control"
-                placeholder="Detalhes ou notas adicionais..."
+                [placeholder]="'Detalhes ou notas adicionais...' | t"
               ></textarea>
             </div>
 
@@ -928,17 +931,17 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
                 [disabled]="savingEdit"
                 (click)="closeEditModal()"
               >
-                Cancelar
+                {{ 'Cancelar' | t }}
               </button>
               <button
                 type="submit"
                 class="btn btn-primary"
                 [disabled]="savingEdit"
               >
-                <span *ngIf="!savingEdit">Salvar Alterações</span>
+                <span *ngIf="!savingEdit">{{ 'Salvar Alterações' | t }}</span>
                 <span *ngIf="savingEdit" class="btn-spinner-wrap">
                   <span class="mini-spinner"></span>
-                  Salvando...
+                  {{ 'Salvando...' | t }}
                 </span>
               </button>
             </div>
@@ -949,11 +952,11 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
       <!-- Modal de Confirmação Reutilizável para Exclusão -->
       <app-confirm-modal
         [isOpen]="showDeleteModal"
-        [title]="'Excluir Lançamento'"
-        [message]="'Tem certeza que deseja excluir permanentemente este lançamento? Todas as parcelas associadas serão removidas.'"
-        [itemName]="expenseToDelete ? (expenseToDelete.nome + ' (' + (expenseToDelete.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR') + ')') : ''"
-        [confirmText]="'Sim, Excluir'"
-        [cancelText]="'Cancelar'"
+        [title]="('Excluir Lançamento' | t)"
+        [message]="('Tem certeza que deseja excluir permanentemente este lançamento? Todas as parcelas associadas serão removidas.' | t)"
+        [itemName]="expenseToDelete ? (expenseToDelete.nome + ' (' + (expenseToDelete.valorTotal | money) + ')') : ''"
+        [confirmText]="('Sim, Excluir' | t)"
+        [cancelText]="('Cancelar' | t)"
         [variant]="'danger'"
         [loading]="deletingExpense"
         (confirm)="confirmDelete()"
@@ -1800,6 +1803,8 @@ import { SearchableDropdownComponent, DropdownOption } from '../../../../shared/
   `],
 })
 export class ExpenseListComponent implements OnInit {
+  /** Símbolo da moeda do país (R$, $, €...) nos rótulos de valor */
+  readonly currency = currencySymbol();
   viewMode: 'table' | 'grouped' = 'table'; // Padrão: Tabela paginada (20 itens)
 
   // Filtros
@@ -1891,7 +1896,7 @@ export class ExpenseListComponent implements OnInit {
       list.push({
         value: 'OUTRO',
         label: this.editForm.comprador,
-        sublabel: 'Não cadastrado: selecione ou cadastre',
+        sublabel: t('Não cadastrado: selecione ou cadastre'),
       });
     }
     return list;
@@ -1912,7 +1917,7 @@ export class ExpenseListComponent implements OnInit {
         this.editSelectedBuyerId = buyer.id;
         this.onEditBuyerChange();
       },
-      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar o comprador.')),
+      error: (err) => (this.editError = this.apiMessage(err, t('Não foi possível cadastrar o comprador.'))),
     });
   }
 
@@ -1926,7 +1931,7 @@ export class ExpenseListComponent implements OnInit {
       list.push({
         value: 'OUTRA',
         label: this.editForm.loja,
-        sublabel: 'Não cadastrada: selecione ou cadastre',
+        sublabel: t('Não cadastrada: selecione ou cadastre'),
       });
     }
     return list;
@@ -1947,7 +1952,7 @@ export class ExpenseListComponent implements OnInit {
         this.editSelectedStoreId = store.id;
         this.onEditStoreChange();
       },
-      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar a loja.')),
+      error: (err) => (this.editError = this.apiMessage(err, t('Não foi possível cadastrar a loja.'))),
     });
   }
 
@@ -1960,7 +1965,7 @@ export class ExpenseListComponent implements OnInit {
         this.itemCategoriesList = [...this.itemCategoriesList, cat];
         this.editForm.categoria = cat.nome;
       },
-      error: (err) => (this.editError = this.apiMessage(err, 'Não foi possível cadastrar a categoria.')),
+      error: (err) => (this.editError = this.apiMessage(err, t('Não foi possível cadastrar a categoria.'))),
     });
   }
 
@@ -2173,7 +2178,7 @@ export class ExpenseListComponent implements OnInit {
     if (!dateStr) return '';
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    return monthName(date.getMonth(), 'short');
   }
 
   openParcelasModal(item: Lancamento) {
@@ -2293,13 +2298,8 @@ export class ExpenseListComponent implements OnInit {
       return isNaN(val) || val <= 0 ? 0 : val;
     }
     if (!val) return 0;
-    const str = String(val).trim();
-    if (str.includes(',')) {
-      const normalized = str.replace(/\./g, '').replace(',', '.');
-      const num = parseFloat(normalized);
-      return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
-    }
-    const num = parseFloat(str);
+    // Formato do país (1.234,5 no Brasil, 1,234.5 nos EUA)
+    const num = parseDecimal(val);
     return isNaN(num) || num <= 0 ? 0 : Number(num.toFixed(3));
   }
 
@@ -2307,7 +2307,7 @@ export class ExpenseListComponent implements OnInit {
     if (val === undefined || val === null || val === '') return '0';
     const num = Number(val);
     if (isNaN(num)) return String(val);
-    return num.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    return formatNumber(num, 0, 3);
   }
 
   recalculateEditTotal() {
@@ -2323,41 +2323,41 @@ export class ExpenseListComponent implements OnInit {
 
     // Comprador, loja e categoria precisam estar cadastrados (lançamentos antigos podem ter texto solto)
     if (!this.buyersList.some((b) => b.id === this.editSelectedBuyerId)) {
-      this.editError = 'Selecione ou cadastre um comprador.';
+      this.editError = t('Selecione ou cadastre um comprador.');
       return;
     }
     if (!this.storesList.some((st) => st.id === this.editSelectedStoreId)) {
-      this.editError = 'Selecione ou cadastre uma loja.';
+      this.editError = t('Selecione ou cadastre uma loja.');
       return;
     }
     if (!this.editForm.nome?.trim()) {
-      this.editError = 'O nome do item é obrigatório.';
+      this.editError = t('O nome do item é obrigatório.');
       return;
     }
     if (!this.editForm.categoria?.trim()) {
-      this.editError = 'A categoria é obrigatória.';
+      this.editError = t('A categoria é obrigatória.');
       return;
     }
     if (!this.itemCategoriesList.some((c) => c.nome.toLowerCase() === this.editForm.categoria.trim().toLowerCase())) {
-      this.editError = `A categoria "${this.editForm.categoria.trim()}" não está cadastrada. Selecione ou cadastre uma categoria.`;
+      this.editError = t('A categoria "{nome}" não está cadastrada. Selecione ou cadastre uma categoria.', { nome: this.editForm.categoria.trim() });
       return;
     }
     if (!this.editForm.data) {
-      this.editError = 'A data é obrigatória.';
+      this.editError = t('A data é obrigatória.');
       return;
     }
     if (!this.editForm.meioPagamentoId) {
-      this.editError = 'Selecione um meio de pagamento.';
+      this.editError = t('Selecione um meio de pagamento.');
       return;
     }
     if (!this.editForm.valorTotal || this.editForm.valorTotal <= 0) {
-      this.editError = 'O valor total deve ser maior que zero.';
+      this.editError = t('O valor total deve ser maior que zero.');
       return;
     }
 
     const qty = this.parseQuantity(this.editForm.quantidade);
     if (qty <= 0) {
-      this.editError = 'A quantidade deve ser maior que zero.';
+      this.editError = t('A quantidade deve ser maior que zero.');
       return;
     }
 
@@ -2384,7 +2384,7 @@ export class ExpenseListComponent implements OnInit {
       },
       error: (err) => {
         this.savingEdit = false;
-        this.editError = err.error?.message || err.message || 'Erro ao atualizar lançamento.';
+        this.editError = err.error?.message || err.message || t('Erro ao atualizar lançamento.');
       },
     });
   }

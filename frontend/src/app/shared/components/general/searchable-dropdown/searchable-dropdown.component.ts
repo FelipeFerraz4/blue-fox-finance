@@ -22,11 +22,12 @@ import {
   DropdownRounded,
   BadgeColorVariant
 } from './searchable-dropdown.model';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 @Component({
   selector: 'app-searchable-dropdown',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [...I18N, CommonModule, FormsModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

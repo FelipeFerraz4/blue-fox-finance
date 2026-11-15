@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { storageGet, storageSet } from '../../utils/browser-storage';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +9,7 @@ export class SidebarService {
   private readonly storageKey = 'bluefox_sidebar_collapsed';
 
   private readonly collapsedSubject = new BehaviorSubject<boolean>(
-    localStorage.getItem(this.storageKey) === 'true',
+    storageGet(this.storageKey) === 'true',
   );
   readonly isCollapsed$ = this.collapsedSubject.asObservable();
 
@@ -26,7 +27,7 @@ export class SidebarService {
   toggleCollapse(): void {
     const next = !this.collapsedSubject.value;
     this.collapsedSubject.next(next);
-    localStorage.setItem(this.storageKey, String(next));
+    storageSet(this.storageKey, String(next));
   }
 
   toggleMobile(): void {

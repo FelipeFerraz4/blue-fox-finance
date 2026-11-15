@@ -8,11 +8,13 @@ import { Store, CreateStoreDto } from '../../../shared/model/types/store.model';
 import { CategoriaLoja } from '../../../shared/model/types/category.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
+import { I18N } from '../../../core/i18n/i18n.pipes';
+import { t } from '../../../core/i18n/i18n';
 
 @Component({
   selector: 'app-stores',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
+  imports: [...I18N, CommonModule, FormsModule, ConfirmModalComponent, SearchableDropdownComponent],
   template: `
     <div class="stores-page">
       <div class="page-header">
@@ -24,11 +26,11 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
             </div>
-            <h1 class="page-title">Lojas & Estabelecimentos</h1>
-            <span class="badge badge-brand">Locais de Compra</span>
+            <h1 class="page-title">{{ 'Lojas & Estabelecimentos' | t }}</h1>
+            <span class="badge badge-brand">{{ 'Locais de Compra' | t }}</span>
           </div>
           <p class="page-subtitle">
-            Cadastre as lojas e suas categorias para agilizar o preenchimento de lançamentos e permitir filtros refinados
+            {{ 'Cadastre as lojas e suas categorias para agilizar o preenchimento de lançamentos e permitir filtros refinados' | t }}
           </p>
         </div>
 
@@ -37,19 +39,19 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>Adicionar Loja</span>
+          <span>{{ 'Adicionar Loja' | t }}</span>
         </button>
       </div>
 
       <!-- Filtros por Categoria de Loja -->
       <div class="card category-filter-bar">
-        <span class="filter-title">Categorias:</span>
+        <span class="filter-title">{{ 'Categorias:' | t }}</span>
         <button
           (click)="filterCategory('')"
           class="badge-filter"
           [class.active]="selectedCategory === ''"
         >
-          Todas ({{ stores.length }})
+          {{ 'Todas ({n})' | t: { n: stores.length } }}
         </button>
         <button
           *ngFor="let cat of categories"
@@ -64,13 +66,13 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <!-- Tabela de Lojas Cadastradas -->
       <div class="card">
         <div class="card-title">
-          <span>Lojas Cadastradas</span>
-          <span class="badge badge-primary">{{ filteredStores.length }} lojas exibidas</span>
+          <span>{{ 'Lojas Cadastradas' | t }}</span>
+          <span class="badge badge-primary">{{ '{n} lojas exibidas' | t: { n: filteredStores.length } }}</span>
         </div>
 
         <div *ngIf="loading" class="loading-state">
           <div class="spinner"></div>
-          <p>Carregando lojas...</p>
+          <p>{{ 'Carregando lojas...' | t }}</p>
         </div>
 
         <div *ngIf="!loading && filteredStores.length > 0">
@@ -79,10 +81,10 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Nome da Loja</th>
-                    <th>Categoria</th>
-                    <th>Data de Cadastro</th>
-                    <th class="text-center">Ações</th>
+                    <th>{{ 'Nome da Loja' | t }}</th>
+                    <th>{{ 'Categoria' | t }}</th>
+                    <th>{{ 'Data de Cadastro' | t }}</th>
+                    <th class="text-center">{{ 'Ações' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -90,38 +92,38 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                     <td>
                       <div class="store-info-cell">
                         <strong class="text-gray-900 font-semibold">{{ s.nome }}</strong>
-                        <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">★ Padrão</span>
+                        <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                       </div>
                     </td>
                     <td>
                       <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
-                        {{ s.categoria || 'Não categorizado' }}
+                        {{ s.categoria || ('Não categorizado' | t) }}
                       </span>
                     </td>
-                    <td>{{ s.createdAt | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ s.createdAt | appDate: 'short' : false }}</td>
                     <td class="text-center">
                       <div class="table-actions-row">
                         <button
                           (click)="openEditModal(s)"
                           class="btn btn-outline btn-sm"
-                          title="Editar Loja"
+                          [title]="'Editar Loja' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
-                          Editar
+                          {{ 'Editar' | t }}
                         </button>
                         <button
                           (click)="promptDeleteStore(s)"
                           class="btn btn-danger btn-sm"
-                          title="Excluir Loja"
+                          [title]="'Excluir Loja' | t"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
-                          Excluir
+                          {{ 'Excluir' | t }}
                         </button>
                       </div>
                     </td>
@@ -137,38 +139,38 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
               <div class="store-card-header">
                 <div>
                   <span class="store-card-name">{{ s.nome }}</span>
-                  <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">★ Padrão</span>
+                  <span *ngIf="isStoreDefault(s.id)" class="badge-default-pill">{{ '★ Padrão' | t }}</span>
                 </div>
                 <span class="badge" [ngClass]="getCategoryBadgeClass(s.categoria)">
-                  {{ s.categoria || 'Não categorizado' }}
+                  {{ s.categoria || ('Não categorizado' | t) }}
                 </span>
               </div>
               <div class="store-card-body">
-                <span class="text-muted text-xs">Cadastrado em:</span>
-                <span class="font-medium text-xs">{{ s.createdAt | date:'dd/MM/yyyy' }}</span>
+                <span class="text-muted text-xs">{{ 'Cadastrado em:' | t }}</span>
+                <span class="font-medium text-xs">{{ s.createdAt | appDate: 'short' : false }}</span>
               </div>
               <div class="store-card-actions">
                 <button
                   (click)="openEditModal(s)"
                   class="btn btn-outline btn-sm mr-2"
-                  title="Editar Loja"
+                  [title]="'Editar Loja' | t"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
-                  <span>Editar</span>
+                  <span>{{ 'Editar' | t }}</span>
                 </button>
                 <button
                   (click)="promptDeleteStore(s)"
                   class="btn btn-danger btn-sm mobile-store-delete-btn"
-                  title="Excluir Loja"
+                  [title]="'Excluir Loja' | t"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
-                  <span>Excluir</span>
+                  <span>{{ 'Excluir' | t }}</span>
                 </button>
               </div>
             </div>
@@ -176,8 +178,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
         </div>
 
         <div *ngIf="!loading && filteredStores.length === 0" class="empty-state">
-          <p>Nenhuma loja cadastrada para o filtro selecionado.</p>
-          <button (click)="openAddModal()" class="btn btn-primary btn-sm mt-3">+ Cadastrar Nova Loja</button>
+          <p>{{ 'Nenhuma loja cadastrada para o filtro selecionado.' | t }}</p>
+          <button (click)="openAddModal()" class="btn btn-primary btn-sm mt-3">{{ '+ Cadastrar Nova Loja' | t }}</button>
         </div>
       </div>
 
@@ -193,8 +195,8 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                 </svg>
               </div>
               <div>
-                <h3>{{ editingId ? 'Editar Loja' : 'Nova Loja' }}</h3>
-                <p class="modal-subtitle">Preencha as informações para registro da loja</p>
+                <h3>{{ editingId ? ('Editar Loja' | t) : ('Nova Loja' | t) }}</h3>
+                <p class="modal-subtitle">{{ 'Preencha as informações para registro da loja' | t }}</p>
               </div>
             </div>
             <button class="btn-close" (click)="closeModal()">✕</button>
@@ -203,24 +205,24 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
           <form (ngSubmit)="saveStore()" #modalForm="ngForm">
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Nome da Loja *</label>
+                <label class="form-label">{{ 'Nome da Loja *' | t }}</label>
                 <input
                   type="text"
                   name="nome"
                   [(ngModel)]="newStore.nome"
                   required
                   class="form-control"
-                  placeholder="ex: Amazon, Carrefour, Supermercado Extra, Farmácia São Paulo..."
+                  [placeholder]="'ex: Amazon, Carrefour, Supermercado Extra, Farmácia São Paulo...' | t"
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">Categoria</label>
+                <label class="form-label">{{ 'Categoria' | t }}</label>
                 <app-searchable-dropdown
                   [options]="categoryOptions"
                   [(ngModel)]="newStore.categoria"
                   name="categoria"
-                  placeholder="Selecione, busque ou cadastre uma categoria..."
+                  [placeholder]="'Selecione, busque ou cadastre uma categoria...' | t"
                   searchPlaceholder="Pesquisar categoria..."
                   [allowCreate]="true"
                   [createOnBlur]="false"
@@ -240,23 +242,23 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
                   <span class="switch-slider"></span>
                 </label>
                 <div class="switch-label-text">
-                  <strong>Definir como loja padrão</strong>
-                  <span class="text-xs text-muted block">Será pré-selecionada automaticamente ao abrir novos lançamentos</span>
+                  <strong>{{ 'Definir como loja padrão' | t }}</strong>
+                  <span class="text-xs text-muted block">{{ 'Será pré-selecionada automaticamente ao abrir novos lançamentos' | t }}</span>
                 </div>
               </div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'Cancelar' | t }}</button>
               <button
                 type="submit"
                 [disabled]="!modalForm.valid || saving"
                 class="btn btn-primary btn-pill"
               >
-                <span *ngIf="!saving">{{ editingId ? 'Salvar Alterações' : 'Cadastrar Loja' }}</span>
+                <span *ngIf="!saving">{{ editingId ? ('Salvar Alterações' | t) : ('Cadastrar Loja' | t) }}</span>
                 <span *ngIf="saving" class="btn-spinner-wrap">
                   <span class="mini-spinner"></span>
-                  Salvando...
+                  {{ 'Salvando...' | t }}
                 </span>
               </button>
             </div>
@@ -267,11 +269,11 @@ import { SearchableDropdownComponent } from '../../../shared/components/general/
       <!-- Modal de Confirmação Reutilizável para Exclusão de Loja -->
       <app-confirm-modal
         [isOpen]="showDeleteModal"
-        [title]="'Excluir Loja'"
-        [message]="'Tem certeza que deseja excluir esta loja? Ela deixará de aparecer nas opções de seleção de novos lançamentos.'"
+        [title]="('Excluir Loja' | t)"
+        [message]="('Tem certeza que deseja excluir esta loja? Ela deixará de aparecer nas opções de seleção de novos lançamentos.' | t)"
         [itemName]="storeToDelete?.nome"
-        [confirmText]="'Sim, Excluir'"
-        [cancelText]="'Cancelar'"
+        [confirmText]="('Sim, Excluir' | t)"
+        [cancelText]="('Cancelar' | t)"
         [variant]="'danger'"
         [loading]="deleting"
         (confirm)="confirmDeleteStore()"
@@ -718,7 +720,7 @@ export class StoresComponent implements OnInit {
       },
       error: (err) => {
         const msg = err?.error?.message;
-        this.categoryError = (Array.isArray(msg) ? msg.join(' ') : msg) || 'Não foi possível cadastrar a categoria.';
+        this.categoryError = (Array.isArray(msg) ? msg.join(' ') : msg) || t('Não foi possível cadastrar a categoria.');
       },
     });
   }

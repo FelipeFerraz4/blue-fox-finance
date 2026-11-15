@@ -7,6 +7,8 @@ import { CreatePaymentMethodDto } from '../../payment-methods/dto/payment-method
 import { CreateItemCategoryDto, CreateStoreCategoryDto } from '../../categories/dto/category.dto';
 import { CreateBillDto } from '../../bills/dto/bill.dto';
 import { FormKind } from '../bot.types';
+import { t } from '../../../common/i18n/translate';
+import { currentLocale } from '../../../common/i18n/locale-context';
 
 export type FieldValue = string | number | null;
 export type Values = Record<string, FieldValue>;
@@ -56,7 +58,19 @@ export interface FormSpec {
   toDto: (v: Values) => Record<string, unknown>;
 }
 
-const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+/**
+ * Rótulos, dicas e títulos ficam em português (chaves do t()) e são traduzidos pelo
+ * RegisterFlow na hora de mostrar. Listas fixas de opções traduzem dentro de `choices`,
+ * que roda no idioma do usuário em atendimento.
+ */
+const translated = (options: Option[]): Option[] => options.map((o) => ({ ...o, label: t(o.label) }));
+
+/** Meses no idioma do usuário (Intl). */
+const months = (): Option[] =>
+  Array.from({ length: 12 }, (_, i) => {
+    const name = new Date(Date.UTC(2024, i, 1)).toLocaleDateString(currentLocale().lang, { month: 'long', timeZone: 'UTC' });
+    return { id: String(i + 1), label: name.charAt(0).toUpperCase() + name.slice(1) };
+  });
 
 /** Mesmos rótulos da tela de Meios de Pagamento. */
 const MODALIDADES: Option[] = [
@@ -69,10 +83,11 @@ const MODALIDADES: Option[] = [
 /** Mesmas cores da tela de Categorias de Itens, com o emoji mais próximo. */
 const CORES: Option[] = CATEGORY_COLORS.map((c) => ({ id: c.hex, label: `${c.emoji} ${c.label}` }));
 
-/** Cor digitada: nome de uma cor da paleta ("verde") ou qualquer código hexadecimal ("#ff8800"). */
+/** Cor digitada: nome de uma cor da paleta ("verde"/"green") ou qualquer código hexadecimal ("#ff8800"). */
 function parseColor(text: string): Option | null {
-  const byName = CATEGORY_COLORS.find((c) => c.label.toLowerCase() === text.trim().toLowerCase());
-  if (byName) return { id: byName.hex, label: `${byName.emoji} ${byName.label}` };
+  const typed = text.trim().toLowerCase();
+  const byName = CATEGORY_COLORS.find((c) => c.label.toLowerCase() === typed || t(c.label).toLowerCase() === typed);
+  if (byName) return { id: byName.hex, label: `${byName.emoji} ${t(byName.label)}` };
   const hex = normalizeHex(text);
   return hex ? { id: hex, label: `🎨 ${hex}` } : null;
 }
@@ -140,7 +155,7 @@ export const FORMS: Record<FormKind, FormSpec> = {
     dto: CreatePaymentMethodDto,
     fields: [
       name('nome', 'Meio de Pagamento (Nome)', 'Exemplo: Nubank, Itaú Platinum, Pix Inter'),
-      { key: 'modalidade', label: 'Modalidade', short: 'Modalidade', type: 'choice', required: true, choices: () => MODALIDADES },
+      { key: 'modalidade', label: 'Modalidade', short: 'Modalidade', type: 'choice', required: true, choices: () => translated(MODALIDADES) },
       {
         key: 'diaFechamento',
         label: 'Dia de Fechamento da Fatura (1 a 31)',
@@ -188,7 +203,7 @@ export const FORMS: Record<FormKind, FormSpec> = {
         hint:
           'Toque numa cor ou digite qualquer outra em hexadecimal, ex.: <code>#ff8800</code> (pesquise "seletor de cores" no Google para achar o código).\n<i>Automática: uma cor que você ainda não usa.</i>',
         invalidText: 'Não reconheci essa cor. Toque numa opção ou digite um código como <code>#ff8800</code>.',
-        choices: () => CORES,
+        choices: () => CORES.map((c, i) => ({ ...c, label: `${CATEGORY_COLORS[i].emoji} ${t(CATEGORY_COLORS[i].label)}` })),
         parseText: parseColor,
         perRow: 3,
       },
@@ -233,7 +248,7 @@ export const FORMS: Record<FormKind, FormSpec> = {
       },
       name('nome', 'Nome', 'Exemplo: Energia, Internet, Aluguel'),
       { key: 'categoria', label: 'Categoria', short: 'Categoria', type: 'text', required: false, maxLength: 120, hint: 'Exemplo: Moradia, Serviços' },
-      { key: 'recorrencia', label: 'Repetição', short: 'Repetição', type: 'choice', required: true, choices: () => REPETICAO },
+      { key: 'recorrencia', label: 'Repetição', short: 'Repetição', type: 'choice', required: true, choices: () => translated(REPETICAO) },
       {
         key: 'dataUnica',
         label: 'Vencimento',
@@ -259,7 +274,7 @@ export const FORMS: Record<FormKind, FormSpec> = {
         type: 'month',
         required: true,
         visible: (v) => v.recorrencia === RecorrenciaConta.ANUAL,
-        choices: () => MONTHS.map((m, i) => ({ id: String(i + 1), label: m })),
+        choices: () => months(),
       },
       {
         key: 'valorPrevisto',

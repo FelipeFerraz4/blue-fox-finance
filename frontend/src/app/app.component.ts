@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -8,6 +8,10 @@ import { SidebarService } from './core/services/sidebar/sidebar.service';
 import { A11yToolbarComponent } from './shared/components/general/a11y-toolbar/a11y-toolbar.component';
 import { ThemeService } from './core/services/theme/theme.service';
 import { AccessibilityService } from './core/services/accessibility/accessibility.service';
+import { SeoService } from './core/services/seo/seo.service';
+import { AuthService } from './core/services/auth/auth.service';
+import { LocaleService } from './core/services/locale/locale.service';
+import { TranslationService } from './core/services/translation/translation.service';
 
 @Component({
   selector: 'app-root',
@@ -87,8 +91,19 @@ export class AppComponent implements OnInit {
     // Instanciados no início para aplicar tema/fonte/contraste e ouvir o tema do sistema
     _theme: ThemeService,
     _a11y: AccessibilityService,
+    seo: SeoService,
+    // Idioma das páginas públicas (pela URL) e o lang do <html>
+    _translation: TranslationService,
   ) {
     this.updateLayoutState(this.router.url);
+    // Meta tags por rota: públicas indexadas, internas com noindex
+    seo.init();
+    // Logado: idioma e país da conta (outros aparelhos) ou grava os deste navegador
+    const auth = inject(AuthService);
+    const locale = inject(LocaleService);
+    effect(() => {
+      if (auth.isAuthenticated()) void locale.syncWithAccount();
+    });
   }
 
   ngOnInit(): void {
@@ -97,6 +112,7 @@ export class AppComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.updateLayoutState(event.urlAfterRedirects || event.url);
         // Reseta o scroll para o início da página ao navegar para uma nova rota
+        if (typeof window === 'undefined') return;
         if (!event.urlAfterRedirects?.includes('#') && !event.url?.includes('#')) {
           window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -105,17 +121,18 @@ export class AppComponent implements OnInit {
       });
   }
 
+  /** Rotas do sistema interno; fora delas (404) vale o layout público. */
+  private isAppRoute(url: string): boolean {
+    return /^\/(dashboard|expenses|bills|payment-methods|stores|buyers|admin|lancamentos|analytics|analises|contas|meios-pagamento|lojas|compradores)(\/|$)/.test(url);
+  }
+
   private updateLayoutState(url: string): void {
     if (!url) {
       this.isPublicPage = true;
       return;
     }
     const cleanUrl = url.split('?')[0].split('#')[0];
-    this.isPublicPage =
-      cleanUrl === '' ||
-      cleanUrl === '/' ||
-      cleanUrl === '/home' ||
-      cleanUrl === '/about' ||
-      cleanUrl === '/updates';
+    // Páginas públicas em /pt e /en, e as URLs antigas sem idioma (redirecionam)
+    this.isPublicPage = /^\/?((pt|en)(\/(about|updates))?|home|about|updates)?\/?$/.test(cleanUrl) || !this.isAppRoute(cleanUrl);
   }
 }

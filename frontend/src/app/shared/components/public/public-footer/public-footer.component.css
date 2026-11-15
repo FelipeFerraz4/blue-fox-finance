@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.public-footer {
+  background: #060b19;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2.5rem 1.5rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.logo-box-mini {
+  width: 28px;
+  height: 28px;
+  background: #ffffff;
+  border-radius: 7px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logo-mini {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footer-brand-name {
+  font-family: var(--font-headers, 'Outfit', sans-serif);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-links a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #38b6ff;
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.footer-links a:focus-visible {
+  outline: 2px solid #38b6ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

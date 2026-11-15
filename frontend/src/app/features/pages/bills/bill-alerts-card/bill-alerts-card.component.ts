@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BillsService } from '../../../../core/services/bills/bills.service';
 import { BillOccurrence } from '../../../../shared/model/types/bill.model';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
 
 /** Card do dashboard com contas atrasadas, vencendo hoje e próximas. */
 @Component({
   selector: 'app-bill-alerts-card',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [...I18N, CommonModule, RouterModule],
   templateUrl: './bill-alerts-card.component.html',
   styleUrl: './bill-alerts-card.component.css',
 })
@@ -27,10 +29,9 @@ export class BillAlertsCardComponent implements OnInit {
 
   label(o: BillOccurrence): string {
     if (o.status === 'ATRASADA') {
-      const dias = Math.abs(o.diasParaVencer);
-      return `Atrasada ${dias}d`;
+      return t('Atrasada {n}d', { n: Math.abs(o.diasParaVencer) });
     }
-    if (o.status === 'VENCE_HOJE') return 'Vence hoje';
-    return o.diasParaVencer === 1 ? 'Amanhã' : `Em ${o.diasParaVencer} dias`;
+    if (o.status === 'VENCE_HOJE') return t('Vence hoje');
+    return o.diasParaVencer === 1 ? t('Amanhã') : t('Em {n} dias', { n: o.diasParaVencer });
   }
 }

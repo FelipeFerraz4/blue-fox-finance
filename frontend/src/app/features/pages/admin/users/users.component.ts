@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AdminUsersService } from '../../../../core/services/admin-users/admin-users.service';
 import { AdminUser, CreateAdminUserDto } from '../../../../shared/model/types/admin-user.model';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
+import { t } from '../../../../core/i18n/i18n';
 
 // Sem caracteres ambíguos (0/O, 1/l/I) para facilitar repassar a senha
 const PASSWORD_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -22,7 +23,7 @@ interface CreatedCredentials {
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [FormsModule, RouterModule, DatePipe],
+  imports: [...I18N, FormsModule, RouterModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
 })
@@ -92,7 +93,7 @@ export class UsersComponent implements OnInit {
   async copyCredentials(): Promise<void> {
     const c = this.created();
     if (!c) return;
-    const text = `Acesso ao Blue Fox Finance\nLogin (e-mail): ${c.username}\nSenha temporária: ${c.senha}\n(no primeiro acesso você vai definir uma nova senha)`;
+    const text = t('Acesso ao Blue Fox Finance\nLogin (e-mail): {login}\nSenha temporária: {senha}\n(no primeiro acesso você vai definir uma nova senha)', { login: c.username, senha: c.senha });
     try {
       await navigator.clipboard.writeText(text);
       this.copied.set(true);
@@ -122,10 +123,10 @@ export class UsersComponent implements OnInit {
   }
 
   private messageOf(err: HttpErrorResponse): string {
-    if (err.status === 403) return 'Você não tem permissão para gerenciar usuários.';
+    if (err.status === 403) return t('Você não tem permissão para gerenciar usuários.');
     const message = err.error?.message;
     if (Array.isArray(message)) return message.join('; ');
-    return typeof message === 'string' ? message : 'Não foi possível concluir. Tente de novo.';
+    return typeof message === 'string' ? message : t('Não foi possível concluir. Tente de novo.');
   }
 
   private emptyForm(): CreateAdminUserDto {

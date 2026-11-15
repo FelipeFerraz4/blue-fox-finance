@@ -15,6 +15,9 @@ import { DropdownOption } from '../../../shared/components/general/searchable-dr
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { NoticeModalComponent } from '../../../shared/components/general/notice-modal/notice-modal.component';
 import { SearchableDropdownComponent } from '../../../shared/components/general/searchable-dropdown';
+import { I18N } from '../../../core/i18n/i18n.pipes';
+import { t } from '../../../core/i18n/i18n';
+import { formatDate, monthName } from '../../../core/i18n/format';
 
 interface BillForm {
   nome: string;
@@ -38,15 +41,16 @@ const STATUS_LABELS: Record<BillStatus, string> = {
   PENDENTE: 'Pendente',
 };
 
-const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-];
+/** Mês por extenso no idioma em uso, com inicial maiúscula (0 = janeiro). */
+const monthFull = (i: number) => {
+  const name = monthName(i);
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 @Component({
   selector: 'app-bills',
   standalone: true,
-  imports: [
+  imports: [...I18N, 
     CommonModule,
     FormsModule,
     ConfirmModalComponent,
@@ -72,7 +76,7 @@ export class BillsComponent implements OnInit {
 
   readonly monthLabel = computed(() => {
     const [y, m] = this.month().split('-').map(Number);
-    return `${MONTH_NAMES[m - 1]} de ${y}`;
+    return t('{mes} de {ano}', { mes: monthFull(m - 1), ano: y });
   });
   readonly isCurrentMonth = computed(() => this.month() === this.currentMonth());
 
@@ -98,14 +102,14 @@ export class BillsComponent implements OnInit {
   noticeMessage = '';
 
   readonly recorrenciaOptions: DropdownOption<RecorrenciaConta>[] = [
-    { value: 'MENSAL', label: 'Mensal' },
-    { value: 'ANUAL', label: 'Anual' },
-    { value: 'UNICA', label: 'Avulsa' },
+    { value: 'MENSAL', label: t('Mensal') },
+    { value: 'ANUAL', label: t('Anual') },
+    { value: 'UNICA', label: t('Avulsa') },
   ];
 
-  readonly monthOptions: DropdownOption<number>[] = MONTH_NAMES.map((label, i) => ({
+  readonly monthOptions: DropdownOption<number>[] = Array.from({ length: 12 }, (_, i) => ({
     value: i + 1,
-    label,
+    label: monthFull(i),
   }));
 
   ngOnInit(): void {
@@ -119,7 +123,7 @@ export class BillsComponent implements OnInit {
             .map((m) => ({
               value: m.id,
               label: m.nome,
-              sublabel: m.diaVencimento ? `dia ${m.diaVencimento}` : '',
+              sublabel: m.diaVencimento ? t('dia {n}', { n: m.diaVencimento }) : '',
             })),
         ),
       error: () => this.cardOptions.set([]),
@@ -139,7 +143,7 @@ export class BillsComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        this.showError(err, 'Não foi possível carregar as contas do mês.');
+        this.showError(err, t('Não foi possível carregar as contas do mês.'));
       },
     });
     this.billsService.refreshAlerts();
@@ -148,7 +152,7 @@ export class BillsComponent implements OnInit {
   loadBills(): void {
     this.billsService.getAll().subscribe({
       next: (bills) => this.bills.set(bills),
-      error: (err) => this.showError(err, 'Não foi possível carregar o cadastro de contas.'),
+      error: (err) => this.showError(err, t('Não foi possível carregar o cadastro de contas.')),
     });
   }
 
@@ -191,7 +195,7 @@ export class BillsComponent implements OnInit {
         },
         error: (err) => {
           this.savingPay = false;
-          this.showError(err, 'Não foi possível registrar o pagamento.');
+          this.showError(err, t('Não foi possível registrar o pagamento.'));
         },
       });
   }
@@ -208,7 +212,7 @@ export class BillsComponent implements OnInit {
       error: (err) => {
         this.confirmLoading = false;
         this.occurrenceToUnpay = null;
-        this.showError(err, 'Não foi possível desfazer o pagamento.');
+        this.showError(err, t('Não foi possível desfazer o pagamento.'));
       },
     });
   }
@@ -255,7 +259,7 @@ export class BillsComponent implements OnInit {
       this.form.diaVencimento = Number(match[1]);
     }
     if (cardId && !this.form.nome && card) {
-      this.form.nome = `Fatura ${card.label}`;
+      this.form.nome = t('Fatura {nome}', { nome: card.label });
     }
   }
 
@@ -289,7 +293,7 @@ export class BillsComponent implements OnInit {
       },
       error: (err) => {
         this.savingBill = false;
-        this.showError(err, 'Não foi possível salvar a conta.');
+        this.showError(err, t('Não foi possível salvar a conta.'));
       },
     });
   }
@@ -300,7 +304,7 @@ export class BillsComponent implements OnInit {
         this.loadBills();
         this.loadMonth();
       },
-      error: (err) => this.showError(err, 'Não foi possível alterar a conta.'),
+      error: (err) => this.showError(err, t('Não foi possível alterar a conta.')),
     });
   }
 
@@ -317,7 +321,7 @@ export class BillsComponent implements OnInit {
       error: (err) => {
         this.confirmLoading = false;
         this.billToDelete = null;
-        this.showError(err, 'Não foi possível excluir a conta.');
+        this.showError(err, t('Não foi possível excluir a conta.'));
       },
     });
   }
@@ -328,13 +332,12 @@ export class BillsComponent implements OnInit {
 
   statusLabel(o: BillOccurrence): string {
     if (o.status === 'PROXIMA') {
-      return o.diasParaVencer === 1 ? 'Amanhã' : `Em ${o.diasParaVencer} dias`;
+      return o.diasParaVencer === 1 ? t('Amanhã') : t('Em {n} dias', { n: o.diasParaVencer });
     }
     if (o.status === 'ATRASADA') {
-      const dias = Math.abs(o.diasParaVencer);
-      return `Atrasada ${dias}d`;
+      return t('Atrasada {n}d', { n: Math.abs(o.diasParaVencer) });
     }
-    return STATUS_LABELS[o.status];
+    return t(STATUS_LABELS[o.status]);
   }
 
   statusClass(status: BillStatus): string {
@@ -354,24 +357,26 @@ export class BillsComponent implements OnInit {
   recurrenceLabel(bill: Bill): string {
     switch (bill.recorrencia) {
       case 'MENSAL':
-        return `Mensal · dia ${bill.diaVencimento}`;
-      case 'ANUAL':
-        return `Anual · ${bill.diaVencimento}/${String(bill.mesVencimento).padStart(2, '0')}`;
+        return t('Mensal · dia {dia}', { dia: bill.diaVencimento });
+      case 'ANUAL': {
+        // Dia e mês na ordem do país (31/12 ou 12/31)
+        const date = formatDate(new Date(Date.UTC(2024, (bill.mesVencimento ?? 1) - 1, bill.diaVencimento ?? 1)), 'dayMonth');
+        return t('Anual · {data}', { data: date });
+      }
       default:
-        return `Avulsa · ${this.formatDate(bill.dataUnica)}`;
+        return t('Avulsa · {data}', { data: this.formatDate(bill.dataUnica) });
     }
   }
 
   formatDate(iso: string | null): string {
     if (!iso) return '-';
-    const d = new Date(iso);
     // Datas de vencimento são salvas ao meio-dia; usar UTC evita trocar de dia
-    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+    return formatDate(iso, 'short');
   }
 
   formatMonth(month: string): string {
     const [y, m] = month.split('-').map(Number);
-    return `${MONTH_NAMES[m - 1].slice(0, 3)}/${y}`;
+    return `${monthFull(m - 1).slice(0, 3)}/${y}`;
   }
 
   private showError(err: any, fallback: string): void {

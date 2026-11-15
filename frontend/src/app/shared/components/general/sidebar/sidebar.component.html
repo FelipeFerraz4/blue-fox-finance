@@ -6,7 +6,7 @@
   <!-- TOPO DA SIDEBAR: Mecanismo de Abrir e Fechar no Topo -->
   <div class="sidebar-top-bar">
     <div class="top-title" *ngIf="!(sidebarService.isCollapsed$ | async)">
-      <span class="nav-title-label">Menu de Navegação</span>
+      <span class="nav-title-label">{{ 'Menu de Navegação' | t }}</span>
     </div>
 
     <!-- Botão Toggle de Abrir/Fechar no Topo -->
@@ -14,7 +14,7 @@
       type="button"
       class="btn-toggle-top"
       (click)="sidebarService.toggleCollapse()"
-      [title]="(sidebarService.isCollapsed$ | async) ? 'Expandir Menu' : 'Recolher Menu'"
+      [title]="(sidebarService.isCollapsed$ | async) ? ('Expandir Menu' | t) : ('Recolher Menu' | t)"
     >
       <svg
         width="17"
@@ -35,7 +35,7 @@
     <!-- SEÇÃO 1: PRINCIPAL / OPERACIONAL (Topo) -->
     <div class="nav-group">
       <div class="group-title" *ngIf="!(sidebarService.isCollapsed$ | async)">
-        Principal
+        {{ 'Principal' | t }}
       </div>
 
       <nav class="nav-list">
@@ -43,7 +43,7 @@
           routerLink="/dashboard"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Dashboard' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Dashboard' | t) : null"
         >
           <div class="link-icon">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,7 +53,7 @@
               <rect x="3" y="16" width="7" height="5"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Dashboard</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Dashboard' | t }}</span>
         </a>
 
         <a
@@ -61,7 +61,7 @@
           routerLinkActive="active"
           [routerLinkActiveOptions]="{exact: true}"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Lançamentos' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Lançamentos' | t) : null"
         >
           <div class="link-icon">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -69,14 +69,14 @@
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Lançamentos</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Lançamentos' | t }}</span>
         </a>
 
         <a
           routerLink="/expenses/new"
           routerLinkActive="active"
           class="nav-link highlight-action"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Novo Lançamento' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Novo Lançamento' | t) : null"
         >
           <div class="link-icon">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -84,14 +84,14 @@
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
           </div>
-          <span class="link-text font-bold" *ngIf="!(sidebarService.isCollapsed$ | async)">Novo Lançamento</span>
+          <span class="link-text font-bold" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Novo Lançamento' | t }}</span>
         </a>
 
         <a
           routerLink="/bills"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Contas a Pagar' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Contas a Pagar' | t) : null"
         >
           <div class="link-icon">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -107,12 +107,12 @@
               [class.alert-danger]="hasOverdue()"
             ></span>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Contas a Pagar</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Contas a Pagar' | t }}</span>
           <span
             *ngIf="!(sidebarService.isCollapsed$ | async) && alertCount() > 0"
             class="alert-count"
             [class.alert-danger]="hasOverdue()"
-            [attr.aria-label]="alertCount() + ' conta(s) precisando de atenção'"
+            [attr.aria-label]="'{n} conta(s) precisando de atenção' | t: { n: alertCount() }"
           >{{ alertCount() }}</span>
         </a>
       </nav>
@@ -121,7 +121,7 @@
     <!-- SEÇÃO 2: CADASTROS BASE (2ª Seção, acima de Administrativo) -->
     <div class="nav-group">
       <div class="group-title" *ngIf="!(sidebarService.isCollapsed$ | async)">
-        Cadastros Base
+        {{ 'Cadastros Base' | t }}
       </div>
 
       <nav class="nav-list">
@@ -130,7 +130,7 @@
           routerLink="/buyers"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Compradores' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Compradores' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -138,7 +138,7 @@
               <circle cx="12" cy="7" r="4"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Compradores</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Compradores' | t }}</span>
         </a>
 
         <!-- 2. Lojas & Estabelecimentos -->
@@ -146,7 +146,7 @@
           routerLink="/stores"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Lojas & Estabelecimentos' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Lojas & Estabelecimentos' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -154,7 +154,7 @@
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Lojas</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Lojas' | t }}</span>
         </a>
 
         <!-- 3. Meios de Pagamento -->
@@ -162,7 +162,7 @@
           routerLink="/payment-methods"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Meios de Pagamento' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Meios de Pagamento' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -170,7 +170,7 @@
               <line x1="2" y1="10" x2="22" y2="10"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Meios de Pagamento</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Meios de Pagamento' | t }}</span>
         </a>
 
         <!-- 4. Categorias de Itens -->
@@ -178,7 +178,7 @@
           routerLink="/admin/item-categories"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Categorias de Itens' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Categorias de Itens' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -186,7 +186,7 @@
               <line x1="7" y1="7" x2="7.01" y2="7"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Cat. de Itens</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Cat. de Itens' | t }}</span>
         </a>
 
         <!-- 5. Categorias de Lojas -->
@@ -194,7 +194,7 @@
           routerLink="/admin/store-categories"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Categorias de Lojas' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Categorias de Lojas' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -202,7 +202,7 @@
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Cat. de Lojas</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Cat. de Lojas' | t }}</span>
         </a>
       </nav>
     </div>
@@ -210,7 +210,7 @@
     <!-- SEÇÃO 3: SERVIÇOS (3ª Seção, abaixo de Cadastros Base) -->
     <div class="nav-group">
       <div class="group-title" *ngIf="!(sidebarService.isCollapsed$ | async)">
-        Serviços
+        {{ 'Serviços' | t }}
       </div>
 
       <nav class="nav-list">
@@ -220,7 +220,7 @@
           routerLinkActive="active"
           [routerLinkActiveOptions]="{exact: true}"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Serviços' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Serviços' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -230,8 +230,8 @@
               <rect x="3" y="14" width="7" height="7" rx="1.5"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Serviços</span>
-          <span class="badge-mini" *ngIf="!(sidebarService.isCollapsed$ | async)">Hub</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Serviços' | t }}</span>
+          <span class="badge-mini" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Hub' | t }}</span>
         </a>
 
         <!-- 2. Perfil do Usuário -->
@@ -239,7 +239,7 @@
           routerLink="/admin/user-profile"
           routerLinkActive="active"
           class="nav-link"
-          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? 'Perfil do Usuário' : null"
+          [attr.data-tooltip]="(sidebarService.isCollapsed$ | async) ? ('Perfil do Usuário' | t) : null"
         >
           <div class="link-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -247,7 +247,7 @@
               <circle cx="12" cy="7" r="4"/>
             </svg>
           </div>
-          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">Perfil do Usuário</span>
+          <span class="link-text" *ngIf="!(sidebarService.isCollapsed$ | async)">{{ 'Perfil do Usuário' | t }}</span>
         </a>
       </nav>
     </div>

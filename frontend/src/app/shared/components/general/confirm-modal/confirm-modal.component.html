@@ -33,13 +33,13 @@
 
     <!-- Conteúdo do Modal -->
     <div class="modal-body-content">
-      <h3 class="modal-title">{{ title }}</h3>
+      <h3 class="modal-title">{{ title | t }}</h3>
       
-      <p class="modal-message">{{ message }}</p>
+      <p class="modal-message">{{ message | t }}</p>
 
       <!-- Item em Destaque (Opcional) -->
       <div *ngIf="itemName" class="modal-item-highlight">
-        <span class="highlight-label">Item selecionado:</span>
+        <span class="highlight-label">{{ 'Item selecionado:' | t }}</span>
         <strong class="highlight-text">{{ itemName }}</strong>
       </div>
     </div>
@@ -52,7 +52,7 @@
         [disabled]="loading"
         (click)="onCancel()"
       >
-        {{ cancelText }}
+        {{ cancelText | t }}
       </button>
 
       <button
@@ -62,10 +62,10 @@
         [disabled]="loading"
         (click)="onConfirm()"
       >
-        <span *ngIf="!loading">{{ confirmText }}</span>
+        <span *ngIf="!loading">{{ confirmText | t }}</span>
         <span *ngIf="loading" class="btn-spinner-wrap">
           <span class="mini-spinner"></span>
-          Processando...
+          {{ 'Processando...' | t }}
         </span>
       </button>
     </div>

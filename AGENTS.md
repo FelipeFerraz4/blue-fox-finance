@@ -22,6 +22,15 @@ O frontend segue estritamente o padrão arquitetural **Core-Feature-Shared** ado
 ```text
 frontend/src/app/
 ├── core/                                             # Singletons, lógica global, auth, interceptors e guards
+│   ├── i18n/                                         # Idioma e país do sistema interno
+│   │   ├── i18n.ts                                   # t(), idioma/país lidos ao carregar, activeLanguage
+│   │   ├── en.ts                                     # Inglês (chave = texto em português)
+│   │   ├── format.ts                                 # Moeda, data e número pelo país (Intl), parseDecimal
+│   │   ├── i18n.pipes.ts                             # Pipes t, money, appDate, appNumber, appPercent (I18N)
+│   │   └── locale.ts                                 # Idiomas e países suportados
+│   ├── content/                                      # Textos das páginas públicas por idioma
+│   │   ├── pt/{common,home,about,updates}.ts         # Português (define os tipos)
+│   │   └── en/{common,home,about,updates}.ts         # Inglês (mesma forma, tipado pelo PT)
 │   ├── core-module.ts                                # Módulo raiz do Core
 │   ├── guards/
 │   │   └── auth.guard.ts                             # Guard funcional de rotas com validação de login e roles Keycloak
@@ -44,10 +53,16 @@ frontend/src/app/
 │       │   └── expenses.service.ts                   # Gestão de despesas, parcelas e preview (/api/expenses)
 │       ├── payment-methods/
 │       │   └── payment-methods.service.ts            # CRUD de meios de pagamento e cartões (/api/payment-methods)
+│       ├── seo/
+│       │   └── seo.service.ts                        # Meta tags por rota: públicas (data.seo) indexadas com hreflang, internas noindex
 │       ├── sidebar/
 │       │   └── sidebar.service.ts                    # Estado reativo do menu lateral (collapse/mobile)
 │       ├── stores/
 │       │   └── stores.service.ts                     # CRUD de lojas (/api/stores); categoria precisa existir em CategoriaLoja
+│       ├── locale/
+│       │   └── locale.service.ts                     # Idioma e país na conta (/api/preferences/locale)
+│       ├── translation/
+│       │   └── translation.service.ts                # Idioma das páginas públicas pela URL (/pt, /en), textos e lang do <html>
 │       ├── theme/
 │       │   └── theme.service.ts                      # Tema claro/escuro (data-theme no <html>, segue o sistema por padrão)
 │       ├── accessibility/
@@ -57,13 +72,13 @@ frontend/src/app/
 │
 ├── features/                                         # Módulos de páginas e fluxos funcionais
 │   └── pages/
-│       ├── main/                                     # Páginas institucionais e públicas
+│       ├── main/                                     # Páginas públicas em /pt e /en (textos em core/content), geradas em HTML no build (prerender) + not-found/ (404)
 │       │   ├── home/
-│       │   │   └── home.component.ts                 # Landing page com apresentação do ecossistema
+│       │   │   └── home.component.{ts,html,css}      # Landing page com apresentação do ecossistema
 │       │   ├── about/
-│       │   │   └── about.component.ts                # Página "Sobre a Blue Fox Finance"
+│       │   │   └── about.component.{ts,html,css}     # Página "Sobre a Blue Fox Finance"
 │       │   └── updates/
-│       │       └── updates.component.ts              # Changelog e notas de versão
+│       │       └── updates.component.{ts,html,css}   # Changelog e roadmap
 │       ├── dashboard/                                # Dashboard único estilo Power BI (filtro cruzado)
 │       │   ├── dashboard.component.{ts,html,css}
 │       │   ├── analytics.store.ts                    # Estado e filtros (Signals)
@@ -90,9 +105,13 @@ frontend/src/app/
 │           │   └── store-categories.component.ts     # Gestão de segmentos de lojas
 │           └── user-profile/
 │               └── user-profile.component.ts         # Visualização de perfil e dados Keycloak
+│                   (+ locale-card/: idioma e país; telegram-link-card/: vínculo do bot)
 │
 ├── shared/                                           # Componentes reutilizáveis, tipos e mocks
 │   ├── components/
+│   │   ├── public/                                   # Cabeçalho (com seletor PT | EN) e rodapé das páginas públicas
+│   │   │   ├── public-header/
+│   │   │   └── public-footer/
 │   │   └── general/                                  # Componentes visuais globais
 │   │       ├── a11y-toolbar/                         # Barra flutuante de acessibilidade e tema (todas as páginas)
 │   │       ├── navbar/

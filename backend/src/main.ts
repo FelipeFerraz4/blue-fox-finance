@@ -1,4 +1,5 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { I18nExceptionFilter } from './common/i18n/i18n-exception.filter';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -23,6 +24,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Mensagens de erro no idioma do Accept-Language (pt no código, en pelo dicionário)
+  app.useGlobalFilters(new I18nExceptionFilter(app.get(HttpAdapterHost).httpAdapter));
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

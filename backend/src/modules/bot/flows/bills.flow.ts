@@ -3,6 +3,7 @@ import { BillOccurrenceView, BillsService } from '../../bills/bills.service';
 import { BotLinkService } from '../bot-link.service';
 import { BotFormat as F } from '../bot-format';
 import { BotButton, BotReply, BotUser, ConversationState } from '../bot.types';
+import { t } from '../../../common/i18n/translate';
 
 type ContaValorState = Extract<ConversationState, { flow: 'conta-valor' | 'conta-previsto' }>;
 
@@ -20,7 +21,7 @@ export class BillsFlow {
 
   /** Botão para informar (ou alterar) o valor do mês de uma conta variável pendente. */
   static amountButton(o: BillOccurrenceView, suffix = ''): BotButton {
-    const verb = o.valor === null ? '✏️ Informar valor' : '✏️ Alterar valor';
+    const verb = o.valor === null ? t('✏️ Informar valor') : t('✏️ Alterar valor');
     return { label: F.label(`${verb} · ${o.nome}${suffix}`, 40), data: `c::amount:${o.id}` };
   }
 
@@ -28,18 +29,18 @@ export class BillsFlow {
     const alerts = await this.bills.getAlerts(u.userId);
     const items = [...alerts.atrasadas, ...alerts.venceHoje, ...alerts.proximas];
     if (!items.length) {
-      return [{ text: '🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.' }];
+      return [{ text: t('🎉 Nenhuma conta atrasada ou vencendo nos próximos dias.') }];
     }
 
-    const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)}${o.valor !== null ? ` · ${F.brl(o.valor)}` : ' · valor a informar'}`);
+    const lines = items.map((o) => `${this.icon(o)} <b>${F.esc(o.nome)}</b> · ${this.when(o)} · ${o.valor !== null ? F.brl(o.valor) : t('valor a informar')}`);
     const buttons: BotButton[][] = [];
     for (const o of items.slice(0, 10)) {
-      buttons.push([{ label: F.label(`✅ Confirmar pagamento · ${o.nome}`, 40), data: `c::pay:${o.id}` }]);
+      buttons.push([{ label: F.label(`${t('✅ Confirmar pagamento')} · ${o.nome}`, 40), data: `c::pay:${o.id}` }]);
       if (o.valorVariavel && o.valor === null) buttons.push([BillsFlow.amountButton(o)]);
     }
     return [
       {
-        text: `<b>Contas a pagar</b>\n\n${lines.join('\n')}\n\n<i>Já pagou alguma? Toque para confirmar o pagamento.</i>`,
+        text: `${t('<b>Contas a pagar</b>')}\n\n${lines.join('\n')}\n\n${t('<i>Já pagou alguma? Toque para confirmar o pagamento.</i>')}`,
         buttons,
       },
     ];
@@ -47,28 +48,28 @@ export class BillsFlow {
 
   async onCallback(u: BotUser, action: string, id?: string): Promise<BotReply[]> {
     if (action === 'list') return this.list(u);
-    if (!id) return [{ text: 'Opção inválida.' }];
+    if (!id) return [{ text: t('Opção inválida.') }];
 
     if (action === 'unpay') {
       const view = await this.bills.unpay(u.userId, id);
-      return [{ text: `↩️ Confirmação de pagamento desfeita: <b>${F.esc(view.nome)}</b> voltou para pendente.` }];
+      return [{ text: t('↩️ Confirmação de pagamento desfeita: <b>{nome}</b> voltou para pendente.', { nome: F.esc(view.nome) }) }];
     }
 
     const view = await this.findPending(u, id);
-    if (!view) return [{ text: 'Essa conta não está mais pendente.', buttons: [[{ label: '📋 Ver contas', data: 'c::list' }]] }];
+    if (!view) return [{ text: t('Essa conta não está mais pendente.'), buttons: [[{ label: t('📋 Ver contas'), data: 'c::list' }]] }];
 
     if (action === 'amount') {
-      if (view.valorDaFatura) return [{ text: 'O valor dessa conta vem da fatura do cartão.' }];
+      if (view.valorDaFatura) return [{ text: t('O valor dessa conta vem da fatura do cartão.') }];
       await this.link.setState(u.canal, u.externalUserId, {
         flow: 'conta-previsto',
         nonce: F.nonce(),
         occurrenceId: id,
         nome: view.nome,
       });
-      const current = view.valor !== null ? `\nValor atual: ${F.brl(view.valor)}` : '';
+      const current = view.valor !== null ? `\n${t('Valor atual: {valor}', { valor: F.brl(view.valor) })}` : '';
       return [
         {
-          text: `💰 <b>Valor de ${F.esc(view.nome)}</b> (vence ${F.dayMonth(view.dataVencimento)})${current}\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>`,
+          text: `${t('💰 <b>Valor de {nome}</b> (vence {data})', { nome: F.esc(view.nome), data: F.dayMonth(view.dataVencimento) })}${current}\n${t('Digite o valor. <i>Exemplo: {exemplo} · /cancelar para sair</i>', { exemplo: F.amountExample() })}`,
         },
       ];
     }
@@ -82,16 +83,16 @@ export class BillsFlow {
           occurrenceId: id,
           nome: view.nome,
         });
-        return [{ text: `💰 <b>Valor pago em ${F.esc(view.nome)}</b>\nDigite o valor. <i>Exemplo: 120,50 · /cancelar para sair</i>` }];
+        return [{ text: `${t('💰 <b>Valor pago em {nome}</b>', { nome: F.esc(view.nome) })}\n${t('Digite o valor. <i>Exemplo: {exemplo} · /cancelar para sair</i>', { exemplo: F.amountExample() })}` }];
       }
       return this.pay(u, id);
     }
-    return [{ text: 'Opção inválida.' }];
+    return [{ text: t('Opção inválida.') }];
   }
 
   async onText(u: BotUser, state: ContaValorState, text: string): Promise<BotReply[]> {
     const valor = F.parseAmount(text);
-    if (!valor) return [{ text: 'Não entendi o valor. Exemplo: <code>120,50</code> (ou /cancelar).' }];
+    if (!valor) return [{ text: t('Não entendi o valor. Exemplo: <code>120,50</code> (ou /cancelar).') }];
     if (!(await this.link.consumeState(u.canal, u.externalUserId, state.nonce))) return [];
     if (state.flow === 'conta-previsto') return this.setAmount(u, state.occurrenceId, valor);
     return this.pay(u, state.occurrenceId, valor);
@@ -101,8 +102,8 @@ export class BillsFlow {
     const view = await this.bills.setAmount(u.userId, occurrenceId, valor);
     return [
       {
-        text: `✏️ Valor registrado: <b>${F.esc(view.nome)}</b> · ${F.brl(valor)} · vence ${F.dayMonth(view.dataVencimento)}\n<i>Ele já entra no /resumo. Quando pagar, confirme aqui.</i>`,
-        buttons: [[{ label: F.label(`✅ Confirmar pagamento · ${view.nome}`, 40), data: `c::pay:${occurrenceId}` }]],
+        text: `${t('✏️ Valor registrado: <b>{nome}</b> · {valor} · vence {data}', { nome: F.esc(view.nome), valor: F.brl(valor), data: F.dayMonth(view.dataVencimento) })}\n${t('<i>Ele já entra no /resumo. Quando pagar, confirme aqui.</i>')}`,
+        buttons: [[{ label: F.label(`${t('✅ Confirmar pagamento')} · ${view.nome}`, 40), data: `c::pay:${occurrenceId}` }]],
       },
     ];
   }
@@ -111,8 +112,8 @@ export class BillsFlow {
     const view = await this.bills.pay(u.userId, occurrenceId, { valorPago });
     return [
       {
-        text: `✅ Pagamento confirmado: <b>${F.esc(view.nome)}</b> · ${F.brl(view.valorPago ?? 0)}`,
-        buttons: [[{ label: '↩️ Desfazer', data: `c::unpay:${occurrenceId}` }]],
+        text: t('✅ Pagamento confirmado: <b>{nome}</b> · {valor}', { nome: F.esc(view.nome), valor: F.brl(view.valorPago ?? 0) }),
+        buttons: [[{ label: t('↩️ Desfazer'), data: `c::unpay:${occurrenceId}` }]],
       },
     ];
   }
@@ -132,8 +133,8 @@ export class BillsFlow {
   }
 
   private when(o: BillOccurrenceView) {
-    if (o.status === 'ATRASADA') return `atrasada ${Math.abs(o.diasParaVencer)}d`;
-    if (o.status === 'VENCE_HOJE') return 'vence hoje';
-    return o.diasParaVencer === 1 ? 'vence amanhã' : `vence em ${o.diasParaVencer} dias`;
+    if (o.status === 'ATRASADA') return t('atrasada {n}d', { n: Math.abs(o.diasParaVencer) });
+    if (o.status === 'VENCE_HOJE') return t('vence hoje');
+    return o.diasParaVencer === 1 ? t('vence amanhã') : t('vence em {n} dias', { n: o.diasParaVencer });
   }
 }

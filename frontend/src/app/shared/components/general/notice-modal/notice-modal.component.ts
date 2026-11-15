@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 @Component({
   selector: 'app-notice-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [...I18N, CommonModule],
   templateUrl: './notice-modal.component.html',
   styleUrl: './notice-modal.component.css'
 })

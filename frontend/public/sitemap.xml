@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Só as páginas públicas, em /pt e /en, cada uma com as alternativas de idioma (hreflang).
+     Página pública nova = entradas aqui + data.seo na rota + texto em core/content/{pt,en}. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/pt</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/en</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/pt/about</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt/about"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/en/about</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt/about"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/pt/updates</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt/updates"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en/updates"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt/updates"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://finance.bluefoxglobalgroup.com/en/updates</loc>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://finance.bluefoxglobalgroup.com/pt/updates"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://finance.bluefoxglobalgroup.com/en/updates"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://finance.bluefoxglobalgroup.com/pt/updates"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

@@ -1,0 +1,20 @@
+@let c = i18n.content().common;
+<footer class="public-footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <div class="logo-box-mini">
+        <img src="assets/logo.png" alt="" class="brand-logo-mini" />
+      </div>
+      <span class="footer-brand-name">BlueFox Finance</span>
+    </div>
+
+    <nav class="footer-links" [attr.aria-label]="c.footerNav">
+      <a [routerLink]="i18n.path('home')">{{ c.nav.home }}</a>
+      <a [routerLink]="i18n.path('about')">{{ c.nav.about }}</a>
+      <a [routerLink]="i18n.path('updates')">{{ c.nav.updates }}</a>
+      <a routerLink="/dashboard">{{ c.login }}</a>
+    </nav>
+
+    <div class="footer-copy">{{ c.copyright }}</div>
+  </div>
+</footer>

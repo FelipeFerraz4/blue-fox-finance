@@ -6,6 +6,7 @@ import { BillScheduleHelper } from '../../../common/helpers/bill-schedule.helper
 import { BotFormat as F } from '../bot-format';
 import { BotButton, BotReply, BotUser } from '../bot.types';
 import { BillsFlow } from './bills.flow';
+import { t } from '../../../common/i18n/translate';
 
 type FutureInstallment = {
   valor: unknown;
@@ -71,14 +72,14 @@ export class SummaryFlow {
     }
     const top = [...byCategory.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    const lines = [`📊 <b>${F.monthName(month)}</b>`, '', `Total do mês: <b>${F.brl(total)}</b>`];
+    const lines = [`📊 <b>${F.monthName(month)}</b>`, '', t('Total do mês: <b>{valor}</b>', { valor: F.brl(total) })];
     if (prev > 0) {
       const diff = ((total - prev) / prev) * 100;
       const arrow = diff >= 0 ? '▲' : '▼';
-      lines.push(`${arrow} ${Math.abs(diff).toFixed(0)}% vs ${F.monthName(previous).toLowerCase()} (${F.brl(prev)})`);
+      lines.push(`${arrow} ${Math.abs(diff).toFixed(0)}% ${t('vs')} ${F.monthName(previous).toLowerCase()} (${F.brl(prev)})`);
     }
     if (top.length) {
-      lines.push('', '<b>Categorias</b>');
+      lines.push('', t('<b>Categorias</b>'));
       for (const [name, value] of top) {
         const pct = total > 0 ? Math.round((value / total) * 100) : 0;
         lines.push(`• ${F.esc(name)}: ${F.brl(value)} (${pct}%)`);
@@ -89,12 +90,12 @@ export class SummaryFlow {
     lines.push('', ...this.futureLines(future, upcoming, upcomingBills));
 
     if (alerts.total > 0) {
-      const overdue = alerts.atrasadas.length ? `, ${alerts.atrasadas.length} atrasada(s)` : '';
-      lines.push('', `🔔 ${alerts.total} conta(s) precisando de atenção${overdue}. Veja em /contas`);
+      const overdue = alerts.atrasadas.length ? t(', {n} atrasada(s)', { n: alerts.atrasadas.length }) : '';
+      lines.push('', t('🔔 {n} conta(s) precisando de atenção{atrasadas}. Veja em /contas', { n: alerts.total, atrasadas: overdue }));
     }
 
     const buttons = this.amountButtons(currentBills, upcomingBills[0], next);
-    if (buttons.length) lines.push('', '<i>Chegou a conta de valor variável? Toque para informar o valor do mês.</i>');
+    if (buttons.length) lines.push('', t('<i>Chegou a conta de valor variável? Toque para informar o valor do mês.</i>'));
     return [{ text: lines.join('\n'), ...(buttons.length ? { buttons } : {}) }];
   }
 
@@ -115,14 +116,14 @@ export class SummaryFlow {
     const pending = bills.items.filter((o) => o.status !== 'PAGA');
     const sum = (list: BillOccurrenceView[]) => list.reduce((acc, o) => acc + (o.valor ?? 0), 0);
 
-    const lines = ['', `🧾 <b>Contas fixas de ${F.monthName(month).toLowerCase()}</b>`];
+    const lines = ['', t('🧾 <b>Contas fixas de {mes}</b>', { mes: F.monthName(month).toLowerCase() })];
     for (const o of bills.items) {
-      const value = o.valor === null ? 'valor a informar' : F.brl(o.valor);
+      const value = o.valor === null ? t('valor a informar') : F.brl(o.valor);
       lines.push(`${this.billIcon(o)} ${F.esc(o.nome)} · ${F.dayMonth(o.dataVencimento)} · ${value} · ${this.billStatus(o)}`);
     }
     const variable = pending.filter((o) => o.valor === null).length;
-    const note = variable ? ` (${variable} sem valor)` : '';
-    lines.push(`Pago: ${F.brl(sum(paid))} · Falta: <b>${F.brl(sum(pending))}</b>${note}`);
+    const note = variable ? t(' ({n} sem valor)', { n: variable }) : '';
+    lines.push(t('Pago: {pago} · Falta: <b>{falta}</b>{nota}', { pago: F.brl(sum(paid)), falta: F.brl(sum(pending)), nota: note }));
     return lines;
   }
 
@@ -144,13 +145,13 @@ export class SummaryFlow {
   private billStatus(o: BillOccurrenceView): string {
     switch (o.status) {
       case 'PAGA':
-        return o.pagoEm ? `paga em ${F.dayMonth(o.pagoEm)}` : 'paga';
+        return o.pagoEm ? t('paga em {data}', { data: F.dayMonth(o.pagoEm) }) : t('paga');
       case 'ATRASADA':
-        return 'atrasada';
+        return t('atrasada');
       case 'VENCE_HOJE':
-        return 'vence hoje';
+        return t('vence hoje');
       default:
-        return 'a pagar';
+        return t('a pagar');
     }
   }
 
@@ -188,11 +189,11 @@ export class SummaryFlow {
     }
 
     if (!future.length && bills.every((b) => !b.items.length)) {
-      return ['🗓️ <b>Gastos futuros</b>', `Nada previsto a partir de ${F.monthName(next).toLowerCase()}.`];
+      return [t('🗓️ <b>Gastos futuros</b>'), t('Nada previsto a partir de {mes}.', { mes: F.monthName(next).toLowerCase() })];
     }
 
-    const variableNote = (b: MonthBills) => (b.variable ? ` · ${b.variable} de valor variável fora da soma` : '');
-    const lines = ['🗓️ <b>Gastos futuros</b>'];
+    const variableNote = (b: MonthBills) => (b.variable ? t(' · {n} de valor variável fora da soma', { n: b.variable }) : '');
+    const lines = [t('🗓️ <b>Gastos futuros</b>')];
 
     // Próximo mês em detalhe
     const nextBills = bills[0];
@@ -201,13 +202,13 @@ export class SummaryFlow {
       lines.push(`  • ${F.esc(method)}: ${F.brl(value)}`);
     }
     if (nextBills.items.length) {
-      lines.push(`  • Contas fixas: ${F.brl(nextBills.total)} (${nextBills.items.length})`);
+      lines.push(`  • ${t('Contas fixas: {valor} ({n})', { valor: F.brl(nextBills.total), n: nextBills.items.length })}`);
       for (const o of nextBills.items.slice(0, MAX_LISTED_BILLS)) {
-        const value = o.valor === null ? 'valor variável' : F.brl(o.valor);
+        const value = o.valor === null ? t('valor variável') : F.brl(o.valor);
         lines.push(`      ◦ ${F.esc(o.nome)} (${F.dayMonth(o.dataVencimento)}): ${value}`);
       }
       const hidden = nextBills.items.length - MAX_LISTED_BILLS;
-      if (hidden > 0) lines.push(`      ◦ e mais ${hidden}`);
+      if (hidden > 0) lines.push(`      ◦ ${t('e mais {n}', { n: hidden })}`);
     }
 
     // Os dois meses seguintes, só os totais
@@ -215,14 +216,17 @@ export class SummaryFlow {
       const parcelas = byMonth.get(m) ?? 0;
       const b = bills[i + 1];
       if (parcelas + b.total === 0 && !b.variable) return;
-      const parts = [parcelas > 0 && `parcelas ${F.brl(parcelas)}`, b.items.length && `contas ${F.brl(b.total)}`].filter(Boolean);
+      const parts = [
+        parcelas > 0 && t('parcelas {valor}', { valor: F.brl(parcelas) }),
+        b.items.length && t('contas {valor}', { valor: F.brl(b.total) }),
+      ].filter(Boolean);
       lines.push(`${F.monthName(m)}: ${F.brl(parcelas + b.total)} (${parts.join(' + ')})${variableNote(b)}`);
     });
 
     if (future.length) {
-      lines.push('', `Parcelas futuras (a partir de ${F.monthName(next).toLowerCase()}): <b>${F.brl(installmentsTotal)}</b>`);
-      const plans = openPlans.size ? `${openPlans.size} parcelamento(s) em aberto, ` : '';
-      lines.push(`${plans}última parcela em ${F.monthName(lastMonth).toLowerCase()}`);
+      lines.push('', t('Parcelas futuras (a partir de {mes}): <b>{valor}</b>', { mes: F.monthName(next).toLowerCase(), valor: F.brl(installmentsTotal) }));
+      const plans = openPlans.size ? t('{n} parcelamento(s) em aberto, ', { n: openPlans.size }) : '';
+      lines.push(t('{planos}última parcela em {mes}', { planos: plans, mes: F.monthName(lastMonth).toLowerCase() }));
     }
     return lines;
   }

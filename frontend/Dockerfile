@@ -23,10 +23,13 @@ RUN mkdir -p /app/public-html && \
       cp -r /app/dist/bluefox-finance-frontend/* /app/public-html/; \
     fi
 
-# Stage 2: Nginx para servir a SPA
+# Stage 2: Nginx para servir as páginas prontas (prerender) e o app
 FROM nginx:alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove o index.html/50x.html padrão da imagem: com o prerender não existe index.html
+# na raiz (o app é o index.csr.html), e o padrão do nginx apareceria em "/"
+RUN rm -rf /usr/share/nginx/html/*
 # Suporte caso o build context seja a raiz ou a pasta frontend
 COPY --from=builder /app/public-html /usr/share/nginx/html
 

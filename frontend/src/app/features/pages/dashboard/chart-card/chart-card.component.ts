@@ -1,9 +1,11 @@
 import { Component, input } from '@angular/core';
+import { I18N } from '../../../../core/i18n/i18n.pipes';
 
 /** Moldura dos painéis de Análises: título, legenda curta, estado vazio e recarga sem salto. */
 @Component({
   selector: 'app-chart-card',
   standalone: true,
+  imports: [...I18N],
   templateUrl: './chart-card.component.html',
   styleUrl: './chart-card.component.css',
   host: { class: 'chart-card' },
