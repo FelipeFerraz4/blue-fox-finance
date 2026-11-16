@@ -19,7 +19,7 @@ export const homeContent = {
     secondary: 'Conhecer a Origem',
   },
   mockup: {
-    previewLabel: 'Prévia do dashboard do BlueFox Finance',
+    previewLabel: 'Prévia do dashboard do Blue Fox Finance',
     badge: 'VERSÃO ATIVA • v1.6',
     stats: [
       { label: 'Total de Despesas', value: 'R$ 14.850,20', sub: 'Mês de referência ativo' },
@@ -36,7 +36,7 @@ export const homeContent = {
   },
   features: {
     badge: 'RECURSOS DISPONÍVEIS HOJE',
-    title: 'O que o BlueFox Finance entrega',
+    title: 'O que o Blue Fox Finance entrega',
     subtitle: 'Funcionalidades operacionais prontas para uso no controle diário de gastos pessoais e em equipe.',
     // Mesma ordem dos ícones em home.component.html
     items: [
@@ -68,7 +68,7 @@ export const homeContent = {
   },
   about: {
     badge: 'NOSSA HISTÓRIA & GOVERNANÇA',
-    title: 'A Origem do BlueFox Finance',
+    title: 'A Origem do Blue Fox Finance',
     subtitle:
       'Desenvolvido internamente pelo Blue Fox Global Group para controle rigoroso de despesas, faturas e contas, e agora disponível para todos.',
     boxes: [

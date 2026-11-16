@@ -10,14 +10,14 @@ export const aboutContent = {
   },
   hero: {
     badge: 'HISTÓRIA & GOVERNANÇA CORPORATIVA',
-    title: 'Sobre o BlueFox Finance',
+    title: 'Sobre o Blue Fox Finance',
     html: 'Como uma solução desenvolvida internamente para resolver os desafios de orçamento e gastos do <strong>Blue Fox Global Group</strong> evoluiu para uma plataforma aberta de controle financeiro de alta precisão.',
   },
   foundation: {
     tag: 'A FUNDAÇÃO',
     title: 'Por que o sistema foi criado?',
     paragraphs: [
-      'O <strong>BlueFox Finance</strong> surgiu no seio das operações internas do <strong>Blue Fox Global Group</strong> para resolver uma dor concreta e urgente de governança corporativa: o controle rigoroso de fluxo de despesas, faturamento e previsibilidade de orçamento entre diversas frentes e projetos.',
+      'O <strong>Blue Fox Finance</strong> surgiu no seio das operações internas do <strong>Blue Fox Global Group</strong> para resolver uma dor concreta e urgente de governança corporativa: o controle rigoroso de fluxo de despesas, faturamento e previsibilidade de orçamento entre diversas frentes e projetos.',
       'Com múltiplos cartões corporativos, diferentes dias de fechamento e vencimento de faturas, e despesas realizadas por vários membros da equipe, métodos manuais como planilhas geravam ruídos constantes: parcelas atribuídas ao mês errado, compras sem rastreabilidade de comprador e falta de clareza sobre o impacto no fluxo de caixa futuro.',
     ],
     highlight:
@@ -46,7 +46,7 @@ export const aboutContent = {
   identity: {
     tag: 'INFRAESTRUTURA & IDENTIDADE',
     title: 'O Papel do Grupo no Sistema & o Login Único com Keycloak',
-    html: 'No <strong>BlueFox Finance</strong>, o papel do <strong>Blue Fox Global Group</strong> é atuar como provedor de infraestrutura, custodiante das boas práticas de engenharia e guardião da segurança dos dados.',
+    html: 'No <strong>Blue Fox Finance</strong>, o papel do <strong>Blue Fox Global Group</strong> é atuar como provedor de infraestrutura, custodiante das boas práticas de engenharia e guardião da segurança dos dados.',
     panelBadge: 'Segurança Corporativa',
     panelTitle: 'Por que o Keycloak?',
     panelHtml:
@@ -65,7 +65,7 @@ export const aboutContent = {
     footnote: 'O botão de Login leva ao login único da Blue Fox: a mesma conta vale para todos os produtos do ecossistema.',
   },
   cta: {
-    title: 'Acesse o BlueFox Finance',
+    title: 'Acesse o Blue Fox Finance',
     subtitle: 'Faça login para navegar pela ferramenta e gerenciar seus lançamentos, cartões e orçamentos.',
     updates: 'Ver Atualizações & Roadmap',
   },

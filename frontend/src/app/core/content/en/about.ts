@@ -9,14 +9,14 @@ export const aboutContent: AboutContent = {
   },
   hero: {
     badge: 'HISTORY & CORPORATE GOVERNANCE',
-    title: 'About BlueFox Finance',
+    title: 'About Blue Fox Finance',
     html: 'How a tool built in-house to solve the budgeting and spending challenges of <strong>Blue Fox Global Group</strong> grew into an open, high-precision expense tracking platform.',
   },
   foundation: {
     tag: 'THE FOUNDATION',
     title: 'Why was it built?',
     paragraphs: [
-      '<strong>BlueFox Finance</strong> was born inside the internal operations of <strong>Blue Fox Global Group</strong> to solve a real and pressing governance problem: keeping tight control of spending, card statements and budget forecasting across several fronts and projects.',
+      '<strong>Blue Fox Finance</strong> was born inside the internal operations of <strong>Blue Fox Global Group</strong> to solve a real and pressing governance problem: keeping tight control of spending, card statements and budget forecasting across several fronts and projects.',
       'With several corporate cards, different closing and due dates, and expenses made by multiple team members, manual methods like spreadsheets kept causing trouble: installments assigned to the wrong month, purchases with no record of who made them, and no clear view of the impact on future cash flow.',
     ],
     highlight:
@@ -45,7 +45,7 @@ export const aboutContent: AboutContent = {
   identity: {
     tag: 'INFRASTRUCTURE & IDENTITY',
     title: 'The Group’s Role in the App & Single Sign-On with Keycloak',
-    html: 'In <strong>BlueFox Finance</strong>, <strong>Blue Fox Global Group</strong> acts as the infrastructure provider, the keeper of engineering best practices and the guardian of data security.',
+    html: 'In <strong>Blue Fox Finance</strong>, <strong>Blue Fox Global Group</strong> acts as the infrastructure provider, the keeper of engineering best practices and the guardian of data security.',
     panelBadge: 'Corporate Security',
     panelTitle: 'Why Keycloak?',
     panelHtml:
@@ -64,7 +64,7 @@ export const aboutContent: AboutContent = {
     footnote: 'The Login button takes you to Blue Fox single sign-on: the same account works across every product in the ecosystem.',
   },
   cta: {
-    title: 'Access BlueFox Finance',
+    title: 'Access Blue Fox Finance',
     subtitle: 'Log in to explore the app and manage your entries, cards and budgets.',
     updates: 'See Updates & Roadmap',
   },

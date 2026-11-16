@@ -10,7 +10,7 @@ export const commonContent = {
   mainNav: 'Navegação principal',
   language: 'Idioma',
   languageNames: { pt: 'Português', en: 'English' },
-  logoAlt: 'Logo do BlueFox Finance',
+  logoAlt: 'Logo do Blue Fox Finance',
   footerNav: 'Links do rodapé',
   copyright: '© 2026 Blue Fox Global Group • Todos os direitos reservados.',
   notFound: {

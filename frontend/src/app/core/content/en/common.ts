@@ -12,7 +12,7 @@ export const commonContent: CommonContent = {
   mainNav: 'Main navigation',
   language: 'Language',
   languageNames: { pt: 'Português', en: 'English' },
-  logoAlt: 'BlueFox Finance logo',
+  logoAlt: 'Blue Fox Finance logo',
   footerNav: 'Footer links',
   copyright: '© 2026 Blue Fox Global Group • All rights reserved.',
   notFound: {
