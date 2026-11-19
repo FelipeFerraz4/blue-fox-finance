@@ -230,24 +230,21 @@ export const FORMS: Record<FormKind, FormSpec> = {
     doneLabel: 'Conta cadastrada',
     dto: CreateBillDto,
     fields: [
+      name('nome', 'Nome', 'Exemplo: Energia, Internet, Aluguel'),
       {
-        key: 'meioPagamentoId',
-        label: 'Cartão',
-        short: 'Cartão',
+        key: 'categoria',
+        label: 'Categoria',
+        short: 'Categoria',
         type: 'choice',
         required: false,
-        skipLabel: 'Nenhum',
-        hint: 'Para a fatura de um cartão de crédito: o valor vem da soma das parcelas do mês.',
+        skipLabel: 'Sem categoria',
+        hint: 'Toque numa opção. Para criar uma categoria nova, use /novacategoria.',
         choices: async (userId, prisma) =>
-          (
-            await prisma.paymentMethod.findMany({
-              where: { userId, ativo: true, modalidade: ModalidadePagamento.CREDITO },
-              orderBy: { nome: 'asc' },
-            })
-          ).map((m) => ({ id: m.id, label: m.nome })),
+          (await prisma.categoriaItem.findMany({ where: { userId, ativo: true }, orderBy: { nome: 'asc' } })).map((c) => ({
+            id: c.nome,
+            label: c.nome,
+          })),
       },
-      name('nome', 'Nome', 'Exemplo: Energia, Internet, Aluguel'),
-      { key: 'categoria', label: 'Categoria', short: 'Categoria', type: 'text', required: false, maxLength: 120, hint: 'Exemplo: Moradia, Serviços' },
       { key: 'recorrencia', label: 'Repetição', short: 'Repetição', type: 'choice', required: true, choices: () => translated(REPETICAO) },
       {
         key: 'dataUnica',
@@ -259,13 +256,12 @@ export const FORMS: Record<FormKind, FormSpec> = {
       },
       {
         key: 'diaVencimento',
-        label: 'Dia',
-        short: 'Dia',
+        label: 'Vencimento',
+        short: 'Vencimento',
         type: 'day',
         required: true,
         hint: 'Dia do vencimento (1 a 31).',
-        // Com cartão, vale o dia de vencimento do cartão
-        visible: (v) => v.recorrencia !== RecorrenciaConta.UNICA && !v.meioPagamentoId,
+        visible: (v) => v.recorrencia !== RecorrenciaConta.UNICA,
       },
       {
         key: 'mesVencimento',
@@ -283,20 +279,7 @@ export const FORMS: Record<FormKind, FormSpec> = {
         type: 'money',
         required: false,
         skipLabel: 'Variável',
-        hint: 'Se variar todo mês, toque em Variável e informe o valor ao confirmar o pagamento.',
-        visible: (v) => !v.meioPagamentoId,
-      },
-      {
-        key: 'lembrarDiasAntes',
-        label: 'Aviso (dias)',
-        short: 'Aviso',
-        type: 'int',
-        required: false,
-        min: 0,
-        max: 30,
-        skipLabel: 'Padrão (2)',
-        hint: 'Quantos dias antes do vencimento a conta aparece nos avisos.',
-        quick: () => [1, 3, 5, 7].map((n) => ({ id: String(n), label: String(n) })),
+        hint: 'Se variar todo mês/ano, toque em Variável para informar o valor a cada período.',
       },
       {
         key: 'dataInicio',
@@ -312,17 +295,16 @@ export const FORMS: Record<FormKind, FormSpec> = {
     ],
     toDto: (v) => {
       const unica = v.recorrencia === RecorrenciaConta.UNICA;
-      const card = opt(v.meioPagamentoId, String);
       return {
         nome: v.nome,
         categoria: opt(v.categoria, String) ?? null,
         recorrencia: v.recorrencia,
-        meioPagamentoId: card ?? null,
+        meioPagamentoId: null,
         dataUnica: unica ? v.dataUnica : null,
-        diaVencimento: !unica && !card ? v.diaVencimento : null,
+        diaVencimento: !unica ? v.diaVencimento : null,
         mesVencimento: v.recorrencia === RecorrenciaConta.ANUAL ? Number(v.mesVencimento) : null,
-        valorPrevisto: card ? null : (opt(v.valorPrevisto, Number) ?? null),
-        lembrarDiasAntes: opt(v.lembrarDiasAntes, Number),
+        valorPrevisto: opt(v.valorPrevisto, Number) ?? null,
+        lembrarDiasAntes: 2,
         dataInicio: unica ? undefined : opt(v.dataInicio, String),
         observacoes: opt(v.observacoes, String) ?? null,
       };

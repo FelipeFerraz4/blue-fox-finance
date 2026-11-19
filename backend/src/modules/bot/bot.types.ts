@@ -30,6 +30,13 @@ export interface BotReply {
   noFollowUp?: boolean;
 }
 
+export interface ExpenseItemDraft {
+  nome: string;
+  categoria: string;
+  quantidade: number;
+  valorUnitario: number;
+}
+
 /**
  * Rascunho do lançamento montado pelo assistente. Mesmos campos e ordem da
  * tela "Novo Lançamento" do site; nada vem preenchido sem perguntar
@@ -46,6 +53,12 @@ export interface ExpenseDraft {
   modalidade?: string;
   tipo?: 'A_VISTA' | 'PARCELADO';
   parcelas?: number;
+  /** Itens já adicionados a esta mesma compra */
+  items?: ExpenseItemDraft[];
+  /** Indica que o usuário pediu para adicionar mais um item à compra */
+  addingItem?: boolean;
+  /** Índice do item que está sendo editado (quando aplicável) */
+  editingItemIndex?: number;
   nome?: string;
   categoria?: string;
   quantidade?: number;

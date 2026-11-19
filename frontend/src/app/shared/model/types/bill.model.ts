@@ -55,6 +55,7 @@ export interface BillOccurrence {
   dataVencimento: string;
   valor: number | null;
   valorDaFatura: boolean;
+  valorVariavel: boolean;
   valorPago: number | null;
   pagoEm: string | null;
   status: BillStatus;

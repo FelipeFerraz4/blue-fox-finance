@@ -117,7 +117,7 @@ export class BillsService {
           OR: [{ mesReferencia: { gte: currentMonth } }, { mesReferencia: { lt: startMonth } }],
         },
       });
-      if (updated.ativo && !updated.meioPagamentoId) {
+      if (updated.ativo && !updated.meioPagamentoId && updated.valorPrevisto === null) {
         const rows = manual
           .filter((m) => m.mesReferencia >= startMonth)
           .map((m) => ({ ...m, dataVencimento: BillScheduleHelper.dueDateFor(updated, m.mesReferencia) }))
@@ -470,7 +470,7 @@ export class BillsService {
       dataUnica,
       valorPrevisto: dto.valorPrevisto ?? null,
       meioPagamentoId: dto.meioPagamentoId || null,
-      lembrarDiasAntes: dto.lembrarDiasAntes ?? 2,
+      lembrarDiasAntes: 2,
       dataInicio,
       ativo: dto.ativo ?? true,
       observacoes: dto.observacoes?.trim() || null,
