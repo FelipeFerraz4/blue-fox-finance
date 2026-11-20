@@ -446,6 +446,7 @@ export const EN: Record<string, string> = {
   "O nome do comprador é obrigatório.": "Buyer name is required.",
   "O nome do item é obrigatório.": "Item name is required.",
   "O sistema de login corporativo com Keycloak SSO está em fase de implementação.": "Login uses Blue Fox single sign-on (Keycloak SSO).",
+  "O valor desta conta é calculado automaticamente pela fatura do cartão de crédito.": "This bill's amount is calculated automatically from the credit card statement.",
   "O valor total deve ser maior que zero.": "Total amount must be greater than zero.",
   "O valor total do Item #{n} (\"{nome}\") deve ser maior que {zero}.": "The total amount of Item #{n} (\"{nome}\") must be greater than {zero}.",
   "Observações": "Notes",

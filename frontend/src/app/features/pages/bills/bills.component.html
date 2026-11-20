@@ -165,7 +165,9 @@
             <strong>{{ o.nome }}</strong>
             <div class="occurrence-meta">
               <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o) }}</span>
-              @if (o.valorVariavel) {
+              @if (o.meioPagamentoId) {
+                <span class="badge badge-brand">{{ 'Cartão de Crédito' | t }}</span>
+              } @else if (o.valorVariavel) {
                 <span class="badge badge-gray">{{ 'Variável' | t }}</span>
               }
               @if (o.categoria) {
@@ -391,47 +393,53 @@
               </div>
             }
 
-            <!-- Seletor Fixo vs Variável -->
-            <div class="form-group">
-              <label class="form-label">{{ 'Tipo de valor *' | t }}</label>
-              <div class="value-type-switch" role="group" [attr.aria-label]="'Tipo de valor' | t">
-                <button
-                  type="button"
-                  class="value-type-btn"
-                  [class.active]="form.tipoValor === 'FIXO'"
-                  (click)="setTipoValor('FIXO')"
-                >
-                  {{ 'Valor fixo' | t }}
-                </button>
-                <button
-                  type="button"
-                  class="value-type-btn"
-                  [class.active]="form.tipoValor === 'VARIAVEL'"
-                  (click)="setTipoValor('VARIAVEL')"
-                >
-                  {{ 'Valor variável' | t }}
-                </button>
-              </div>
-            </div>
-
-            @if (form.tipoValor === 'FIXO') {
-              <div class="form-group">
-                <label class="form-label">{{ 'Valor *' | t }}</label>
-                <input
-                  type="number"
-                  name="valorPrevisto"
-                  min="0.01"
-                  step="0.01"
-                  [(ngModel)]="form.valorPrevisto"
-                  required
-                  class="form-control"
-                  [placeholder]="'ex: 187,35' | t"
-                />
+            <!-- Seletor Fixo vs Variável (apenas para contas que não são fatura de cartão) -->
+            @if (form.meioPagamentoId) {
+              <div class="variable-value-hint">
+                {{ 'O valor desta conta é calculado automaticamente pela fatura do cartão de crédito.' | t }}
               </div>
             } @else {
-              <div class="variable-value-hint">
-                {{ 'A conta aparecerá todo período na lista para você informar o valor do mês ou ano.' | t }}
+              <div class="form-group">
+                <label class="form-label">{{ 'Tipo de valor *' | t }}</label>
+                <div class="value-type-switch" role="group" [attr.aria-label]="'Tipo de valor' | t">
+                  <button
+                    type="button"
+                    class="value-type-btn"
+                    [class.active]="form.tipoValor === 'FIXO'"
+                    (click)="setTipoValor('FIXO')"
+                  >
+                    {{ 'Valor fixo' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="value-type-btn"
+                    [class.active]="form.tipoValor === 'VARIAVEL'"
+                    (click)="setTipoValor('VARIAVEL')"
+                  >
+                    {{ 'Valor variável' | t }}
+                  </button>
+                </div>
               </div>
+
+              @if (form.tipoValor === 'FIXO') {
+                <div class="form-group">
+                  <label class="form-label">{{ 'Valor *' | t }}</label>
+                  <input
+                    type="number"
+                    name="valorPrevisto"
+                    min="0.01"
+                    step="0.01"
+                    [(ngModel)]="form.valorPrevisto"
+                    required
+                    class="form-control"
+                    [placeholder]="'ex: 187,35' | t"
+                  />
+                </div>
+              } @else {
+                <div class="variable-value-hint">
+                  {{ 'A conta aparecerá todo período na lista para você informar o valor do mês ou ano.' | t }}
+                </div>
+              }
             }
 
             @if (form.recorrencia !== 'UNICA') {
@@ -456,7 +464,7 @@
                 !billForm.valid ||
                 savingBill ||
                 (form.recorrencia === 'ANUAL' && !form.mesVencimento) ||
-                (form.tipoValor === 'FIXO' && (!form.valorPrevisto || form.valorPrevisto <= 0))
+                (!form.meioPagamentoId && form.tipoValor === 'FIXO' && (!form.valorPrevisto || form.valorPrevisto <= 0))
               "
             >
               @if (savingBill) {

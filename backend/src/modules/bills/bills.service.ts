@@ -36,7 +36,8 @@ export class BillsService {
   // Contas (regras)
   // ---------------------------------------------------------------------------
 
-  findAll(userId: string) {
+  async findAll(userId: string) {
+    await this.syncCreditCardBills(userId);
     return this.prisma.contaPagar.findMany({
       where: { userId },
       include: BILL_INCLUDE,
@@ -297,6 +298,7 @@ export class BillsService {
    * também apareçam como atrasados.
    */
   private async ensureOccurrences(userId: string, untilMonth: string) {
+    await this.syncCreditCardBills(userId);
     const bills = await this.prisma.contaPagar.findMany({
       where: { userId, ativo: true },
     });
@@ -319,6 +321,56 @@ export class BillsService {
 
     if (rows.length > 0) {
       await this.prisma.pagamentoConta.createMany({ data: rows, skipDuplicates: true });
+    }
+  }
+
+  /**
+   * Garante que todo cartão de crédito cadastrado em Meios de Pagamento tenha
+   * automaticamente sua conta a pagar ("Fatura <Cartão>") vinculada.
+   */
+  private async syncCreditCardBills(userId: string) {
+    const [cards, existingCardBills] = await Promise.all([
+      this.prisma.paymentMethod.findMany({
+        where: {
+          userId,
+          modalidade: ModalidadePagamento.CREDITO,
+          diaVencimento: { not: null },
+        },
+      }),
+      this.prisma.contaPagar.findMany({
+        where: { userId, meioPagamentoId: { not: null } },
+        select: { meioPagamentoId: true },
+      }),
+    ]);
+
+    const linkedCardIds = new Set(existingCardBills.map((b) => b.meioPagamentoId));
+    const missingCards = cards.filter((c) => !linkedCardIds.has(c.id));
+    if (missingCards.length === 0) return;
+
+    const currentMonth = BillScheduleHelper.currentMonth();
+    for (const card of missingCards) {
+      const earliestParcela = await this.prisma.parcela.findFirst({
+        where: { lancamento: { userId, meioPagamentoId: card.id } },
+        orderBy: { mesReferencia: 'asc' },
+        select: { mesReferencia: true },
+      });
+      const startMonth =
+        earliestParcela && earliestParcela.mesReferencia < currentMonth
+          ? earliestParcela.mesReferencia
+          : currentMonth;
+
+      await this.prisma.contaPagar.create({
+        data: {
+          userId,
+          nome: `Fatura ${card.nome}`,
+          recorrencia: RecorrenciaConta.MENSAL,
+          diaVencimento: card.diaVencimento!,
+          meioPagamentoId: card.id,
+          lembrarDiasAntes: 2,
+          dataInicio: this.firstDayOfMonth(startMonth),
+          ativo: card.ativo,
+        },
+      });
     }
   }
 
