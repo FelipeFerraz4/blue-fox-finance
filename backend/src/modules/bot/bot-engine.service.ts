@@ -120,7 +120,7 @@ export class BotEngineService {
 
   /**
    * Terminada uma operação (nenhuma conversa em andamento), acrescenta à última resposta
-   * um convite curto para continuar, com Sim (menu compacto) e Não (despedida).
+   * um convite claro e destacado para realizar outra operação ou encerrar.
    */
   private async withFollowUp(u: BotUser, replies: BotReply[]): Promise<BotReply[]> {
     const last = replies[replies.length - 1];
@@ -130,12 +130,12 @@ export class BotEngineService {
       ...replies.slice(0, -1),
       {
         ...last,
-        text: `${last.text}\n\n${t('<i>Mais alguma coisa?</i>')}`,
+        text: `${last.text}\n\n${t('🧭 <b>Deseja realizar mais alguma operação?</b>')}`,
         buttons: [
           ...(last.buttons ?? []),
           [
-            { label: t('👍 Sim'), data: 'm::mais' },
-            { label: t('👋 Não'), data: 'm::tchau' },
+            { label: t('✅ Sim, outra operação'), data: 'm::mais' },
+            { label: t('👋 Não, encerrar'), data: 'm::tchau' },
           ],
         ],
       },
@@ -223,7 +223,7 @@ export class BotEngineService {
           case 'mais':
             return [this.quickMenu()];
           case 'tchau':
-            return [{ text: t('Até mais! 👋 Quando precisar, é só mandar uma mensagem.'), noFollowUp: true }];
+            return [{ text: t('👋 <b>Atendimento finalizado.</b> Quando precisar realizar uma nova operação, basta enviar uma mensagem.'), noFollowUp: true }];
         }
     }
     return [{ text: t('Esse botão não é mais válido.') }];
@@ -267,9 +267,13 @@ export class BotEngineService {
     };
   }
 
-  /** Só os botões do menu, para quem respondeu "Sim" ao "Mais alguma coisa?". */
+  /** Só os botões do menu, para quem respondeu "Sim" ao convite de nova operação. */
   private quickMenu(): BotReply {
-    return { text: t('O que vamos fazer?'), buttons: this.menuButtons(), noFollowUp: true };
+    return {
+      text: t('🧭 <b>Qual operação você deseja realizar agora?</b>\n<i>Selecione uma das opções abaixo:</i>'),
+      buttons: this.menuButtons(),
+      noFollowUp: true,
+    };
   }
 
   private menuButtons(): BotReply['buttons'] {
