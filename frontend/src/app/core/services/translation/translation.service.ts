@@ -78,6 +78,12 @@ export class TranslationService {
   readonly content = computed(() => DICTIONARY[this.lang()]);
 
   constructor() {
+    if (typeof window !== 'undefined') {
+      const firstSeg = window.location.pathname.split('/').filter(Boolean)[0];
+      const initialLang = isLanguage(firstSeg) ? firstSeg : PREFERRED_LANGUAGE;
+      this.lang.set(initialLang);
+      activeLanguage.set(initialLang);
+    }
     // Idioma em uso trocado antes de criar os componentes da nova rota (ResolveEnd), para
     // textos montados no construtor (t()) já saírem no idioma certo
     this.router.events.pipe(filter((e): e is ResolveEnd => e instanceof ResolveEnd)).subscribe((e) => {

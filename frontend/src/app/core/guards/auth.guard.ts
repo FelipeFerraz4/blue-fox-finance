@@ -2,9 +2,11 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  await authService.init();
 
   if (authService.isLoggedIn()) {
     // Verificação opcional de roles se especificada em route.data
@@ -22,6 +24,6 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   // Redireciona para o login do Keycloak passando o destino original
   const returnUrl = window.location.origin + state.url;
-  authService.login(returnUrl);
+  await authService.login(returnUrl);
   return false;
 };
