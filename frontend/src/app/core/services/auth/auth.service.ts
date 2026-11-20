@@ -14,12 +14,17 @@ export interface UserAuthProfile {
   roles: string[];
 }
 
+const SESSION_TOKEN_KEY = 'bf_kc_token';
+const SESSION_REFRESH_KEY = 'bf_kc_refresh_token';
+const SESSION_ID_TOKEN_KEY = 'bf_kc_id_token';
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private keycloak: Keycloak | null = null;
   private readonly config = environment.keycloak;
+  private initPromise: Promise<boolean> | null = null;
 
   // Signals reativos para o estado do usuário
   public readonly isAuthenticated = signal<boolean>(false);
@@ -36,28 +41,65 @@ export class AuthService {
   }
 
   /**
-   * Inicializa o cliente Keycloak no ciclo de vida da aplicação
+   * Inicializa o cliente Keycloak no ciclo de vida da aplicação sem bloquear
+   * páginas públicas com redirecionamentos de check-sso.
    */
   async init(): Promise<boolean> {
     if (!this.keycloak) {
       return false;
     }
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = this.performInit();
+    return this.initPromise;
+  }
+
+  private async performInit(): Promise<boolean> {
+    if (!this.keycloak) {
+      return false;
+    }
 
     try {
-      const authenticated = await this.keycloak.init({
-        onLoad: 'check-sso',
+      const savedToken = this.readSession(SESSION_TOKEN_KEY);
+      const savedRefresh = this.readSession(SESSION_REFRESH_KEY);
+      const savedIdToken = this.readSession(SESSION_ID_TOKEN_KEY);
+
+      this.keycloak.onTokenExpired = () => {
+        void this.getValidToken();
+      };
+
+      // Não usa onLoad: 'check-sso' no bootstrap para evitar redirecionamento de janela
+      // inteira (que deixa a tela azul vazia no primeiro acesso). Processa callbacks OAuth
+      // quando o usuário retorna do login ou restaura os tokens salvos na sessão.
+      const initCall = this.keycloak.init({
         checkLoginIframe: false,
+        ...(savedToken && savedRefresh
+          ? {
+              token: savedToken,
+              refreshToken: savedRefresh,
+              idToken: savedIdToken || undefined,
+            }
+          : {}),
       });
+
+      const timeout = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 6000));
+      const authenticated = await Promise.race([initCall, timeout]);
 
       this.isAuthenticated.set(!!authenticated);
 
       if (authenticated) {
+        this.persistSessionTokens();
         this.updateUserProfile();
+      } else {
+        this.clearSessionTokens();
       }
 
-      return authenticated;
+      return !!authenticated;
     } catch (error) {
       console.warn('Falha na inicialização do Keycloak SSO:', error);
+      this.clearSessionTokens();
       this.isAuthenticated.set(false);
       return false;
     }
@@ -66,12 +108,14 @@ export class AuthService {
   /**
    * Redireciona para o login do Keycloak
    */
-  login(redirectUri?: string): Promise<void> {
-    return this.keycloak?.login({
+  async login(redirectUri?: string): Promise<void> {
+    if (!this.keycloak) return;
+    await this.init();
+    return this.keycloak.login({
       redirectUri: redirectUri || window.location.href,
       // Tela de login do Keycloak no idioma do usuário
       locale: languageTag(PREFERRED_LANGUAGE),
-    }) || Promise.resolve();
+    });
   }
 
   /**
@@ -80,9 +124,12 @@ export class AuthService {
   logout(redirectUri?: string): Promise<void> {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
-    return this.keycloak?.logout({
-      redirectUri: redirectUri || window.location.origin,
-    }) || Promise.resolve();
+    this.clearSessionTokens();
+    return (
+      this.keycloak?.logout({
+        redirectUri: redirectUri || window.location.origin,
+      }) || Promise.resolve()
+    );
   }
 
   /**
@@ -99,9 +146,13 @@ export class AuthService {
     if (!this.keycloak) return undefined;
 
     try {
-      await this.keycloak.updateToken(30);
+      const refreshed = await this.keycloak.updateToken(30);
+      if (refreshed) {
+        this.persistSessionTokens();
+      }
       return this.keycloak.token;
     } catch {
+      this.clearSessionTokens();
       this.isAuthenticated.set(false);
       this.currentUser.set(null);
       return undefined;
@@ -129,6 +180,36 @@ export class AuthService {
         `ROLE_${normalizedR}` === normalizedTarget
       );
     });
+  }
+
+  private persistSessionTokens(): void {
+    try {
+      if (typeof sessionStorage === 'undefined' || !this.keycloak) return;
+      if (this.keycloak.token) sessionStorage.setItem(SESSION_TOKEN_KEY, this.keycloak.token);
+      if (this.keycloak.refreshToken) sessionStorage.setItem(SESSION_REFRESH_KEY, this.keycloak.refreshToken);
+      if (this.keycloak.idToken) sessionStorage.setItem(SESSION_ID_TOKEN_KEY, this.keycloak.idToken);
+    } catch {
+      /* sessionStorage indisponível */
+    }
+  }
+
+  private clearSessionTokens(): void {
+    try {
+      if (typeof sessionStorage === 'undefined') return;
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      sessionStorage.removeItem(SESSION_REFRESH_KEY);
+      sessionStorage.removeItem(SESSION_ID_TOKEN_KEY);
+    } catch {
+      /* sessionStorage indisponível */
+    }
+  }
+
+  private readSession(key: string): string | null {
+    try {
+      return typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
   }
 
   /**

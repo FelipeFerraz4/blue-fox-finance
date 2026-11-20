@@ -8,6 +8,7 @@ import {
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
+  withNavigationErrorHandler,
 } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -29,6 +30,19 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({
         scrollPositionRestoration: 'top',
         anchorScrolling: 'enabled',
+      }),
+      withNavigationErrorHandler((err) => {
+        // Se um chunk lazy antigo falhar após deploy, recarrega automaticamente uma única vez
+        if (typeof window !== 'undefined') {
+          const msg = String((err as { error?: unknown })?.error ?? err ?? '');
+          if (/ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed/i.test(msg)) {
+            const key = 'bf_chunk_reload';
+            if (!sessionStorage.getItem(key)) {
+              sessionStorage.setItem(key, '1');
+              window.location.reload();
+            }
+          }
+        }
       }),
     ),
     provideHttpClient(withFetch(), withInterceptors([languageInterceptor, authInterceptor])),

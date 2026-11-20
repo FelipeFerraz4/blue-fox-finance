@@ -2,26 +2,27 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { FINANCE_ACCESS_ROLES, KeycloakRole } from './core/services/auth/roles.constants';
 import { preferredLanguage } from './core/services/translation/translation.service';
+import { HomeComponent } from './features/pages/main/home/home.component';
+import { AboutComponent } from './features/pages/main/about/about.component';
+import { UpdatesComponent } from './features/pages/main/updates/updates.component';
+import { NotFoundComponent } from './features/pages/main/not-found/not-found.component';
 
 /** Páginas públicas, montadas em /pt e /en (como no Blue Fox Global Group). */
 const publicPages: Routes = [
   {
     path: '',
     data: { seo: 'home' },
-    loadComponent: () =>
-      import('./features/pages/main/home/home.component').then((m) => m.HomeComponent),
+    component: HomeComponent,
   },
   {
     path: 'about',
     data: { seo: 'about' },
-    loadComponent: () =>
-      import('./features/pages/main/about/about.component').then((m) => m.AboutComponent),
+    component: AboutComponent,
   },
   {
     path: 'updates',
     data: { seo: 'updates' },
-    loadComponent: () =>
-      import('./features/pages/main/updates/updates.component').then((m) => m.UpdatesComponent),
+    component: UpdatesComponent,
   },
 ];
 
@@ -150,7 +151,6 @@ export const routes: Routes = [
   {
     // 404 no idioma da URL (o nginx já responde com status 404)
     path: '**',
-    loadComponent: () =>
-      import('./features/pages/main/not-found/not-found.component').then((m) => m.NotFoundComponent),
+    component: NotFoundComponent,
   },
 ];

@@ -1,6 +1,6 @@
 import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { NavbarComponent } from './shared/components/general/navbar/navbar.component';
 import { SidebarComponent } from './shared/components/general/sidebar/sidebar.component';
@@ -95,7 +95,11 @@ export class AppComponent implements OnInit {
     // Idioma das páginas públicas (pela URL) e o lang do <html>
     _translation: TranslationService,
   ) {
-    this.updateLayoutState(this.router.url);
+    const initialUrl =
+      typeof window !== 'undefined' && (!this.router.url || this.router.url === '/')
+        ? window.location.pathname
+        : this.router.url;
+    this.updateLayoutState(initialUrl);
     // Meta tags por rota: públicas indexadas, internas com noindex
     seo.init();
     // Logado: idioma e país da conta (outros aparelhos) ou grava os deste navegador
@@ -107,6 +111,12 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.router.events
+      .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
+      .subscribe((event: NavigationStart) => {
+        this.updateLayoutState(event.url);
+      });
+
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
