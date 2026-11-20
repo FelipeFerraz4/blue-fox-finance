@@ -18,7 +18,7 @@ export const homeContent: HomeContent = {
     secondary: 'Discover Our Story',
   },
   mockup: {
-    previewLabel: 'BlueFox Finance dashboard preview',
+    previewLabel: 'Blue Fox Finance dashboard preview',
     badge: 'LIVE VERSION • v1.6',
     stats: [
       { label: 'Total Expenses', value: 'R$ 14,850.20', sub: 'Current reference month' },
@@ -35,7 +35,7 @@ export const homeContent: HomeContent = {
   },
   features: {
     badge: 'AVAILABLE TODAY',
-    title: 'What BlueFox Finance delivers',
+    title: 'What Blue Fox Finance delivers',
     subtitle: 'Production-ready features for day-to-day expense tracking, on your own or as a team.',
     items: [
       {
@@ -66,7 +66,7 @@ export const homeContent: HomeContent = {
   },
   about: {
     badge: 'OUR STORY & GOVERNANCE',
-    title: 'Where BlueFox Finance Comes From',
+    title: 'Where Blue Fox Finance Comes From',
     subtitle:
       'Built in-house by Blue Fox Global Group to keep tight control of expenses, card statements and bills, and now available to everyone.',
     boxes: [

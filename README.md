@@ -1,4 +1,4 @@
-# 🦊 BlueFox Finance - Gestão Financeira e Controle de Gastos
+# 🦊 Blue Fox Finance - Gestão Financeira e Controle de Gastos
 
 Sistema web completo para gestão financeira e controle de gastos (*Finance & Spend Management*), compras com cartões de crédito e débito, regras de fechamento e vencimento de faturas, parcelamentos, múltiplos compradores e dashboard analítico.
 

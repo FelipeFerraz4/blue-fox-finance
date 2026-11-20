@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ModalidadePagamento, OrigemLancamento, TipoLancamento } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ExpensesService } from '../../expenses/expenses.service';
 import { PreferencesService } from '../../preferences/preferences.service';
@@ -13,6 +14,7 @@ import {
   BotUser,
   ConversationState,
   ExpenseDraft,
+  ExpenseItemDraft,
   ExpenseStep,
   FormKind,
   RegistrableStep,
@@ -62,6 +64,8 @@ const REGISTRABLE: Record<RegistrableStep, { form: FormKind; novo: string; cadas
   },
 };
 const isRegistrable = (step: ExpenseStep): step is RegistrableStep => step in REGISTRABLE;
+const isItemStep = (step: ExpenseStep): boolean =>
+  step === 'nome' || step === 'categoria' || step === 'quantidade' || step === 'valor';
 
 /** Rótulos idênticos aos da tela "Novo Lançamento" do site (em português; use `label()`). */
 const LABEL: Record<Exclude<ExpenseStep, 'confirmar'>, string> = {
@@ -82,8 +86,9 @@ const label = (step: Exclude<ExpenseStep, 'confirmar'>) => t(LABEL[step], { moed
 
 /**
  * Assistente de lançamento: pergunta campo a campo, na mesma ordem e com os
- * mesmos nomes da tela "Novo Lançamento". Os padrões do perfil aparecem como
- * primeira opção (⭐), mas nada é preenchido sem o usuário escolher.
+ * mesmos nomes da tela "Novo Lançamento". Ao terminar um item, permite adicionar
+ * mais itens à mesma compra (reaproveitando comprador, loja, data, meio e parcelas)
+ * ou finalizar a compra.
  * Callbacks com estado: `g:<nonce>:<ação>:<arg>`. Sem estado: `x::<ação>:<id>`.
  */
 @Injectable()
@@ -108,7 +113,7 @@ export class ExpenseFlow {
    * (valor unitário com quantidade 1, nome e loja) e o resto é perguntado.
    */
   async start(u: BotUser, args: string): Promise<BotReply[]> {
-    const draft: ExpenseDraft = {};
+    const draft: ExpenseDraft = { items: [] };
     const [left, storeText] = args.split('@').map((s) => s.trim());
     if (left) {
       const [first, ...rest] = left.split(/\s+/);
@@ -227,7 +232,7 @@ export class ExpenseFlow {
         break;
       }
       case 'confirmar':
-        return this.retry(u, state, t('Use os botões para salvar, cancelar ou alterar.'));
+        return this.retry(u, state, t('Use os botões para adicionar outro item, finalizar a compra ou editar.'));
     }
     return this.advance(u, draft);
   }
@@ -245,6 +250,35 @@ export class ExpenseFlow {
 
       case 'save':
         return this.save(u, state);
+
+      case 'additem':
+        this.commitCurrentItemIfComplete(draft);
+        draft.addingItem = true;
+        draft.editingItemIndex = undefined;
+        draft.nome = undefined;
+        draft.categoria = undefined;
+        draft.quantidade = undefined;
+        draft.valorUnitario = undefined;
+        return this.advance(u, draft);
+
+      case 'cancelitem':
+        draft.addingItem = false;
+        draft.editingItemIndex = undefined;
+        draft.nome = undefined;
+        draft.categoria = undefined;
+        draft.quantidade = undefined;
+        draft.valorUnitario = undefined;
+        return this.advance(u, draft);
+
+      case 'rmitem': {
+        const idx = Number(arg);
+        const list = [...(draft.items ?? [])];
+        if (Number.isInteger(idx) && idx >= 0 && idx < list.length && list.length > 1) {
+          list.splice(idx, 1);
+          draft.items = list;
+        }
+        return this.advance(u, draft);
+      }
 
       case 'pick': {
         const id = state.options?.[Number(arg)];
@@ -287,7 +321,6 @@ export class ExpenseFlow {
         return this.register.start(u, REGISTRABLE[state.step].form, name, { draft, step: state.step });
       }
 
-
       case 'back':
         return this.advance(u, draft, state.step);
     }
@@ -298,7 +331,22 @@ export class ExpenseFlow {
   async onStatelessCallback(u: BotUser, action: string, id?: string): Promise<BotReply[]> {
     if (!id && action !== 'keep') return [{ text: t('Opção inválida.') }];
     switch (action) {
-      case 'undo':
+      case 'undo': {
+        const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
+        if (!expense) return [{ text: t('Esse lançamento já não existe.') }];
+        const batch = await this.prisma.lancamento.findMany({
+          where: { userId: u.userId, codigo: expense.codigo },
+        });
+        const targets = batch.length > 0 ? batch : [expense];
+        for (const item of targets) {
+          await this.expenses.remove(u.userId, item.id);
+        }
+        if (targets.length > 1) {
+          const total = targets.reduce((acc, it) => acc + Number(it.valorTotal), 0);
+          return [{ text: t('🗑 Compra desfeita: <b>{n} itens</b> · {valor}', { n: targets.length, valor: F.brl(total) }) }];
+        }
+        return [{ text: t('🗑 Excluído: <b>{nome}</b> · {valor}', { nome: F.esc(expense.nome), valor: F.brl(expense.valorTotal) }) }];
+      }
       case 'delok': {
         const expense = await this.prisma.lancamento.findFirst({ where: { id, userId: u.userId } });
         if (!expense) return [{ text: t('Esse lançamento já não existe.') }];
@@ -373,7 +421,6 @@ export class ExpenseFlow {
     const name = typed.trim().slice(0, MAX_TEXT);
     const nonce = F.nonce();
     await this.link.setState(u.canal, u.externalUserId, { flow: 'gasto', nonce, step, draft, pending: name });
-    // Tudo no lançamento precisa estar cadastrado: cadastrar agora ou escolher outro
     const buttons: BotButton[][] = [
       [{ label: F.label(t(r.cadastrar), 32), data: `g:${nonce}:new` }],
       [{ label: `↩️ ${t(r.outro)}`, data: `g:${nonce}:back` }],
@@ -382,7 +429,35 @@ export class ExpenseFlow {
     return [{ text: `${t(r.missing, { nome: F.esc(name) })}\n${t('O que você quer fazer?')}`, buttons }];
   }
 
-  /** Ordem da tela "Novo Lançamento": dados da compra e depois o item. */
+  /**
+   * Quando os 4 campos do item atual estão preenchidos, move o item para `draft.items`
+   * e limpa os campos temporários do item.
+   */
+  private commitCurrentItemIfComplete(d: ExpenseDraft): void {
+    if (d.nome && d.categoria && d.quantidade && d.valorUnitario) {
+      const item: ExpenseItemDraft = {
+        nome: d.nome,
+        categoria: d.categoria,
+        quantidade: d.quantidade,
+        valorUnitario: d.valorUnitario,
+      };
+      const list = [...(d.items ?? [])];
+      if (d.editingItemIndex !== undefined && d.editingItemIndex >= 0 && d.editingItemIndex < list.length) {
+        list[d.editingItemIndex] = item;
+      } else {
+        list.push(item);
+      }
+      d.items = list;
+      d.nome = undefined;
+      d.categoria = undefined;
+      d.quantidade = undefined;
+      d.valorUnitario = undefined;
+      d.addingItem = false;
+      d.editingItemIndex = undefined;
+    }
+  }
+
+  /** Ordem da tela "Novo Lançamento": dados da compra e depois os itens. */
   private firstMissing(d: ExpenseDraft): ExpenseStep {
     if (!d.comprador) return 'comprador';
     if (!d.loja) return 'loja';
@@ -390,14 +465,34 @@ export class ExpenseFlow {
     if (!d.meioPagamentoId) return 'meio';
     if (!d.tipo) return 'tipo';
     if (d.tipo === 'PARCELADO' && !d.parcelas) return 'parcelas';
-    if (!d.nome) return 'nome';
-    if (!d.categoria) return 'categoria';
-    if (!d.quantidade) return 'quantidade';
-    if (!d.valorUnitario) return 'valor';
+
+    this.commitCurrentItemIfComplete(d);
+
+    const hasItems = (d.items?.length ?? 0) > 0;
+    const fillingItem = !hasItems || d.addingItem || d.editingItemIndex !== undefined || !!(d.nome || d.categoria || d.quantidade || d.valorUnitario);
+
+    if (fillingItem) {
+      if (!d.nome) return 'nome';
+      if (!d.categoria) return 'categoria';
+      if (!d.quantidade) return 'quantidade';
+      if (!d.valorUnitario) return 'valor';
+    }
+
     return 'confirmar';
   }
 
   private edit(u: BotUser, d: ExpenseDraft, field: ExpenseStep): Promise<BotReply[]> {
+    if (isItemStep(field) && (d.items?.length ?? 0) > 0 && d.editingItemIndex === undefined) {
+      // Edita o último item adicionado à compra
+      const idx = d.items!.length - 1;
+      const target = d.items![idx];
+      d.editingItemIndex = idx;
+      d.nome = target.nome;
+      d.categoria = target.categoria;
+      d.quantidade = target.quantidade;
+      d.valorUnitario = target.valorUnitario;
+    }
+
     switch (field) {
       case 'comprador':
         d.comprador = undefined;
@@ -455,7 +550,6 @@ export class ExpenseFlow {
   }
 
   private async applyOption(userId: string, step: ExpenseStep, d: ExpenseDraft, id: string) {
-    // Os ids vêm do próprio estado, mas a consulta continua filtrando por userId
     switch (step) {
       case 'comprador': {
         const buyer = await this.prisma.comprador.findFirst({ where: { id, userId } });
@@ -496,9 +590,18 @@ export class ExpenseFlow {
   ): Promise<{ reply: BotReply; options?: string[] }> {
     if (step === 'confirmar') return { reply: this.summary(d, nonce) };
 
-    const title = `📝 <b>${label(step)}</b>`;
+    const itemCount = d.items?.length ?? 0;
+    const itemIndex = d.editingItemIndex !== undefined ? d.editingItemIndex + 1 : itemCount + 1;
+    const itemTag = isItemStep(step) && (itemCount > 0 || d.editingItemIndex !== undefined)
+      ? ` · <i>${t('Item #{n}', { n: itemIndex })}</i>`
+      : '';
+    const title = `📝 <b>${label(step)}</b>${itemTag}`;
+    const cancelExtra: BotButton[][] =
+      isItemStep(step) && itemCount > 0 && d.editingItemIndex === undefined
+        ? [[{ label: t('↩️ Voltar ao resumo ({n})', { n: itemCount }), data: `g:${nonce}:cancelitem` }]]
+        : [];
+
     const choose = async (hint: string, suggestion: Option | null, list: Option[], perRow = 2) => {
-      // Sugestão (padrão do perfil) primeiro, marcada com ⭐; sem repetir na lista
       const items = [
         ...(suggestion ? [{ ...suggestion, label: `⭐ ${suggestion.label}` }] : []),
         ...list.filter((o) => o.id !== suggestion?.id),
@@ -507,19 +610,17 @@ export class ExpenseFlow {
         items.map((it, i) => ({ label: F.label(it.label), data: `g:${nonce}:pick:${i}` })),
         perRow,
       );
-      // Cadastrar um item novo sem sair do lançamento
       const create = isRegistrable(step) ? [[{ label: `➕ ${t(REGISTRABLE[step].novo)}`, data: `g:${nonce}:create` }]] : [];
       return {
         reply: {
-          // Sem opções para tocar: só a parte do "digite"
           text: `${title}\n${items.length ? hint : t('Digite o nome.')}`,
-          buttons: [...buttons, ...create, [CANCEL(nonce)]],
+          buttons: [...buttons, ...create, ...cancelExtra, [CANCEL(nonce)]],
         },
         options: items.map((i) => i.id),
       };
     };
     const ask = (hint: string, buttons: BotButton[][] = []) => ({
-      reply: { text: `${title}\n${hint}`, buttons: [...buttons, [CANCEL(nonce)]] },
+      reply: { text: `${title}\n${hint}`, buttons: [...buttons, ...cancelExtra, [CANCEL(nonce)]] },
     });
 
     switch (step) {
@@ -583,11 +684,12 @@ export class ExpenseFlow {
               })
             : [],
         ]);
-        // Sugestão ⭐: a categoria de item mais usada nesta loja; senão a padrão do perfil.
-        // A categoria da loja (ex.: E-commerce) é de outra lista e não serve para o item.
         const active = new Set(cats.map((c) => c.nome));
-        const suggested = usedAtStore.map((g) => g.categoria).find((c) => active.has(c)) ?? prefs.categoriaPadrao;
-        // Para categoria, a "opção" guardada é o próprio nome (Lancamento.categoria é texto)
+        const lastAddedCat = d.items?.length ? d.items[d.items.length - 1].categoria : undefined;
+        const suggested =
+          (lastAddedCat && active.has(lastAddedCat) ? lastAddedCat : undefined) ??
+          usedAtStore.map((g) => g.categoria).find((c) => active.has(c)) ??
+          prefs.categoriaPadrao;
         return choose(
           t('Toque numa opção ou digite o nome.'),
           suggested ? { id: suggested, label: suggested } : null,
@@ -610,18 +712,38 @@ export class ExpenseFlow {
     }
   }
 
-  private total(d: ExpenseDraft): number {
-    // Mesmo cálculo do ExpensesService quando o total não é informado
-    return Number(((d.quantidade ?? 1) * (d.valorUnitario ?? 0)).toFixed(2));
+  private itemSubtotal(it: ExpenseItemDraft): number {
+    return Number((it.quantidade * it.valorUnitario).toFixed(2));
+  }
+
+  private allItems(d: ExpenseDraft): ExpenseItemDraft[] {
+    this.commitCurrentItemIfComplete(d);
+    return d.items ?? [];
+  }
+
+  private grandTotal(d: ExpenseDraft): number {
+    return Number(
+      this.allItems(d)
+        .reduce((acc, it) => acc + this.itemSubtotal(it), 0)
+        .toFixed(2),
+    );
   }
 
   private summary(d: ExpenseDraft, nonce: string): BotReply {
-    const total = this.total(d);
+    const items = this.allItems(d);
+    const total = this.grandTotal(d);
     const tipo =
       d.tipo === 'PARCELADO'
         ? t('Parcelado em {n}x de {valor}', { n: d.parcelas, valor: F.brl(Math.round((total / d.parcelas!) * 100) / 100) })
         : t('À Vista');
-    const line = (label: string, value: string) => `<b>${label}:</b> ${value}`;
+    const line = (lbl: string, value: string) => `<b>${lbl}:</b> ${value}`;
+
+    const itemLines = items.map((it, idx) => {
+      const sub = this.itemSubtotal(it);
+      const qtyDetail = it.quantidade !== 1 ? `${F.quantity(it.quantidade)} × ${F.brl(it.valorUnitario)} = ` : '';
+      return `${idx + 1}. <b>${F.esc(it.nome)}</b> (${F.esc(it.categoria)})\n    ${qtyDetail}<b>${F.brl(sub)}</b>`;
+    });
+
     const text = [
       t('📝 <b>Confirma o lançamento?</b>'),
       '',
@@ -631,17 +753,19 @@ export class ExpenseFlow {
       line(label('meio'), `${F.esc(d.meioNome)} · ${F.modalidade(d.modalidade)}`),
       line(label('tipo'), tipo),
       '',
-      line(label('nome'), F.esc(d.nome)),
-      line(label('categoria'), F.esc(d.categoria)),
-      line(label('quantidade'), F.quantity(d.quantidade!)),
-      line(t('Valor Unitário'), F.brl(d.valorUnitario!)),
+      `<b>${t('Itens na Compra:')}</b> (${items.length})`,
+      ...itemLines,
+      '',
       line(t('Valor Total'), `<b>${F.brl(total)}</b>`),
+      '',
+      t('<i>Quer adicionar outro item a esta compra ou finalizar?</i>'),
     ].join('\n');
 
     return {
       text,
       buttons: [
-        [{ label: t('✅ Salvar'), data: `g:${nonce}:save` }, { label: t('✏️ Editar'), data: `g:${nonce}:editmenu` }],
+        [{ label: t('➕ Adicionar outro item'), data: `g:${nonce}:additem` }],
+        [{ label: t('✅ Finalizar compra'), data: `g:${nonce}:save` }, { label: t('✏️ Editar'), data: `g:${nonce}:editmenu` }],
         [CANCEL(nonce)],
       ],
     };
@@ -649,7 +773,19 @@ export class ExpenseFlow {
 
   /** Mesmo resumo, com a lista de campos que podem ser alterados no lugar dos botões. */
   private editMenu(d: ExpenseDraft, nonce: string): BotReply {
-    const edit = (label: string, field: ExpenseStep): BotButton => ({ label, data: `g:${nonce}:edit:${field}` });
+    const edit = (lbl: string, field: ExpenseStep): BotButton => ({ label: lbl, data: `g:${nonce}:edit:${field}` });
+    const items = this.allItems(d);
+    const removeRow: BotButton[][] =
+      items.length > 1
+        ? F.rows(
+            items.map((it, i) => ({
+              label: F.label(`🗑 #${i + 1} ${it.nome}`, 24),
+              data: `g:${nonce}:rmitem:${i}`,
+            })),
+            2,
+          )
+        : [];
+
     return {
       text: `${this.summary(d, nonce).text}\n\n${t('<i>Qual campo você quer alterar?</i>')}`,
       replace: true,
@@ -658,6 +794,7 @@ export class ExpenseFlow {
         [edit(t('Meio de Pagamento'), 'meio'), edit(t('Tipo'), 'tipo')],
         [edit(t('Nome'), 'nome'), edit(t('Categoria'), 'categoria')],
         [edit(t('Quantidade'), 'quantidade'), edit(t('Valor Unitário'), 'valor')],
+        ...removeRow,
         [{ label: t('↩️ Voltar'), data: `g:${nonce}:review` }],
       ],
     };
@@ -694,50 +831,75 @@ export class ExpenseFlow {
     const d = state.draft;
     if (this.firstMissing(d) !== 'confirmar') return this.advance(u, d);
 
+    const items = this.allItems(d);
+    if (!items.length) return this.advance(u, d);
+
     // Só quem consumir o estado grava (clique duplo / update reenviado)
     if (!(await this.link.consumeState(u.canal, u.externalUserId, state.nonce))) {
       return [{ text: t('Esse lançamento já foi processado.') }];
     }
 
     const parcelas = d.tipo === 'PARCELADO' ? d.parcelas! : 1;
-    // Mesmo payload que a tela "Novo Lançamento" envia
-    const created = await this.expenses.create(
-      u.userId,
-      {
-        comprador: d.comprador!,
-        compradorId: d.compradorId ?? undefined,
-        loja: d.loja!,
-        lojaId: d.lojaId ?? undefined,
-        data: d.data!,
-        meioPagamentoId: d.meioPagamentoId!,
-        tipo: d.tipo === 'PARCELADO' ? TipoLancamento.PARCELADO : TipoLancamento.A_VISTA,
-        numeroParcelas: parcelas,
-        nome: d.nome!,
-        categoria: d.categoria!,
-        quantidade: d.quantidade!,
-        valorUnitario: d.valorUnitario!,
-        valorTotal: this.total(d),
-      },
-      OrigemLancamento.TELEGRAM,
-    );
+    const batchCode = randomUUID();
+    const createdList = [];
 
-    const first = created.parcelas[0];
-    const tipo = parcelas > 1 ? t('Parcelado em {n}x de {valor}', { n: parcelas, valor: F.brl(first.valor) }) : t('À Vista');
+    for (const it of items) {
+      const created = await this.expenses.create(
+        u.userId,
+        {
+          codigo: batchCode,
+          comprador: d.comprador!,
+          compradorId: d.compradorId ?? undefined,
+          loja: d.loja!,
+          lojaId: d.lojaId ?? undefined,
+          data: d.data!,
+          meioPagamentoId: d.meioPagamentoId!,
+          tipo: d.tipo === 'PARCELADO' ? TipoLancamento.PARCELADO : TipoLancamento.A_VISTA,
+          numeroParcelas: parcelas,
+          nome: it.nome,
+          categoria: it.categoria,
+          quantidade: it.quantidade,
+          valorUnitario: it.valorUnitario,
+          valorTotal: this.itemSubtotal(it),
+        },
+        OrigemLancamento.TELEGRAM,
+      );
+      createdList.push(created);
+    }
+
+    const firstExpense = createdList[0];
+    const firstInstallment = firstExpense.parcelas[0];
+    const total = createdList.reduce((acc, c) => acc + Number(c.valorTotal), 0);
+    const totalParcela = createdList.reduce((acc, c) => acc + Number(c.parcelas[0]?.valor ?? 0), 0);
+    const tipo =
+      parcelas > 1
+        ? t('Parcelado em {n}x de {valor}', { n: parcelas, valor: F.brl(totalParcela) })
+        : t('À Vista');
     const invoice =
-      created.meioPagamento.modalidade === ModalidadePagamento.CREDITO && first
-        ? t(' · 1ª na fatura de {mes}', { mes: F.monthName(first.mesReferencia).toLowerCase() })
+      firstExpense.meioPagamento.modalidade === ModalidadePagamento.CREDITO && firstInstallment
+        ? t(' · 1ª na fatura de {mes}', { mes: F.monthName(firstInstallment.mesReferencia).toLowerCase() })
         : '';
+
+    const itemLines =
+      createdList.length === 1
+        ? [`<b>${F.esc(firstExpense.nome)}</b> · ${F.brl(firstExpense.valorTotal)}`]
+        : [
+            ...createdList.map((c, idx) => `${idx + 1}. <b>${F.esc(c.nome)}</b> · ${F.brl(c.valorTotal)}`),
+            `<b>${t('Valor Total')}:</b> <b>${F.brl(total)}</b>`,
+          ];
 
     const reply = this.withSiteLink(
       [
-        t('✅ <b>Lançado!</b>'),
-        `<b>${F.esc(created.nome)}</b> · ${F.brl(created.valorTotal)}`,
-        `${F.esc(created.loja)} · ${F.date(created.data)}`,
-        `${F.esc(created.meioPagamento.nome)} · ${tipo}${invoice}`,
+        createdList.length > 1
+          ? t('✅ <b>Compra lançada! ({n} itens)</b>', { n: createdList.length })
+          : t('✅ <b>Lançado!</b>'),
+        ...itemLines,
+        `${F.esc(firstExpense.loja)} · ${F.date(firstExpense.data)}`,
+        `${F.esc(firstExpense.meioPagamento.nome)} · ${tipo}${invoice}`,
       ].join('\n'),
       '/expenses',
     );
-    reply.buttons = [[{ label: t('↩️ Desfazer'), data: `x::undo:${created.id}` }, ...(reply.buttons?.[0] ?? [])]];
+    reply.buttons = [[{ label: t('↩️ Desfazer'), data: `x::undo:${firstExpense.id}` }, ...(reply.buttons?.[0] ?? [])]];
     return [reply];
   }
 

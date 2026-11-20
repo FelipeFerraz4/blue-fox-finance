@@ -221,6 +221,68 @@
   white-space: nowrap;
 }
 
+.occurrence-value-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.inline-amount-form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.inline-amount-input {
+  width: 8.5rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+/* Switch de Tipo de Valor (Fixo / Variável) */
+.value-type-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  background: var(--gray-100);
+  border-radius: 10px;
+}
+
+.value-type-btn {
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.value-type-btn:hover {
+  color: var(--gray-900);
+}
+
+.value-type-btn.active {
+  background: var(--surface, #ffffff);
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.variable-value-hint {
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--gray-700);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .row-actions {
   display: flex;
   gap: 0.5rem;

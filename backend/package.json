@@ -1,7 +1,7 @@
 {
   "name": "bluefox-finance-backend",
   "version": "1.0.0",
-  "description": "Backend NestJS para controle e gestão financeira BlueFox Finance",
+  "description": "Backend NestJS para controle e gestão financeira Blue Fox Finance",
   "author": "Blue Fox",
   "private": true,
   "license": "UNLICENSED",

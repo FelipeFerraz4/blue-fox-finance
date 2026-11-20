@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BillsService } from '../../../core/services/bills/bills.service';
-import { PaymentMethodsService } from '../../../core/services/payment-methods/payment-methods.service';
+import { CategoriesService } from '../../../core/services/categories/categories.service';
 import {
   Bill,
   BillMonthOverview,
@@ -11,6 +11,7 @@ import {
   CreateBillDto,
   RecorrenciaConta,
 } from '../../../shared/model/types/bill.model';
+import { CategoriaItem } from '../../../shared/model/types/category.model';
 import { DropdownOption } from '../../../shared/components/general/searchable-dropdown/searchable-dropdown.model';
 import { ConfirmModalComponent } from '../../../shared/components/general/confirm-modal/confirm-modal.component';
 import { NoticeModalComponent } from '../../../shared/components/general/notice-modal/notice-modal.component';
@@ -19,6 +20,8 @@ import { I18N } from '../../../core/i18n/i18n.pipes';
 import { t } from '../../../core/i18n/i18n';
 import { formatDate, monthName } from '../../../core/i18n/format';
 
+export type BillValueType = 'FIXO' | 'VARIAVEL';
+
 interface BillForm {
   nome: string;
   categoria: string;
@@ -26,9 +29,9 @@ interface BillForm {
   diaVencimento: number | null;
   mesVencimento: number | null;
   dataUnica: string;
+  tipoValor: BillValueType;
   valorPrevisto: number | null;
   meioPagamentoId: string | null;
-  lembrarDiasAntes: number;
   dataInicio: string;
   observacoes: string;
 }
@@ -50,7 +53,8 @@ const monthFull = (i: number) => {
 @Component({
   selector: 'app-bills',
   standalone: true,
-  imports: [...I18N, 
+  imports: [
+    ...I18N,
     CommonModule,
     FormsModule,
     ConfirmModalComponent,
@@ -62,17 +66,18 @@ const monthFull = (i: number) => {
 })
 export class BillsComponent implements OnInit {
   private readonly billsService = inject(BillsService);
-  private readonly paymentMethodsService = inject(PaymentMethodsService);
+  private readonly categoriesService = inject(CategoriesService);
 
   // Estado da visão mensal
   readonly month = signal(this.currentMonth());
   readonly overview = signal<BillMonthOverview | null>(null);
   readonly loading = signal(true);
 
-  // Cadastro de contas
+  // Cadastro de contas e categorias de itens
   readonly bills = signal<Bill[]>([]);
   readonly showManage = signal(false);
-  readonly cardOptions = signal<DropdownOption[]>([]);
+  readonly itemCategories = signal<CategoriaItem[]>([]);
+  readonly itemCategoryOptions = computed(() => this.itemCategories().map((c) => c.nome));
 
   readonly monthLabel = computed(() => {
     const [y, m] = this.month().split('-').map(Number);
@@ -85,6 +90,11 @@ export class BillsComponent implements OnInit {
   editingBillId: string | null = null;
   form: BillForm = this.emptyForm();
   savingBill = false;
+
+  // Edição rápida de valor do mês/ano para contas variáveis
+  amountDrafts: Record<string, number | null> = {};
+  editingAmountId: string | null = null;
+  savingAmountId: string | null = null;
 
   // Modal de pagamento
   payingOccurrence: BillOccurrence | null = null;
@@ -115,19 +125,7 @@ export class BillsComponent implements OnInit {
   ngOnInit(): void {
     this.loadMonth();
     this.loadBills();
-    this.paymentMethodsService.getAll(true).subscribe({
-      next: (methods) =>
-        this.cardOptions.set(
-          methods
-            .filter((m) => m.modalidade === 'CREDITO')
-            .map((m) => ({
-              value: m.id,
-              label: m.nome,
-              sublabel: m.diaVencimento ? t('dia {n}', { n: m.diaVencimento }) : '',
-            })),
-        ),
-      error: () => this.cardOptions.set([]),
-    });
+    this.loadItemCategories();
   }
 
   // ---------------------------------------------------------------------------
@@ -156,6 +154,25 @@ export class BillsComponent implements OnInit {
     });
   }
 
+  loadItemCategories(): void {
+    this.categoriesService.getItemCategories(true).subscribe({
+      next: (cats) => this.itemCategories.set(cats),
+      error: () => this.itemCategories.set([]),
+    });
+  }
+
+  onCategoryCreateNew(name: string): void {
+    const nome = name.trim();
+    if (!nome) return;
+    this.categoriesService.createItemCategory({ nome }).subscribe({
+      next: (cat) => {
+        this.itemCategories.set([...this.itemCategories(), cat]);
+        this.form.categoria = cat.nome;
+      },
+      error: (err) => this.showError(err, t('Não foi possível cadastrar a categoria.')),
+    });
+  }
+
   changeMonth(delta: number): void {
     const [y, m] = this.month().split('-').map(Number);
     const d = new Date(y, m - 1 + delta, 1);
@@ -169,12 +186,46 @@ export class BillsComponent implements OnInit {
   }
 
   // ---------------------------------------------------------------------------
+  // Valor do mês/ano para contas variáveis
+  // ---------------------------------------------------------------------------
+
+  startEditAmount(o: BillOccurrence): void {
+    this.editingAmountId = o.id;
+    this.amountDrafts[o.id] = o.valor;
+  }
+
+  cancelEditAmount(o: BillOccurrence): void {
+    if (this.editingAmountId === o.id) {
+      this.editingAmountId = null;
+    }
+  }
+
+  saveOccurrenceAmount(o: BillOccurrence): void {
+    const raw = this.amountDrafts[o.id];
+    const valor = raw !== null && raw !== undefined ? Number(raw) : NaN;
+    if (!Number.isFinite(valor) || valor <= 0) return;
+
+    this.savingAmountId = o.id;
+    this.billsService.setAmount(o.id, valor).subscribe({
+      next: () => {
+        this.savingAmountId = null;
+        this.editingAmountId = null;
+        this.loadMonth();
+      },
+      error: (err) => {
+        this.savingAmountId = null;
+        this.showError(err, t('Não foi possível salvar o valor da conta.'));
+      },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Pagamento
   // ---------------------------------------------------------------------------
 
   openPayModal(occurrence: BillOccurrence): void {
     this.payingOccurrence = occurrence;
-    this.payValue = occurrence.valor;
+    this.payValue = occurrence.valor ?? this.amountDrafts[occurrence.id] ?? null;
     this.payDate = this.todayIso();
   }
 
@@ -229,6 +280,7 @@ export class BillsComponent implements OnInit {
 
   openEditBill(bill: Bill): void {
     this.editingBillId = bill.id;
+    const hasFixedValue = bill.valorPrevisto !== null && bill.valorPrevisto !== undefined;
     this.form = {
       nome: bill.nome,
       categoria: bill.categoria ?? '',
@@ -236,13 +288,52 @@ export class BillsComponent implements OnInit {
       diaVencimento: bill.diaVencimento,
       mesVencimento: bill.mesVencimento,
       dataUnica: bill.dataUnica ? bill.dataUnica.slice(0, 10) : '',
-      valorPrevisto: bill.valorPrevisto !== null ? Number(bill.valorPrevisto) : null,
+      tipoValor: hasFixedValue ? 'FIXO' : 'VARIAVEL',
+      valorPrevisto: hasFixedValue ? Number(bill.valorPrevisto) : null,
       meioPagamentoId: bill.meioPagamentoId,
-      lembrarDiasAntes: bill.lembrarDiasAntes,
       dataInicio: bill.dataInicio.slice(0, 7),
       observacoes: bill.observacoes ?? '',
     };
     this.showBillModal = true;
+  }
+
+  openEditByOccurrence(o: BillOccurrence): void {
+    const bill = this.bills().find((b) => b.id === o.contaId);
+    if (bill) {
+      this.openEditBill(bill);
+    } else {
+      this.billsService.getAll().subscribe({
+        next: (bills) => {
+          this.bills.set(bills);
+          const found = bills.find((b) => b.id === o.contaId);
+          if (found) this.openEditBill(found);
+        },
+        error: (err) => this.showError(err, t('Não foi possível carregar o cadastro de contas.')),
+      });
+    }
+  }
+
+  openDeleteByOccurrence(o: BillOccurrence): void {
+    const bill = this.bills().find((b) => b.id === o.contaId);
+    if (bill) {
+      this.billToDelete = bill;
+    } else {
+      this.billsService.getAll().subscribe({
+        next: (bills) => {
+          this.bills.set(bills);
+          const found = bills.find((b) => b.id === o.contaId);
+          if (found) this.billToDelete = found;
+        },
+        error: (err) => this.showError(err, t('Não foi possível carregar o cadastro de contas.')),
+      });
+    }
+  }
+
+  setTipoValor(tipo: BillValueType): void {
+    this.form.tipoValor = tipo;
+    if (tipo === 'VARIAVEL') {
+      this.form.valorPrevisto = null;
+    }
   }
 
   closeBillModal(): void {
@@ -250,21 +341,9 @@ export class BillsComponent implements OnInit {
     this.savingBill = false;
   }
 
-  /** Ao vincular um cartão, sugere o dia de vencimento dele. */
-  onCardChange(cardId: string | null): void {
-    this.form.meioPagamentoId = cardId;
-    const card = this.cardOptions().find((c) => c.value === cardId);
-    const match = card?.sublabel?.match(/dia (\d+)/);
-    if (match && !this.form.diaVencimento) {
-      this.form.diaVencimento = Number(match[1]);
-    }
-    if (cardId && !this.form.nome && card) {
-      this.form.nome = t('Fatura {nome}', { nome: card.label });
-    }
-  }
-
   saveBill(): void {
     const f = this.form;
+    const isFixed = f.tipoValor === 'FIXO' && !f.meioPagamentoId;
     const dto: CreateBillDto = {
       nome: f.nome,
       categoria: f.categoria || null,
@@ -272,10 +351,9 @@ export class BillsComponent implements OnInit {
       diaVencimento: f.recorrencia === 'UNICA' ? null : f.diaVencimento,
       mesVencimento: f.recorrencia === 'ANUAL' ? f.mesVencimento : null,
       dataUnica: f.recorrencia === 'UNICA' ? f.dataUnica : null,
-      // Conta vinculada a cartão usa o valor da fatura
-      valorPrevisto: f.meioPagamentoId ? null : f.valorPrevisto ?? null,
+      valorPrevisto: isFixed ? (f.valorPrevisto ?? null) : null,
       meioPagamentoId: f.meioPagamentoId || null,
-      lembrarDiasAntes: Number(f.lembrarDiasAntes ?? 2),
+      lembrarDiasAntes: 2,
       dataInicio: f.recorrencia === 'UNICA' ? undefined : `${f.dataInicio}-01`,
       observacoes: f.observacoes || null,
     };
@@ -360,7 +438,10 @@ export class BillsComponent implements OnInit {
         return t('Mensal · dia {dia}', { dia: bill.diaVencimento });
       case 'ANUAL': {
         // Dia e mês na ordem do país (31/12 ou 12/31)
-        const date = formatDate(new Date(Date.UTC(2024, (bill.mesVencimento ?? 1) - 1, bill.diaVencimento ?? 1)), 'dayMonth');
+        const date = formatDate(
+          new Date(Date.UTC(2024, (bill.mesVencimento ?? 1) - 1, bill.diaVencimento ?? 1)),
+          'dayMonth',
+        );
         return t('Anual · {data}', { data: date });
       }
       default:
@@ -393,9 +474,9 @@ export class BillsComponent implements OnInit {
       diaVencimento: null,
       mesVencimento: null,
       dataUnica: '',
+      tipoValor: 'FIXO',
       valorPrevisto: null,
       meioPagamentoId: null,
-      lembrarDiasAntes: 2,
       dataInicio: this.currentMonth(),
       observacoes: '',
     };

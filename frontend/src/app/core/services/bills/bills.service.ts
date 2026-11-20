@@ -63,6 +63,12 @@ export class BillsService {
       .pipe(tap(() => this.refreshAlerts()));
   }
 
+  setAmount(occurrenceId: string, valorPrevisto: number): Observable<BillOccurrence> {
+    return this.http
+      .patch<BillOccurrence>(`${this.baseUrl}/occurrences/${occurrenceId}/amount`, { valorPrevisto })
+      .pipe(tap(() => this.refreshAlerts()));
+  }
+
   unpay(occurrenceId: string): Observable<BillOccurrence> {
     return this.http
       .patch<BillOccurrence>(`${this.baseUrl}/occurrences/${occurrenceId}/unpay`, {})

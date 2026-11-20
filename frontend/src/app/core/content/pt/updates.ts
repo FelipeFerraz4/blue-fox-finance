@@ -17,7 +17,7 @@ export const updatesContent = {
     badge: 'TRANSPARÊNCIA & EVOLUÇÃO',
     title: 'Atualizações & Roadmap do Sistema',
     subtitle:
-      'Acompanhe em detalhes o que já está funcionando no BlueFox Finance, o que estamos construindo neste momento e as novidades planejadas para o futuro.',
+      'Acompanhe em detalhes o que já está funcionando no Blue Fox Finance, o que estamos construindo neste momento e as novidades planejadas para o futuro.',
   },
   tabs: {
     label: 'Filtrar atualizações',

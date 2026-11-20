@@ -127,7 +127,7 @@
                   } @else if (bill.valorPrevisto !== null) {
                     <span>{{ +bill.valorPrevisto | money }}</span>
                   } @else {
-                    <span class="text-muted">{{ 'Variável' | t }}</span>
+                    <span class="badge badge-gray">{{ 'Variável' | t }}</span>
                   }
                   @if (bill.categoria) {
                     <span class="badge badge-gray">{{ bill.categoria }}</span>
@@ -165,6 +165,14 @@
             <strong>{{ o.nome }}</strong>
             <div class="occurrence-meta">
               <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o) }}</span>
+              @if (o.meioPagamentoId) {
+                <span class="badge badge-brand">{{ 'Cartão de Crédito' | t }}</span>
+              } @else if (o.valorVariavel) {
+                <span class="badge badge-gray">{{ 'Variável' | t }}</span>
+              }
+              @if (o.categoria) {
+                <span class="badge badge-gray">{{ o.categoria }}</span>
+              }
               @if (o.pagoEm) {
                 <span class="text-muted text-xs">{{ formatDate(o.pagoEm) }}</span>
               }
@@ -172,8 +180,46 @@
           </div>
 
           <div class="occurrence-value">
-            @if (o.valor !== null) {
-              {{ o.valor | money }}
+            @if (o.valorVariavel && o.status !== 'PAGA' && (o.valor === null || editingAmountId === o.id)) {
+              <div class="inline-amount-form">
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  class="form-control inline-amount-input"
+                  [ngModel]="amountDrafts[o.id]"
+                  (ngModelChange)="amountDrafts[o.id] = $event"
+                  (keydown.enter)="saveOccurrenceAmount(o)"
+                  [placeholder]="(o.recorrencia === 'ANUAL' ? 'Valor do ano' : 'Valor do mês') | t"
+                />
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  [disabled]="savingAmountId === o.id || !amountDrafts[o.id] || amountDrafts[o.id]! <= 0"
+                  (click)="saveOccurrenceAmount(o)"
+                >
+                  {{ savingAmountId === o.id ? ('Salvando...' | t) : ('Definir' | t) }}
+                </button>
+                @if (editingAmountId === o.id && o.valor !== null) {
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="cancelEditAmount(o)"
+                    [title]="'Cancelar' | t"
+                  >
+                    ✕
+                  </button>
+                }
+              </div>
+            } @else if (o.valor !== null) {
+              <div class="occurrence-value-wrap">
+                <span>{{ o.valor | money }}</span>
+                @if (o.valorVariavel && o.status !== 'PAGA') {
+                  <button type="button" class="link-btn text-xs" (click)="startEditAmount(o)">
+                    {{ 'Alterar valor' | t }}
+                  </button>
+                }
+              </div>
             } @else {
               <span class="text-muted">—</span>
             }
@@ -185,6 +231,8 @@
             } @else {
               <button class="btn btn-primary btn-sm btn-pill" (click)="openPayModal(o)">{{ 'Confirmar pagamento' | t }}</button>
             }
+            <button class="btn btn-secondary btn-sm" (click)="openEditByOccurrence(o)">{{ 'Editar' | t }}</button>
+            <button class="btn btn-danger btn-sm" (click)="openDeleteByOccurrence(o)">{{ 'Excluir' | t }}</button>
           </div>
         </li>
       }
@@ -262,25 +310,13 @@
             </div>
             <div>
               <h3>{{ editingBillId ? ('Editar conta' | t) : ('Nova conta' | t) }}</h3>
-                          </div>
+            </div>
           </div>
           <button class="btn-close" (click)="closeBillModal()">✕</button>
         </div>
 
         <form (ngSubmit)="saveBill()" #billForm="ngForm">
           <div class="modal-body">
-            <div class="form-group">
-              <label class="form-label">{{ 'Cartão' | t }}</label>
-              <app-searchable-dropdown
-                [options]="cardOptions()"
-                [ngModel]="form.meioPagamentoId"
-                (ngModelChange)="onCardChange($event)"
-                name="meioPagamentoId"
-                [placeholder]="'Nenhum' | t"
-                emptyMessage="Nenhum cartão"
-              ></app-searchable-dropdown>
-            </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">{{ 'Nome *' | t }}</label>
@@ -295,28 +331,32 @@
               </div>
               <div class="form-group">
                 <label class="form-label">{{ 'Categoria' | t }}</label>
-                <input
-                  type="text"
-                  name="categoria"
+                <app-searchable-dropdown
+                  [options]="itemCategoryOptions()"
                   [(ngModel)]="form.categoria"
-                  class="form-control"
-                  [placeholder]="'ex: Moradia, Serviços' | t"
-                />
+                  name="categoria"
+                  [placeholder]="'Selecione ou cadastre...' | t"
+                  [searchPlaceholder]="'Pesquisar categoria...' | t"
+                  [allowCreate]="true"
+                  [createOnBlur]="false"
+                  [createOptionText]="'&#43; Cadastrar categoria:' | t"
+                  (createNew)="onCategoryCreateNew($event)"
+                ></app-searchable-dropdown>
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">{{ 'Repetição *' | t }}</label>
-              <app-searchable-dropdown
-                [options]="recorrenciaOptions"
-                [(ngModel)]="form.recorrencia"
-                name="recorrencia"
-                [showSearch]="false"
-                [clearable]="false"
-              ></app-searchable-dropdown>
-            </div>
-
             <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">{{ 'Repetição *' | t }}</label>
+                <app-searchable-dropdown
+                  [options]="recorrenciaOptions"
+                  [(ngModel)]="form.recorrencia"
+                  name="recorrencia"
+                  [showSearch]="false"
+                  [clearable]="false"
+                ></app-searchable-dropdown>
+              </div>
+
               @if (form.recorrencia === 'UNICA') {
                 <div class="form-group">
                   <label class="form-label">{{ 'Vencimento *' | t }}</label>
@@ -324,7 +364,7 @@
                 </div>
               } @else {
                 <div class="form-group">
-                  <label class="form-label">{{ 'Dia *' | t }}</label>
+                  <label class="form-label">{{ 'Vencimento *' | t }}</label>
                   <input
                     type="number"
                     name="diaVencimento"
@@ -336,49 +376,71 @@
                     [placeholder]="'ex: 10' | t"
                   />
                 </div>
-                @if (form.recorrencia === 'ANUAL') {
-                  <div class="form-group">
-                    <label class="form-label">{{ 'Mês *' | t }}</label>
-                    <app-searchable-dropdown
-                      [options]="monthOptions"
-                      [(ngModel)]="form.mesVencimento"
-                      name="mesVencimento"
-                      [showSearch]="false"
-                      [clearable]="false"
-                      [placeholder]="'Selecione o mês...' | t"
-                    ></app-searchable-dropdown>
-                  </div>
-                }
               }
             </div>
 
-            <div class="form-row">
-              @if (!form.meioPagamentoId) {
+            @if (form.recorrencia === 'ANUAL') {
+              <div class="form-group">
+                <label class="form-label">{{ 'Mês *' | t }}</label>
+                <app-searchable-dropdown
+                  [options]="monthOptions"
+                  [(ngModel)]="form.mesVencimento"
+                  name="mesVencimento"
+                  [showSearch]="false"
+                  [clearable]="false"
+                  [placeholder]="'Selecione o mês...' | t"
+                ></app-searchable-dropdown>
+              </div>
+            }
+
+            <!-- Seletor Fixo vs Variável (apenas para contas que não são fatura de cartão) -->
+            @if (form.meioPagamentoId) {
+              <div class="variable-value-hint">
+                {{ 'O valor desta conta é calculado automaticamente pela fatura do cartão de crédito.' | t }}
+              </div>
+            } @else {
+              <div class="form-group">
+                <label class="form-label">{{ 'Tipo de valor *' | t }}</label>
+                <div class="value-type-switch" role="group" [attr.aria-label]="'Tipo de valor' | t">
+                  <button
+                    type="button"
+                    class="value-type-btn"
+                    [class.active]="form.tipoValor === 'FIXO'"
+                    (click)="setTipoValor('FIXO')"
+                  >
+                    {{ 'Valor fixo' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="value-type-btn"
+                    [class.active]="form.tipoValor === 'VARIAVEL'"
+                    (click)="setTipoValor('VARIAVEL')"
+                  >
+                    {{ 'Valor variável' | t }}
+                  </button>
+                </div>
+              </div>
+
+              @if (form.tipoValor === 'FIXO') {
                 <div class="form-group">
-                  <label class="form-label">{{ 'Valor' | t }}</label>
+                  <label class="form-label">{{ 'Valor *' | t }}</label>
                   <input
                     type="number"
                     name="valorPrevisto"
-                    min="0"
+                    min="0.01"
                     step="0.01"
                     [(ngModel)]="form.valorPrevisto"
+                    required
                     class="form-control"
-                    [placeholder]="'Variável' | t"
+                    [placeholder]="'ex: 187,35' | t"
                   />
                 </div>
+              } @else {
+                <div class="variable-value-hint">
+                  {{ 'A conta aparecerá todo período na lista para você informar o valor do mês ou ano.' | t }}
+                </div>
               }
-              <div class="form-group">
-                <label class="form-label">{{ 'Aviso (dias)' | t }}</label>
-                <input
-                  type="number"
-                  name="lembrarDiasAntes"
-                  min="0"
-                  max="30"
-                  [(ngModel)]="form.lembrarDiasAntes"
-                  class="form-control"
-                />
-              </div>
-            </div>
+            }
 
             @if (form.recorrencia !== 'UNICA') {
               <div class="form-group">
@@ -398,7 +460,12 @@
             <button
               type="submit"
               class="btn btn-primary btn-pill"
-              [disabled]="!billForm.valid || savingBill || (form.recorrencia === 'ANUAL' && !form.mesVencimento)"
+              [disabled]="
+                !billForm.valid ||
+                savingBill ||
+                (form.recorrencia === 'ANUAL' && !form.mesVencimento) ||
+                (!form.meioPagamentoId && form.tipoValor === 'FIXO' && (!form.valorPrevisto || form.valorPrevisto <= 0))
+              "
             >
               @if (savingBill) {
                 <span class="btn-spinner-wrap"><span class="mini-spinner"></span> {{ 'Salvando...' | t }}</span>

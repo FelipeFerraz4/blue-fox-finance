@@ -11,7 +11,7 @@ export const updatesContent: UpdatesContent = {
     badge: 'TRANSPARENCY & EVOLUTION',
     title: 'Updates & Roadmap',
     subtitle:
-      'Follow in detail what already works in BlueFox Finance, what we are building right now and what is planned for the future.',
+      'Follow in detail what already works in Blue Fox Finance, what we are building right now and what is planned for the future.',
   },
   tabs: {
     label: 'Filter updates',
